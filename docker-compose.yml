@@ -1,0 +1,36 @@
+version: '3.0'
+
+services:
+
+  gobprepare:
+    build: src
+    container_name: gobprepare
+    environment:
+      MESSAGE_BROKER_ADDRESS: rabbitmq
+      GOB_SHARED_DIR: /app/shared
+    env_file: .env
+    volumes:
+      - gob-volume:/app/shared
+
+  prepare_database:
+    image: amsterdam/postgres
+    ports:
+      - "5408:5432"
+    container_name: prepare_database
+    environment:
+      POSTGRES_PASSWORD: insecure
+      POSTGRES_DB: gob_prepare
+      POSTGRES_USER: gob_prepare
+    volumes:
+      - "~/.ssh/datapunt.key:/root/.ssh/datapunt.key"
+
+
+volumes:
+  gob-volume:
+    external: true
+
+
+networks:
+  default:
+    external:
+      name: gob-network
