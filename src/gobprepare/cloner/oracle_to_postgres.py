@@ -258,3 +258,4 @@ class OracleToPostgresCloner():
         logger.info(f"Start copying data from {self._src_schema} to {self._dst_schema}")
         rows_copied = self._copy_data()
         logger.info(f"Done copying {rows_copied} rows from {self._src_schema} to {self._dst_schema}.")
+        return rows_copied
