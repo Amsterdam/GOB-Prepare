@@ -20,8 +20,8 @@ DATABASE_CONFIGS = {
         'drivername': POSTGRES_DRIVER,
         'username': os.getenv("GOB_PREPARE_DATABASE_USER", "gob"),
         'password': os.getenv("GOB_PREPARE_DATABASE_PASSWORD", "insecure"),
-        'host': os.getenv("GOB_PREPARE_DATABASE_HOST", "hostname"),
-        'port': os.getenv("GOB_PREPARE_DATABASE_PORT", 5408),
+        'host': os.getenv("PREPARE_DATABASE_HOST_OVERRIDE", os.getenv("GOB_PREPARE_DATABASE_HOST", "hostname")),
+        'port': os.getenv("PREPARE_DATABASE_PORT_OVERRIDE", os.getenv("GOB_PREPARE_DATABASE_PORT", 5408)),
         'database': os.getenv("GOB_PREPARE_DATABASE", ""),
     }
 }
