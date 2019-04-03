@@ -8,7 +8,7 @@ class TestMain(TestCase):
 
     def setUp(self):
         self.mock_msg = {
-            'dataset_file': 'data/somefile.json',
+            'prepare_config': 'data/somefile.json',
         }
 
     @patch("gobprepare.__main__.PrepareClient")
@@ -19,11 +19,11 @@ class TestMain(TestCase):
         mock_get_mapping.return_value = "mapped_file"
         handle_prepare_msg(self.mock_msg)
 
-        mock_prepare_client.assert_called_with(dataset="mapped_file", msg=self.mock_msg)
+        mock_prepare_client.assert_called_with(prepare_config="mapped_file", msg=self.mock_msg)
         mock_prepare_client_instance.start_prepare_process.assert_called_once()
 
     def test_handle_prepare_msg_without_dataset(self):
-        del self.mock_msg['dataset_file']
+        del self.mock_msg['prepare_config']
 
         with self.assertRaises(AssertionError):
             handle_prepare_msg(self.mock_msg)
