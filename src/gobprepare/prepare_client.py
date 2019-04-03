@@ -31,17 +31,19 @@ class PrepareClient:
     _src_user = None
     _dst_connection = None
     _dst_user = None
+    result = {}
 
-    def __init__(self, dataset, msg):
+    def __init__(self, prepare_config, msg):
         self.header = msg.get('header', {})
-        self._dataset = dataset
-        self._action = dataset['action']
-        self.source = self._dataset['source']
-        self.source_app = self._dataset['source'].get('application', self._dataset['source']['schema'])
-        self.destination = self._dataset['destination']
-        self.destination_app = self._dataset['destination'].get(
+        self.msg = msg
+        self._prepare_config = prepare_config
+        self._action = prepare_config['action']
+        self.source = self._prepare_config['source']
+        self.source_app = self._prepare_config['source'].get('application', self._prepare_config['source']['schema'])
+        self.destination = self._prepare_config['destination']
+        self.destination_app = self._prepare_config['destination'].get(
             'application',
-            self._dataset['destination']['schema']
+            self._prepare_config['destination']['schema']
         )
 
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
@@ -76,6 +78,21 @@ class PrepareClient:
         )
         logger.info(f"Connection to {self.destination_app} {self._dst_user} has been made.")
 
+    def disconnect(self):
+        """Closes open database connections
+
+        :return:
+        """
+        if self._src_connection is not None:
+            self._src_connection.close()
+            self._src_connection = None
+            self._src_user = None
+
+        if self._dst_connection is not None:
+            self._dst_connection.close()
+            self._dst_connection = None
+            self._dst_user = None
+
     def clone(self):
         """Clones the source data using an external Cloner class.
 
@@ -88,7 +105,7 @@ class PrepareClient:
         else:
             raise NotImplementedError
 
-        cloner.clone()
+        return cloner.clone()
 
     def prepare(self):
         """Starts the appropriate prepare action based on the input configuration
@@ -96,9 +113,31 @@ class PrepareClient:
         :return:
         """
         if self._action["type"] == "clone":
-            self.clone()
+            self.result['rows_copied'] = self.clone()
         else:
             raise NotImplementedError
+
+        self.result['action'] = self._action['type']
+
+    def get_result(self):
+        """Returns the result of the prepare job
+
+        :return:
+        """
+        metadata = {
+            **self.header,
+            **self.msg,  # Return original message in header
+            "process_id": self.process_id,
+            "source_application": self.source_app,
+            "destination_application": self.destination_app,
+            "version": self._prepare_config['version'],
+            "timestamp": datetime.datetime.utcnow().isoformat()
+        }
+        result = {
+            "header": metadata,
+            "summary": self.result,
+        }
+        return result
 
     def start_prepare_process(self):
         """Entry method. Handles the prepare process.
@@ -114,3 +153,5 @@ class PrepareClient:
             print("Prepare failed: {e}", stacktrace)
             # Log the error and a short error description
             logger.error(f'Prepare failed: {e}')
+        finally:
+            self.disconnect()

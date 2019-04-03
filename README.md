@@ -22,6 +22,9 @@ docker-compose up &
 
 # NB This is the only prepare job currently available. Takes a long time!
 docker exec gobworkflow python -m gobworkflow.start prepare data/brk.prepare.json
+
+# Optionally, you can define a dataset to import after the prepare command:
+docker exec gobworkflow python -m gobworkflow.start prepare data/brk.prepare.json --dataset data/some_dataset.json
 ```
 
 ## Tests
