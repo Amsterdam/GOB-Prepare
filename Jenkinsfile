@@ -24,18 +24,18 @@ node {
 
     stage('Test') {
         tryStep "test", {
-            sh "docker-compose -p gob_prepare_client -f src/.jenkins/test/docker-compose.yml build && " +
-               "docker-compose -p gob_prepare_client -f src/.jenkins/test/docker-compose.yml run -u root --rm test"
+            sh "docker-compose -p gob_prepare -f src/.jenkins/test/docker-compose.yml build && " +
+               "docker-compose -p gob_prepare -f src/.jenkins/test/docker-compose.yml run -u root --rm test"
 
         }, {
-            sh "docker-compose -p gob_prepare_client -f src/.jenkins/test/docker-compose.yml down"
+            sh "docker-compose -p gob_prepare -f src/.jenkins/test/docker-compose.yml down"
         }
     }
 
     stage("Build image") {
         tryStep "build", {
             docker.withRegistry('https://repo.data.amsterdam.nl','docker-registry') {
-                def image = docker.build("datapunt/gob_prepare_client:${env.BUILD_NUMBER}",
+                def image = docker.build("datapunt/gob_prepare:${env.BUILD_NUMBER}",
                     "--build-arg http_proxy=${JENKINS_HTTP_PROXY_STRING} " +
                     "--build-arg https_proxy=${JENKINS_HTTP_PROXY_STRING} " +
                     "--shm-size 1G " +
@@ -57,7 +57,7 @@ if (BRANCH == "develop") {
         stage('Push develop image') {
             tryStep "image tagging", {
                 docker.withRegistry('https://repo.data.amsterdam.nl','docker-registry') {
-                    def image = docker.image("datapunt/gob_prepare_client:${env.BUILD_NUMBER}")
+                    def image = docker.image("datapunt/gob_prepare:${env.BUILD_NUMBER}")
                     image.pull()
                     image.push("develop")
                 }
@@ -73,7 +73,7 @@ if (BRANCH == "master") {
         stage('Push acceptance image') {
             tryStep "image tagging", {
                 docker.withRegistry('https://repo.data.amsterdam.nl','docker-registry') {
-                    def image = docker.image("datapunt/gob_prepare_client:${env.BUILD_NUMBER}")
+                    def image = docker.image("datapunt/gob_prepare:${env.BUILD_NUMBER}")
                     image.pull()
                     image.push("acceptance")
                 }
@@ -94,7 +94,7 @@ if (BRANCH == "master") {
     }
 
     stage('Waiting for approval') {
-        slackSend channel: '#ci-channel', color: 'warning', message: 'gob_prepare_client service is waiting for Production Release - please confirm'
+        slackSend channel: '#ci-channel', color: 'warning', message: 'gob_prepare service is waiting for Production Release - please confirm'
         input "Deploy to Production?"
     }
 
@@ -102,7 +102,7 @@ if (BRANCH == "master") {
         stage('Push production image') {
             tryStep "image tagging", {
                 docker.withRegistry('https://repo.data.amsterdam.nl','docker-registry') {
-                def image = docker.image("datapunt/gob_prepare_client:${env.BUILD_NUMBER}")
+                def image = docker.image("datapunt/gob_prepare:${env.BUILD_NUMBER}")
                     image.pull()
                     image.push("production")
                     image.push("latest")
