@@ -57,10 +57,10 @@ class OracleToPostgresCloner():
         def quote_string(string):
             return f"'{string}'"
 
-        if len(self._ignore_tables) > 0:
+        if self._ignore_tables:
             table_select = f" AND table_name NOT IN " \
                 f"({','.join([quote_string(table) for table in self._ignore_tables])})"
-        elif len(self._include_tables) > 0:
+        elif self._include_tables:
             table_select = f" AND table_name IN ({','.join([quote_string(table) for table in self._include_tables])})"
         else:
             table_select = ""
