@@ -56,7 +56,7 @@ class PrepareClient:
         }
 
         # Log start of import process
-        logger.set_name("IMPORT")
+        logger.set_name("PREPARE")
         logger.set_default_args(extra_log_kwargs)
         logger.info(f"Prepare dataset {self.source['schema']} from {self.source_app} started")
 
