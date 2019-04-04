@@ -3,17 +3,19 @@ Contains the OracleToPostgresCloner class, which contains the logic to clone an 
 database.
 """
 
+import time
 from math import ceil
 from typing import Dict, List, Tuple
 
-from gobcore.exceptions import GOBEmptyResultException
+from gobprepare.config import DEBUG
+from gobcore.exceptions import GOBEmptyResultException, GOBException
 from gobcore.logging.logger import logger
 from gobcore.database.reader.oracle import read_from_oracle
 from gobprepare.cloner.mapping.oracle_to_postgres import \
     get_postgres_column_definition
-from gobprepare.writer.postgresql import (create_schema, drop_schema,
-                                          drop_table, execute_postgresql_query,
-                                          write_rows_to_postgresql)
+from gobcore.database.writer.postgresql import (create_schema, drop_schema,
+                                                drop_table, execute_postgresql_query,
+                                                write_rows_to_postgresql)
 
 
 class OracleToPostgresCloner():
@@ -23,6 +25,7 @@ class OracleToPostgresCloner():
     schema_definition = None
     _mask_columns = {}
     _ignore_tables = []
+    _include_tables = []
 
     def __init__(self, oracle_connection, src_schema: str, postgres_connection, dst_schema: str, config: dict):
         """
@@ -38,23 +41,31 @@ class OracleToPostgresCloner():
         self._dst_schema = dst_schema
 
         if config is not None:
+            if config.get('ignore') and config.get('include'):
+                raise GOBException("Don't know what to do with both ignore and include in the config. "
+                                   "Use either, not both.")
             self._mask_columns = config.get('mask', {})
             self._ignore_tables = config.get('ignore', [])
+            self._include_tables = config.get('include', [])
 
     def _read_source_table_names(self) -> list:
         """Returns a list of table names present in given schema
 
         :return:
         """
+
         def quote_string(string):
             return f"'{string}'"
 
         if len(self._ignore_tables) > 0:
-            ignore = f" AND table_name NOT IN ({','.join([quote_string(table) for table in self._ignore_tables])})"
+            table_select = f" AND table_name NOT IN " \
+                f"({','.join([quote_string(table) for table in self._ignore_tables])})"
+        elif len(self._include_tables) > 0:
+            table_select = f" AND table_name IN ({','.join([quote_string(table) for table in self._include_tables])})"
         else:
-            ignore = ""
+            table_select = ""
 
-        query = f"SELECT table_name FROM all_tables WHERE owner='{self._src_schema}'{ignore} ORDER BY table_name"
+        query = f"SELECT table_name FROM all_tables WHERE owner='{self._src_schema}'{table_select} ORDER BY table_name"
         table_names = read_from_oracle(self._src_connection, [query])
         return [row['table_name'] for row in table_names]
 
@@ -158,24 +169,51 @@ class OracleToPostgresCloner():
         :param table_definition:
         :return:
         """
-        table_name, _ = table_definition
-        select_list = self._get_select_list_for_table_definition(table_definition)
+        table_name, column_definitions = table_definition
         full_table_name = f"{self._src_schema}.{table_name}"
+
+        """Generates a query with a sub-select. The inner query selects all columns from the source table. The outer
+        query performs the transformations (such as TO_WKTGEOMETRY). Reason for this construction is that Oracle
+        somehow performs very poorly when a OFFSET ... FETCH selection is done for larger OFFSETs in combination
+        with the TO_WKTGEOMETRY function. For example, the performance is reasonable for:
+
+        SELECT SDO_UTIL.TO_WKTGEOMETRY(GEO) AS GEO FROM SOME_TABLE OFFSET 0 ROWS FETCH FIRST 100000 ROWS ONLY
+
+        But when we increase the offset the execution time grows exponentially (say 15s for OFFSET 0, 25s for OFFSET
+        50000, 45s for OFFSET 100000 and so on). This means we'll never reach the end of the table.
+
+        Somehow Oracle treats the query with sub-select different than its childless counterpart, although the
+        resulting query plans are the same. Something goes wrong when a call to WKT_TOGEOMETRY is done to a row high
+        in the (intermediate) result set.
+        """
+        outer_select = self._get_select_list_for_table_definition(table_definition)
+        inner_select = ','.join([column_name for column_name, column_type in column_definitions])
+
         cnt = 0
-        mask = table_name in self._mask_columns
-
         while True:
-            query = f"SELECT {select_list} FROM {full_table_name} " \
-                f"OFFSET {cnt * self.READ_BATCH_SIZE} ROWS FETCH FIRST {self.READ_BATCH_SIZE} ROWS ONLY"
-
+            query = f"SELECT /*+ PARALLEL */ {outer_select} FROM (" \
+                f"SELECT /*+ PARALLEL */ {inner_select} FROM {full_table_name} " \
+                f"OFFSET {cnt * self.READ_BATCH_SIZE} ROWS FETCH FIRST {self.READ_BATCH_SIZE} ROWS ONLY" \
+                f")"
+            read_start = time.time()
             try:
                 results = read_from_oracle(self._src_connection, [query])
             except GOBEmptyResultException:
                 results = []
+            read_time = time.time() - read_start
 
-            if mask:
-                results = self._mask_rows(table_name, results)
+            write_start = time.time()
             self._insert_rows(table_definition, results)
+            write_time = time.time() - write_start
+
+            if DEBUG:
+                logger.info("Total: {:>8.1f}s  Read: {:>8.1f}s  Write: {:>8.1f}s  Length: {:>8} rows  ({})".format(
+                    read_time + write_time,
+                    read_time,
+                    write_time,
+                    len(results),
+                    table_name
+                ))
 
             if len(results) < self.READ_BATCH_SIZE:
                 # We're done
@@ -210,6 +248,10 @@ class OracleToPostgresCloner():
         :return:
         """
         table_name, table_columns = table_definition
+
+        if table_name in self._mask_columns:
+            row_data = self._mask_rows(table_name, row_data)
+
         full_table_name = f"{self._dst_schema}.{table_name}"
         # Divide rows in chunks of size WRITE_BATCH_SIZE
         chunks = [row_data[i * self.WRITE_BATCH_SIZE:i * self.WRITE_BATCH_SIZE + self.WRITE_BATCH_SIZE]

@@ -6,6 +6,7 @@ from sqlalchemy.engine.url import URL
 
 ORACLE_DRIVER = 'oracle+cx_oracle'
 POSTGRES_DRIVER = 'postgresql'
+DEBUG = os.getenv('GOB_DEBUG', False)
 
 DATABASE_CONFIGS = {
     'Neuron': {
