@@ -2,15 +2,49 @@
   "version": "0.1",
   "source": {
     "application": "Neuron",
-    "type": "oracle",
-    "schema": "BRK"
+    "type": "oracle"
   },
   "destination": {
     "application": "GOBPrepare",
-    "schema": "brk"
+    "type": "postgres"
   },
-  "action": {
+  "actions": [ // Actions are run sequentially
+    {
+      "type": "clear", // Clear (remove and recreate) schema's in destination database
+      "schemas": [
+        "brk"
+      ]
+    },
+    {
+      "type": "select", // Execute queries on source database and save results in destination database
+      "queries": [
+        {
+          "query": [
+            "         SELECT TRUNC(MAX(BSD.DATUM_AANGEMAAKT)) AS brk_bsd_toestandsdatum",
+            "         ,      'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.' AS omschrijving",
+            "           FROM   BRKMON.BESTAND"
+          ],
+          "destination_table": {
+            "name": "brk.bestand", // Prefix name with schema
+            "create": true, // Whether or not to create the destination table
+            "columns": [
+              {
+                "name": "brk_bsd_toestandsdatum", // Column names should match names (columns/aliases) from query
+                "type": "TIMESTAMP" // Column type in destination database
+              },
+              {
+                "name": "omschrijving",
+                "type": "VARCHAR(120)"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
     "type": "clone",
+    "source_schema": "BRK",
+    "destination_schema": "brk",
     "include": [ // Include and ignore can't be used at the same time
       "KADASTRAAL_OBJECT"
     ],
@@ -55,4 +89,5 @@
       }
     }
   }
+  ]
 }

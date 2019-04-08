@@ -145,18 +145,13 @@ class TestOracleToPostgresCloner(TestCase):
         )
 
     @patch("gobprepare.cloner.oracle_to_postgres.logger")
-    @patch("gobprepare.cloner.oracle_to_postgres.drop_schema")
-    @patch("gobprepare.cloner.oracle_to_postgres.create_schema")
-    def test_prepare_destination_database(self, mock_create_schema, mock_drop_schema, mock_logger):
+    def test_prepare_destination_database(self, mock_logger):
         self.cloner._get_destination_schema_definition = MagicMock(
             return_value=["tabledef_a", "tabledef_b", "tabledef_c"]
         )
         self.cloner._create_destination_table = MagicMock()
-
         self.cloner._prepare_destination_database()
 
-        mock_drop_schema.assert_called_with(self.postgres_connection_mock, self.dst_schema)
-        mock_create_schema.assert_called_with(self.postgres_connection_mock, self.dst_schema)
         self.cloner._create_destination_table.assert_has_calls([
             call("tabledef_a"), call("tabledef_b"), call("tabledef_c")
         ])
