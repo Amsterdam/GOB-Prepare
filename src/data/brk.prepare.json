@@ -1,55 +1,91 @@
 {
   "version": "0.1",
+  "name": "BRK",
   "source": {
     "application": "Neuron",
-    "type": "oracle",
-    "schema": "BRK"
+    "type": "oracle"
   },
   "destination": {
     "application": "GOBPrepare",
-    "schema": "brk"
+    "type": "postgres"
   },
-  "action": {
-    "type": "clone",
-    "ignore": [
-      "MDRT_2DD90$",
-      "MDRT_2DD9B$",
-      "MDRT_2DDA6$",
-      "MDRT_2DDAF$",
-      "MDRT_2DDB8$",
-      "MDRT_2DDC3$",
-      "MDRT_2DDCD$",
-      "MDRT_2DDD4$",
-      "MDRT_2DDDF$",
-      "MDRT_2DDEA$",
-      "MDRT_2DDF5$",
-      "MDXT_2DD90$",
-      "MDXT_2DD9B$",
-      "MDXT_2DDA6$",
-      "MDXT_2DDAF$",
-      "MDXT_2DDB8$",
-      "MDXT_2DDC3$",
-      "MDXT_2DDCD$",
-      "MDXT_2DDD4$",
-      "MDXT_2DDDF$",
-      "MDXT_2DDEA$",
-      "MDXT_2DDF5$"
-    ],
-    "mask": {
-      "SUBJECT": {
-        "bsn": "*****",
-        "voornamen": "*****",
-        "voorvoegselsgeslsnaam": "*****",
-        "geslachtsnaam": "*****",
-        "geboortedatum": "****-**-**",
-        "partner_geslachtsnaam": "*****",
-        "partner_voornamen": "*****",
-        "partner_voorvoegselsgeslsnaam": "*****",
-        "kad_voornamen": "*****",
-        "kad_voorvoegselsgeslsnaam": "*****",
-        "kad_geslachtsnaam": "*****",
-        "kad_geboortedatum": "****-**-**"
+  "actions": [
+    {
+      "type": "clear",
+      "schemas": [
+        "brk"
+      ]
+    },
+    {
+      "type": "select",
+      "queries": [
+        {
+          "query": [
+"         SELECT TRUNC(MAX(BSD.DATUM_AANGEMAAKT)) AS brk_bsd_toestandsdatum",
+"         ,      'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.' AS omschrijving",
+"           FROM   BRKMON.BESTAND BSD"
+          ],
+          "destination_table": {
+            "name": "brk.bestand",
+            "create": true,
+            "columns": [
+              {
+                "name": "brk_bsd_toestandsdatum",
+                "type": "TIMESTAMP"
+              },
+              {
+                "name": "omschrijving",
+                "type": "VARCHAR(120)"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "clone",
+      "source_schema": "BRK",
+      "destination_schema": "brk",
+      "ignore": [
+        "MDRT_2DD90$",
+        "MDRT_2DD9B$",
+        "MDRT_2DDA6$",
+        "MDRT_2DDAF$",
+        "MDRT_2DDB8$",
+        "MDRT_2DDC3$",
+        "MDRT_2DDCD$",
+        "MDRT_2DDD4$",
+        "MDRT_2DDDF$",
+        "MDRT_2DDEA$",
+        "MDRT_2DDF5$",
+        "MDXT_2DD90$",
+        "MDXT_2DD9B$",
+        "MDXT_2DDA6$",
+        "MDXT_2DDAF$",
+        "MDXT_2DDB8$",
+        "MDXT_2DDC3$",
+        "MDXT_2DDCD$",
+        "MDXT_2DDD4$",
+        "MDXT_2DDDF$",
+        "MDXT_2DDEA$",
+        "MDXT_2DDF5$"
+      ],
+      "mask": {
+        "SUBJECT": {
+          "bsn": "*****",
+          "voornamen": "*****",
+          "voorvoegselsgeslsnaam": "*****",
+          "geslachtsnaam": "*****",
+          "geboortedatum": "****-**-**",
+          "partner_geslachtsnaam": "*****",
+          "partner_voornamen": "*****",
+          "partner_voorvoegselsgeslsnaam": "*****",
+          "kad_voornamen": "*****",
+          "kad_voorvoegselsgeslsnaam": "*****",
+          "kad_geslachtsnaam": "*****",
+          "kad_geboortedatum": "****-**-**"
+        }
       }
     }
-  }
+  ]
 }

@@ -13,8 +13,7 @@ from gobcore.logging.logger import logger
 from gobcore.database.reader.oracle import read_from_oracle
 from gobprepare.cloner.mapping.oracle_to_postgres import \
     get_postgres_column_definition
-from gobcore.database.writer.postgresql import (create_schema, drop_schema,
-                                                drop_table, execute_postgresql_query,
+from gobcore.database.writer.postgresql import (drop_table, execute_postgresql_query,
                                                 write_rows_to_postgresql)
 
 
@@ -99,14 +98,11 @@ class OracleToPostgresCloner():
         return table_definition
 
     def _prepare_destination_database(self) -> None:
-        """Creates the schema in the destination database. Removes the existing schema if exists.
+        """Creates tables in the destination schema
 
         :return:
         """
         schema_definition = self._get_destination_schema_definition()
-        drop_schema(self._dst_connection, self._dst_schema)
-        create_schema(self._dst_connection, self._dst_schema)
-
         for table_definition in schema_definition:
             self._create_destination_table(table_definition)
 
