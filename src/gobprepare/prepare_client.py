@@ -9,12 +9,14 @@ database.
 import datetime
 import traceback
 
-from gobcore.logging.logger import logger
 from gobcore.database.connector.oracle import connect_to_oracle
 from gobcore.database.connector.postgresql import connect_to_postgresql
-from gobcore.database.writer.postgresql import drop_schema, create_schema
+from gobcore.database.writer.postgresql import drop_schema, create_schema, execute_postgresql_query
+from gobcore.exceptions import GOBException
+from gobcore.logging.logger import logger
 from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
 from gobprepare.selector.oracle_to_postgres import OracleToPostgresSelector
+from gobprepare.selector.postgres_to_postgres import PostgresToPostgresSelector
 from gobprepare.config import get_database_config
 
 READ_BATCH_SIZE = 100000
@@ -52,7 +54,7 @@ class PrepareClient:
             'job': self._name,
             'process_id': self.process_id,
             'application': self.source.get('application'),
-            'actions': self._actions
+            'actions': [action["type"] for action in self._actions]
         }
 
         # Log start of import process
@@ -123,18 +125,59 @@ class PrepareClient:
         if self.destination['type'] == "postgres":
             for schema in action['schemas']:
                 drop_schema(self._dst_connection, schema)
+                logger.info(f"Drop schema {schema}")
+
                 create_schema(self._dst_connection, schema)
+                logger.info(f"Create schema {schema}")
         else:
             raise NotImplementedError
 
     def action_select(self, action: dict) -> int:
+        """Select action. Selects data using query and inserts the data into destination database.
 
-        if self.source['type'] == "oracle" and self.destination['type'] == "postgres":
+        :param action:
+        :return:
+        """
+        if action['source'] == 'src' and self.source['type'] == "oracle" and self.destination['type'] == "postgres":
             selector = OracleToPostgresSelector(self._src_connection, self._dst_connection, action)
+        elif action['source'] == 'dst' and self.destination['type'] == "postgres":
+            selector = PostgresToPostgresSelector(self._dst_connection, self._dst_connection, action)
         else:
             raise NotImplementedError
 
         return selector.select()
+
+    def action_execute_sql(self, action: dict):
+        """Execute SQL action. Executes SQL on destination database.
+
+        :param action:
+        :return:
+        """
+        if self.destination['type'] == "postgres":
+            query = self._get_query(action)
+            execute_postgresql_query(self._dst_connection, query)
+            logger.info(f"Executed query '{action['description']}' on Postgres")
+        else:
+            raise NotImplementedError
+
+    def _get_query(self, action: dict):
+        """Extracts query form action. Reads query from action or from file.
+
+        :param action:
+        :return:
+        """
+        src = action.get('query_src')
+
+        if src == "string":
+            # Multiline queries are represented as lists in JSON. Join list as string
+            if isinstance(action["query"], list):
+                return "\n".join(action["query"])
+            return action["query"]
+        elif src == "file":
+            with open(action["query"]) as f:
+                return f.read()
+
+        raise GOBException("Missing or invalid 'query_src'")
 
     def prepare(self):
         """Starts the appropriate prepare action based on the input configuration
@@ -146,6 +189,11 @@ class PrepareClient:
             self.result['actions'].append(self._run_prepare_action(action))
 
     def _run_prepare_action(self, action: dict):
+        """Calls appropriate action.
+
+        :param action:
+        :return:
+        """
         result = {}
         if action["type"] == "clone":
             result["rows_copied"] = self.action_clone(action)
@@ -154,6 +202,9 @@ class PrepareClient:
             result["clear"] = "OK"
         elif action["type"] == "select":
             result["rows_copied"] = self.action_select(action)
+        elif action["type"] == "execute_sql":
+            self.action_execute_sql(action)
+            result["executed"] = "OK"
         else:
             raise NotImplementedError
 
@@ -188,6 +239,7 @@ class PrepareClient:
         try:
             self.connect()
             self.prepare()
+            logger.info(f"Prepare job {self._name} finished")
         except Exception as e:
             # Print error message, the message that caused the error and a short stacktrace
             stacktrace = traceback.format_exc(limit=-5)
