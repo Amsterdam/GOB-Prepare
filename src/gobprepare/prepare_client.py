@@ -14,10 +14,11 @@ from gobcore.database.connector.postgresql import connect_to_postgresql
 from gobcore.database.writer.postgresql import drop_schema, create_schema, execute_postgresql_query
 from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
+from gobprepare.config import get_database_config
 from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
+from gobprepare.csv_importer.postgres import PostgresCsvImporter
 from gobprepare.selector.oracle_to_postgres import OracleToPostgresSelector
 from gobprepare.selector.postgres_to_postgres import PostgresToPostgresSelector
-from gobprepare.config import get_database_config
 
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
@@ -160,6 +161,19 @@ class PrepareClient:
         else:
             raise NotImplementedError
 
+    def action_import_csv(self, action: dict):
+        """Import CSV action. Import CSV into destination database
+
+        :param action:
+        :return:
+        """
+        if self.destination['type'] == "postgres":
+            importer = PostgresCsvImporter(self._dst_connection, action)
+        else:
+            raise NotImplementedError
+
+        return importer.import_csv()
+
     def _get_query(self, action: dict):
         """Extracts query form action. Reads query from action or from file.
 
@@ -205,6 +219,8 @@ class PrepareClient:
         elif action["type"] == "execute_sql":
             self.action_execute_sql(action)
             result["executed"] = "OK"
+        elif action["type"] == "import_csv":
+            result["rows_imported"] = self.action_import_csv(action)
         else:
             raise NotImplementedError
 
