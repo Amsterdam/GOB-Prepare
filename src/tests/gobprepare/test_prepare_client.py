@@ -269,6 +269,30 @@ class TestPrepareClient(TestCase):
         with self.assertRaises(NotImplementedError):
             prepare_client.action_execute_sql({})
 
+    @patch("gobprepare.prepare_client.PostgresCsvImporter", autospec=True)
+    def test_action_import_csv(self, mock_importer, mock_logger):
+        action = {
+            "action": "import_csv",
+            "somemore": "configuration",
+        }
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.destination["type"] = "postgres"
+        mock_importer_instance = mock_importer.return_value
+        mock_importer_instance.import_csv.return_value = 4802
+
+        result = prepare_client.action_import_csv(action)
+        self.assertEqual(4802, result)
+
+        mock_importer.assert_called_with(prepare_client._dst_connection, action)
+        mock_importer_instance.import_csv.assert_called_once()
+
+    def test_action_import_csv_invalid_destination(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.destination["type"] = "somedb"
+
+        with self.assertRaises(NotImplementedError):
+            prepare_client.action_import_csv({})
+
     def test__get_query_string_type(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         action = {
@@ -373,6 +397,20 @@ class TestPrepareClient(TestCase):
         self.assertEqual({
             "action": "execute_sql",
             "executed": "OK",
+        }, result)
+
+    def test_run_prepare_action_import_csv(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.action_import_csv = MagicMock(return_value=425)
+        action = {
+            "type": "import_csv"
+        }
+
+        result = prepare_client._run_prepare_action(action)
+        prepare_client.action_import_csv.assert_called_with(action)
+        self.assertEqual({
+            "action": "import_csv",
+            "rows_imported": 425,
         }, result)
 
     def test_prepare_invalid_action_type(self, mock_logger):

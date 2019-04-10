@@ -53,6 +53,8 @@ SELECT kot.identificatie                    AS brk_kot_id
       ,prc.geometrie        AS perceelnummer_geometrie
       ,bij.geometrie         AS bijpijling_geometrie
       ,addr.address as address
+      ,brg.cbscode as brg_gemeente_id
+      ,brg.bgmnaam as brg_gemeente_oms
 --
 FROM   brk.kadastraal_object kot
 LEFT   JOIN brk.c_akrkadastralegemeentecode ake
@@ -122,4 +124,6 @@ ON     (kot.id = prc.id AND kot.volgnummer = prc.volgnummer)
 LEFT   OUTER JOIN brk.bijpijling bij
 ON     (kot.id = bij.id AND kot.volgnummer = bij.volgnummer)
 left outer join brk.baghulptabel addr
-on addr.kadastraalobject_id = kot.id and addr.kadastraalobject_volgnummer = kot.volgnummer;
+on addr.kadastraalobject_id = kot.id and addr.kadastraalobject_volgnummer = kot.volgnummer
+left join (select cbscode, bgmnaam, kadgemnaam from brk.import_burgerlijke_gemeentes group by cbscode, bgmnaam, kadgemnaam) brg
+on (kge.omschrijving = brg.kadgemnaam);

@@ -99,6 +99,11 @@
       "query": "data/sql/brk/materialized_view_baghulptabel.sql"
     },
     {
+      "type": "import_csv",
+      "source": "http://www.kadaster.nl/schemas/waardelijsten/BurgemKadgemSectie/BurgemKadgemSectie.csv",
+      "destination": "brk.import_burgerlijke_gemeentes"
+    },
+    {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
