@@ -8,86 +8,108 @@
     "application": "GOBPrepare",
     "type": "postgres"
   },
-  "actions": [ // Actions are run sequentially
+  "actions": [
+    // Actions are run sequentially
     {
-      "type": "clear", // Clear (remove and recreate) schema's in destination database
+      "type": "clear",
+      // Clear (remove and recreate) schema's in destination database
       "schemas": [
         "brk"
       ]
     },
     {
-      "type": "select", // Execute queries on source database and save results in destination database
-      "queries": [
-        {
-          "query": [
-            "         SELECT TRUNC(MAX(BSD.DATUM_AANGEMAAKT)) AS brk_bsd_toestandsdatum",
-            "         ,      'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.' AS omschrijving",
-            "           FROM   BRKMON.BESTAND"
-          ],
-          "destination_table": {
-            "name": "brk.bestand", // Prefix name with schema
-            "create": true, // Whether or not to create the destination table
-            "columns": [
-              {
-                "name": "brk_bsd_toestandsdatum", // Column names should match names (columns/aliases) from query
-                "type": "TIMESTAMP" // Column type in destination database
-              },
-              {
-                "name": "omschrijving",
-                "type": "VARCHAR(120)"
-              }
-            ]
+      "type": "select",
+      // Execute queries on source database and save results in destination database
+      "source": "src",
+      // "src" or "dst". Select from source or destination database.
+      "ignore_missing": true,
+      // Either true of false. If the query result does not include a column present in 'columns' (below), ignore (and set to None/NULL) or raise an Exception.
+      // Used when importing partial rows that need further processing/additions
+      "query": [
+        "         SELECT TRUNC(MAX(BSD.DATUM_AANGEMAAKT)) AS brk_bsd_toestandsdatum",
+        "         ,      'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.' AS omschrijving",
+        "           FROM   BRKMON.BESTAND"
+      ],
+      "query_src": "string",
+      // "string" or "file". Provide a filename for query to read a query from file.
+      "destination_table": {
+        "name": "brk.bestand",
+        // Prefix name with schema (we always write to the destination database)
+        "create": true,
+        // Whether or not to create the destination table
+        "columns": [
+          {
+            "name": "brk_bsd_toestandsdatum",
+            // Column names should match names (columns/aliases) from query
+            "type": "TIMESTAMP"
+            // Column type in destination database
+          },
+          {
+            "name": "omschrijving",
+            "type": "VARCHAR(120)"
           }
-        }
-      ]
+        ]
+      }
     },
     {
-    "type": "clone",
-    "source_schema": "BRK",
-    "destination_schema": "brk",
-    "include": [ // Include and ignore can't be used at the same time
-      "KADASTRAAL_OBJECT"
-    ],
-    "ignore": [ // Include and ignore can't be used at the same time
-      "MDRT_2DD90$",
-      "MDRT_2DD9B$",
-      "MDRT_2DDA6$",
-      "MDRT_2DDAF$",
-      "MDRT_2DDB8$",
-      "MDRT_2DDC3$",
-      "MDRT_2DDCD$",
-      "MDRT_2DDD4$",
-      "MDRT_2DDDF$",
-      "MDRT_2DDEA$",
-      "MDRT_2DDF5$",
-      "MDXT_2DD90$",
-      "MDXT_2DD9B$",
-      "MDXT_2DDA6$",
-      "MDXT_2DDAF$",
-      "MDXT_2DDB8$",
-      "MDXT_2DDC3$",
-      "MDXT_2DDCD$",
-      "MDXT_2DDD4$",
-      "MDXT_2DDDF$",
-      "MDXT_2DDEA$",
-      "MDXT_2DDF5$"
-    ],
-    "mask": {
-      "SUBJECT": { // Mask columns from table SUBJECT with given strings
-        "bsn": "*****",
-        "voornamen": "*****",
-        "voorvoegselsgeslsnaam": "*****",
-        "geslachtsnaam": "*****",
-        "geboortedatum": "****-**-**",
-        "partner_geslachtsnaam": "*****",
-        "partner_voornamen": "*****",
-        "partner_voorvoegselsgeslsnaam": "*****",
-        "kad_voornamen": "*****",
-        "kad_voorvoegselsgeslsnaam": "*****",
-        "kad_geslachtsnaam": "*****",
-        "kad_geboortedatum": "****-**-**"
+      "type": "clone",
+      "source_schema": "BRK",
+      "destination_schema": "brk",
+      "include": [
+        // Include and ignore can't be used at the same time
+        "KADASTRAAL_OBJECT"
+      ],
+      "ignore": [
+        // Include and ignore can't be used at the same time
+        "MDRT_2DD90$",
+        "MDRT_2DD9B$",
+        "MDRT_2DDA6$",
+        "MDRT_2DDAF$",
+        "MDRT_2DDB8$",
+        "MDRT_2DDC3$",
+        "MDRT_2DDCD$",
+        "MDRT_2DDD4$",
+        "MDRT_2DDDF$",
+        "MDRT_2DDEA$",
+        "MDRT_2DDF5$",
+        "MDXT_2DD90$",
+        "MDXT_2DD9B$",
+        "MDXT_2DDA6$",
+        "MDXT_2DDAF$",
+        "MDXT_2DDB8$",
+        "MDXT_2DDC3$",
+        "MDXT_2DDCD$",
+        "MDXT_2DDD4$",
+        "MDXT_2DDDF$",
+        "MDXT_2DDEA$",
+        "MDXT_2DDF5$"
+      ],
+      "mask": {
+        "SUBJECT": {
+          // Mask columns from table SUBJECT with given strings
+          "bsn": "*****",
+          "voornamen": "*****",
+          "voorvoegselsgeslsnaam": "*****",
+          "geslachtsnaam": "*****",
+          "geboortedatum": "****-**-**",
+          "partner_geslachtsnaam": "*****",
+          "partner_voornamen": "*****",
+          "partner_voorvoegselsgeslsnaam": "*****",
+          "kad_voornamen": "*****",
+          "kad_voorvoegselsgeslsnaam": "*****",
+          "kad_geslachtsnaam": "*****",
+          "kad_geboortedatum": "****-**-**"
+        }
       }
+    },
+    {
+      "type": "execute_sql",
+      // Execute SQL on destination database
+      "description": "Create indexes",
+      "query_src": "file",
+      // Query source. Either "file" or "string" (same as the select action above)
+      "query": "data/sql/brk/indexes.sql"
+      // Either a query (as list) or the path to a file containing the query.
     }
-  }
   ]
 }

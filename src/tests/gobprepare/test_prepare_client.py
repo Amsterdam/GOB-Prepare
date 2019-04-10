@@ -1,6 +1,7 @@
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch, call, mock_open
 
+from gobcore.exceptions import GOBException
 from gobprepare.prepare_client import PrepareClient
 from tests import fixtures
 
@@ -24,6 +25,7 @@ class TestPrepareClient(TestCase):
                 'source_schema': fixtures.random_string(),
                 'destination_schema': fixtures.random_string(),
                 'type': 'clone',
+                'source': 'src',
                 'mask': {
                     "sometable": {
                         "somecolumn": "mask"
@@ -195,12 +197,13 @@ class TestPrepareClient(TestCase):
             prepare_client.action_clear({})
 
     @patch("gobprepare.prepare_client.OracleToPostgresSelector", autospec=True)
-    def test_action_select(self, mock_selector, mock_logger):
+    def test_action_select_src(self, mock_selector, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         mock_selector_instance = mock_selector.return_value
         mock_selector_instance.select.return_value = 82840
         action = {
             "type": "select",
+            "source": "src",
         }
 
         result = prepare_client.action_select(action)
@@ -212,20 +215,97 @@ class TestPrepareClient(TestCase):
         )
         mock_selector_instance.select.assert_called_once()
 
+    @patch("gobprepare.prepare_client.PostgresToPostgresSelector", autospec=True)
+    def test_action_select_dst(self, mock_selector, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        mock_selector_instance = mock_selector.return_value
+        mock_selector_instance.select.return_value = 82840
+        action = {
+            "type": "select",
+            "source": "dst",
+        }
+
+        result = prepare_client.action_select(action)
+        self.assertEqual(82840, result)
+        # Should be called with dst_connection as both source and destination for selector
+        mock_selector.assert_called_with(
+            prepare_client._dst_connection,
+            prepare_client._dst_connection,
+            action
+        )
+        mock_selector_instance.select.assert_called_once()
+
     def test_action_select_invalid_source_destination_types(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         invalid_combinations = [
-            ("oracle", "nonexistent"),
-            ("nonexistent", "postgres"),
-            ("nonexistent", "nonexistent")
+            ("src", "oracle", "nonexistent"),
+            ("src", "nonexistent", "postgres"),
+            ("src", "nonexistent", "nonexistent"),
+            ("dst", "oracle", "nonexistent"),
+            ("dst", "nonexistent", "nonexistent"),
+            ("nonexistent", "oracle", "postgres"),
         ]
 
-        for source, destination in invalid_combinations:
+        for source_type, source, destination in invalid_combinations:
             prepare_client.source['type'] = source
             prepare_client.destination['type'] = destination
             with self.assertRaises(NotImplementedError):
-                prepare_client.action_select({})
+                prepare_client.action_select({'source': source_type})
 
+    @patch("gobprepare.prepare_client.execute_postgresql_query")
+    def test_action_execute_sql(self, mock_execute, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._get_query = MagicMock(return_value="the_query")
+
+        action = {"action": "execute_sql", "query": "SOME QUERY", "description": "Execute the query"}
+        prepare_client.action_execute_sql(action)
+        prepare_client._get_query.assert_called_with(action)
+        mock_execute.assert_called_with(prepare_client._dst_connection, "the_query")
+
+    def test_action_execute_sql_invalid_dst(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.destination["type"] = "somedb"
+
+        with self.assertRaises(NotImplementedError):
+            prepare_client.action_execute_sql({})
+
+    def test__get_query_string_type(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        action = {
+            "query_src": "string",
+            "query": "SELECT SOMETHING FROM SOMEWHERE WHERE SOMETHING IS TRUE",
+        }
+
+        result = prepare_client._get_query(action)
+        self.assertEqual(action["query"], result)
+
+    def test__get_query_string_as_list_type(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        config = {
+            "query_src": "string",
+            "query": ["SELECT", "SOMETHING", "FROM", "SOMEWHERE"],
+        }
+        result = prepare_client._get_query(config)
+        self.assertEqual("\n".join(config['query']), result)
+
+    @patch("builtins.open", new_callable=mock_open, read_data="the query")
+    def test__get_query_file_type(self, mock_file_open, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        action = {
+            "query_src": "file",
+            "query": "some/file/path.sql",
+        }
+        result = prepare_client._get_query(action)
+        mock_file_open.assert_called_with(action['query'])
+        self.assertEqual("the query", result)
+
+    def test__get_query_invalid_type(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        action = {
+            "query_src": "invalid"
+        }
+        with self.assertRaises(GOBException):
+            prepare_client._get_query(action)
 
     def test_prepare(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
@@ -279,6 +359,20 @@ class TestPrepareClient(TestCase):
         self.assertEqual({
             "action": "select",
             "rows_copied": 3223,
+        }, result)
+
+    def test_run_prepare_action_execute_sql(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.action_execute_sql = MagicMock()
+        action = {
+            "type": "execute_sql"
+        }
+
+        result = prepare_client._run_prepare_action(action)
+        prepare_client.action_execute_sql.assert_called_with(action)
+        self.assertEqual({
+            "action": "execute_sql",
+            "executed": "OK",
         }, result)
 
     def test_prepare_invalid_action_type(self, mock_logger):
