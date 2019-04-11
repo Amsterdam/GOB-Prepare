@@ -9,11 +9,16 @@ database.
 import datetime
 import traceback
 
-from gobcore.logging.logger import logger
 from gobcore.database.connector.oracle import connect_to_oracle
 from gobcore.database.connector.postgresql import connect_to_postgresql
-from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
+from gobcore.database.writer.postgresql import drop_schema, create_schema, execute_postgresql_query
+from gobcore.exceptions import GOBException
+from gobcore.logging.logger import logger
 from gobprepare.config import get_database_config
+from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
+from gobprepare.csv_importer.postgres import PostgresCsvImporter
+from gobprepare.selector.oracle_to_postgres import OracleToPostgresSelector
+from gobprepare.selector.postgres_to_postgres import PostgresToPostgresSelector
 
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
@@ -37,46 +42,51 @@ class PrepareClient:
         self.header = msg.get('header', {})
         self.msg = msg
         self._prepare_config = prepare_config
-        self._action = prepare_config['action']
+        self._actions = prepare_config['actions']
+        self._name = prepare_config['name']
         self.source = self._prepare_config['source']
-        self.source_app = self._prepare_config['source'].get('application', self._prepare_config['source']['schema'])
+        self.source_app = self._prepare_config['source']['application']
         self.destination = self._prepare_config['destination']
-        self.destination_app = self._prepare_config['destination'].get(
-            'application',
-            self._prepare_config['destination']['schema']
-        )
+        self.destination_app = self._prepare_config['destination']['application']
 
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
-        self.process_id = f"{start_timestamp}.{self.source_app}.{self.source['schema']}"
+        self.process_id = f"{start_timestamp}.{self.source_app}{self._name}"
         extra_log_kwargs = {
+            'job': self._name,
             'process_id': self.process_id,
             'application': self.source.get('application'),
-            'schema': self.source['schema'],
-            'action': self._action
+            'actions': [action["type"] for action in self._actions]
         }
 
         # Log start of import process
         logger.set_name("PREPARE")
         logger.set_default_args(extra_log_kwargs)
-        logger.info(f"Prepare dataset {self.source['schema']} from {self.source_app} started")
+        logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
 
     def connect(self):
-        """Connects to data source and destination (postgres) database
+        """Connects to data source and destination database
 
         :return:
         """
-        if self.source['type'] == "oracle":
-            self._src_connection, self._src_user = connect_to_oracle(get_database_config(self.source['application']))
+        self._src_connection, self._src_user = self._connect_application(self.source)
+        self._dst_connection, self._dst_user = self._connect_application(self.destination)
+
+    def _connect_application(self, application_config: dict):
+        """Connects to application database
+
+        :param application_config:
+        :return:
+        """
+        if application_config['type'] == "oracle":
+            connection, user = connect_to_oracle(get_database_config(application_config['application']))
+        elif application_config['type'] == "postgres":
+            connection, user = connect_to_postgresql(get_database_config(application_config['application']))
         else:
             raise NotImplementedError
 
-        logger.info(f"Connection to {self.source_app} {self._src_user} has been made.")
+        logger.info(f"Connection to {application_config['application']} {user} has been made.")
 
-        # Destination database is always Postgres
-        self._dst_connection, self._dst_user = connect_to_postgresql(
-            get_database_config(self.destination['application'])
-        )
-        logger.info(f"Connection to {self.destination_app} {self._dst_user} has been made.")
+        return connection, user
 
     def disconnect(self):
         """Closes open database connections
@@ -93,31 +103,129 @@ class PrepareClient:
             self._dst_connection = None
             self._dst_user = None
 
-    def clone(self):
+    def action_clone(self, action: dict) -> int:
         """Clones the source data using an external Cloner class.
 
         :return:
         """
-        if self.source['type'] == "oracle":
-            cloner = OracleToPostgresCloner(self._src_connection, self.source['schema'],
-                                            self._dst_connection, self.destination['schema'],
-                                            self._action)
+        if self.source['type'] == "oracle" and self.destination['type'] == "postgres":
+            cloner = OracleToPostgresCloner(self._src_connection, action['source_schema'],
+                                            self._dst_connection, action['destination_schema'],
+                                            action)
         else:
             raise NotImplementedError
 
         return cloner.clone()
+
+    def action_clear(self, action: dict):
+        """Clears destination database schema's (removes and recreates schemas)
+
+        :param action:
+        :return:
+        """
+        if self.destination['type'] == "postgres":
+            for schema in action['schemas']:
+                drop_schema(self._dst_connection, schema)
+                logger.info(f"Drop schema {schema}")
+
+                create_schema(self._dst_connection, schema)
+                logger.info(f"Create schema {schema}")
+        else:
+            raise NotImplementedError
+
+    def action_select(self, action: dict) -> int:
+        """Select action. Selects data using query and inserts the data into destination database.
+
+        :param action:
+        :return:
+        """
+        if action['source'] == 'src' and self.source['type'] == "oracle" and self.destination['type'] == "postgres":
+            selector = OracleToPostgresSelector(self._src_connection, self._dst_connection, action)
+        elif action['source'] == 'dst' and self.destination['type'] == "postgres":
+            selector = PostgresToPostgresSelector(self._dst_connection, self._dst_connection, action)
+        else:
+            raise NotImplementedError
+
+        return selector.select()
+
+    def action_execute_sql(self, action: dict):
+        """Execute SQL action. Executes SQL on destination database.
+
+        :param action:
+        :return:
+        """
+        if self.destination['type'] == "postgres":
+            query = self._get_query(action)
+            execute_postgresql_query(self._dst_connection, query)
+            logger.info(f"Executed query '{action['description']}' on Postgres")
+        else:
+            raise NotImplementedError
+
+    def action_import_csv(self, action: dict):
+        """Import CSV action. Import CSV into destination database
+
+        :param action:
+        :return:
+        """
+        if self.destination['type'] == "postgres":
+            importer = PostgresCsvImporter(self._dst_connection, action)
+        else:
+            raise NotImplementedError
+
+        return importer.import_csv()
+
+    def _get_query(self, action: dict):
+        """Extracts query form action. Reads query from action or from file.
+
+        :param action:
+        :return:
+        """
+        src = action.get('query_src')
+
+        if src == "string":
+            # Multiline queries are represented as lists in JSON. Join list as string
+            if isinstance(action["query"], list):
+                return "\n".join(action["query"])
+            return action["query"]
+        elif src == "file":
+            with open(action["query"]) as f:
+                return f.read()
+
+        raise GOBException("Missing or invalid 'query_src'")
 
     def prepare(self):
         """Starts the appropriate prepare action based on the input configuration
 
         :return:
         """
-        if self._action["type"] == "clone":
-            self.result['rows_copied'] = self.clone()
+        self.result['actions'] = []
+        for idx, action in enumerate(self._actions):
+            self.result['actions'].append(self._run_prepare_action(action))
+
+    def _run_prepare_action(self, action: dict):
+        """Calls appropriate action.
+
+        :param action:
+        :return:
+        """
+        result = {}
+        if action["type"] == "clone":
+            result["rows_copied"] = self.action_clone(action)
+        elif action["type"] == "clear":
+            self.action_clear(action)
+            result["clear"] = "OK"
+        elif action["type"] == "select":
+            result["rows_copied"] = self.action_select(action)
+        elif action["type"] == "execute_sql":
+            self.action_execute_sql(action)
+            result["executed"] = "OK"
+        elif action["type"] == "import_csv":
+            result["rows_imported"] = self.action_import_csv(action)
         else:
             raise NotImplementedError
 
-        self.result['action'] = self._action['type']
+        result['action'] = action['type']
+        return result
 
     def get_result(self):
         """Returns the result of the prepare job
@@ -147,6 +255,7 @@ class PrepareClient:
         try:
             self.connect()
             self.prepare()
+            logger.info(f"Prepare job {self._name} finished")
         except Exception as e:
             # Print error message, the message that caused the error and a short stacktrace
             stacktrace = traceback.format_exc(limit=-5)

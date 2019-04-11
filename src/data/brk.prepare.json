@@ -1,55 +1,268 @@
 {
   "version": "0.1",
+  "name": "BRK",
   "source": {
     "application": "Neuron",
-    "type": "oracle",
-    "schema": "BRK"
+    "type": "oracle"
   },
   "destination": {
     "application": "GOBPrepare",
-    "schema": "brk"
+    "type": "postgres"
   },
-  "action": {
-    "type": "clone",
-    "ignore": [
-      "MDRT_2DD90$",
-      "MDRT_2DD9B$",
-      "MDRT_2DDA6$",
-      "MDRT_2DDAF$",
-      "MDRT_2DDB8$",
-      "MDRT_2DDC3$",
-      "MDRT_2DDCD$",
-      "MDRT_2DDD4$",
-      "MDRT_2DDDF$",
-      "MDRT_2DDEA$",
-      "MDRT_2DDF5$",
-      "MDXT_2DD90$",
-      "MDXT_2DD9B$",
-      "MDXT_2DDA6$",
-      "MDXT_2DDAF$",
-      "MDXT_2DDB8$",
-      "MDXT_2DDC3$",
-      "MDXT_2DDCD$",
-      "MDXT_2DDD4$",
-      "MDXT_2DDDF$",
-      "MDXT_2DDEA$",
-      "MDXT_2DDF5$"
-    ],
-    "mask": {
-      "SUBJECT": {
-        "bsn": "*****",
-        "voornamen": "*****",
-        "voorvoegselsgeslsnaam": "*****",
-        "geslachtsnaam": "*****",
-        "geboortedatum": "****-**-**",
-        "partner_geslachtsnaam": "*****",
-        "partner_voornamen": "*****",
-        "partner_voorvoegselsgeslsnaam": "*****",
-        "kad_voornamen": "*****",
-        "kad_voorvoegselsgeslsnaam": "*****",
-        "kad_geslachtsnaam": "*****",
-        "kad_geboortedatum": "****-**-**"
+  "actions": [
+    {
+      "type": "clear",
+      "schemas": [
+        "brk",
+        "brk_prep"
+      ]
+    },
+    {
+      "type": "select",
+      "source": "src",
+      "query": [
+        "         SELECT TRUNC(MAX(BSD.DATUM_AANGEMAAKT)) AS brk_bsd_toestandsdatum",
+        "         ,      'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.' AS omschrijving",
+        "           FROM   BRKMON.BESTAND BSD"
+      ],
+      "query_src": "string",
+      "destination_table": {
+        "name": "brk.bestand",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_bsd_toestandsdatum",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "omschrijving",
+            "type": "VARCHAR(120)"
+          }
+        ]
+      }
+    },
+    {
+      "type": "clone",
+      "source_schema": "BRK",
+      "destination_schema": "brk",
+      "ignore": [
+        "MDRT_2DD90$",
+        "MDRT_2DD9B$",
+        "MDRT_2DDA6$",
+        "MDRT_2DDAF$",
+        "MDRT_2DDB8$",
+        "MDRT_2DDC3$",
+        "MDRT_2DDCD$",
+        "MDRT_2DDD4$",
+        "MDRT_2DDDF$",
+        "MDRT_2DDEA$",
+        "MDRT_2DDF5$",
+        "MDXT_2DD90$",
+        "MDXT_2DD9B$",
+        "MDXT_2DDA6$",
+        "MDXT_2DDAF$",
+        "MDXT_2DDB8$",
+        "MDXT_2DDC3$",
+        "MDXT_2DDCD$",
+        "MDXT_2DDD4$",
+        "MDXT_2DDDF$",
+        "MDXT_2DDEA$",
+        "MDXT_2DDF5$"
+      ],
+      "mask": {
+        "SUBJECT": {
+          "bsn": "*****",
+          "voornamen": "*****",
+          "voorvoegselsgeslsnaam": "*****",
+          "geslachtsnaam": "*****",
+          "geboortedatum": "****-**-**",
+          "partner_geslachtsnaam": "*****",
+          "partner_voornamen": "*****",
+          "partner_voorvoegselsgeslsnaam": "*****",
+          "kad_voornamen": "*****",
+          "kad_voorvoegselsgeslsnaam": "*****",
+          "kad_geslachtsnaam": "*****",
+          "kad_geboortedatum": "****-**-**"
+        }
+      }
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create indexes",
+      "query_src": "file",
+      "query": "data/sql/brk/indexes.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create materialized view Baghulptabel",
+      "query_src": "file",
+      "query": "data/sql/brk/materialized_view_baghulptabel.sql"
+    },
+    {
+      "type": "import_csv",
+      "source": "http://www.kadaster.nl/schemas/waardelijsten/BurgemKadgemSectie/BurgemKadgemSectie.csv",
+      "destination": "brk.import_burgerlijke_gemeentes"
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/kadastraal_object.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.kadastraal_object",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_kot_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_kot_id",
+            "type": "INT"
+          },
+          {
+            "name": "source_id",
+            "type": "INT"
+          },
+          {
+            "name": "nrn_kot_volgnr",
+            "type": "INT"
+          },
+          {
+            "name": "brg_gemeente_id",
+            "type": "INT"
+          },
+          {
+            "name": "brg_gemeente_oms",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "kad_gemeentecode",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "kad_gemeente_oms",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "akrkadgemcode_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "kadastralegemeente_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "sectie",
+            "type": "VARCHAR(8)"
+          },
+          {
+            "name": "perceelnummer",
+            "type": "INT"
+          },
+          {
+            "name": "index_letter",
+            "type": "VARCHAR(4)"
+          },
+          {
+            "name": "index_nummer",
+            "type": "INT"
+          },
+          {
+            "name": "soortgrootte_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "kadgrootte",
+            "type": "INT"
+          },
+          {
+            "name": "koopsom",
+            "type": "INT"
+          },
+          {
+            "name": "koopsom_valuta",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "koopjaar",
+            "type": "VARCHAR(60)"
+          },
+          {
+            "name": "indicatie_meer_objecten",
+            "type": "VARCHAR(4)"
+          },
+          {
+            "name": "cultuurcodeonbebouwd_code",
+            "type": "VARCHAR(10)"
+          },
+          {
+            "name": "cultuurcodeonbebouwd_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "cultuurcodebebouwd",
+            "type": "VARCHAR(255)"
+          },
+          {
+            "name": "status_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "ind_voorlopige_kadgrens",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "inonderzoek",
+            "type": "VARCHAR(255)"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "creation",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "modification",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "einddatum",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "geometrie",
+            "type": "GEOMETRY"
+          },
+          {
+            "name": "perceelnummer_rotatie",
+            "type": "INT"
+          },
+          {
+            "name": "perceelnummer_verschuiving_x",
+            "type": "INT"
+          },
+          {
+            "name": "perceelnummer_verschuiving_y",
+            "type": "INT"
+          },
+          {
+            "name": "bijpijling_geometrie",
+            "type": "GEOMETRY"
+          },
+          {
+            "name": "relatie_g_perceel",
+            "type": "TEXT"
+          },
+          {
+            "name": "address",
+            "type": "TEXT"
+          }
+        ]
       }
     }
-  }
+  ]
 }
