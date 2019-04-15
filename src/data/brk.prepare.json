@@ -254,6 +254,10 @@
             "type": "INT"
           },
           {
+            "name": "perceelnummer_geometrie",
+            "type": "GEOMETRY"
+          },
+          {
             "name": "bijpijling_geometrie",
             "type": "GEOMETRY"
           },
@@ -262,7 +266,7 @@
             "type": "TEXT"
           },
           {
-            "name": "address",
+            "name": "adres",
             "type": "TEXT"
           }
         ]
