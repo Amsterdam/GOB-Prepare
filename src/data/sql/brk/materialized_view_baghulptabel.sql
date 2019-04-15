@@ -9,7 +9,7 @@ create materialized view brk.baghulptabel as select
 	coalesce(huisnummertoevoeging, '') || '|' ||
 	coalesce(postcode, '') || '|' ||
 	coalesce(woonplaatsnaam, '')
-	, ';') as address
+	, ';') as adres
 from (
 SELECT kas.id
       ,kas.kadastraalobject_id
@@ -40,6 +40,6 @@ FROM   brk.kadastraal_adres kas
 LEFT JOIN   brk.adresseerbaar_object aot
 ON     kas.adresseerbaar_object_id = aot.id
 WHERE  kas.adresseerbaar_object_id IS NOT null
-) addr
+) adr
 where not (bag_id is null and openbareruimtenaam is null and huisnummer is null and huisletter is null and huisnummertoevoeging is null and postcode is null and woonplaatsnaam is null)
 group by kadastraalobject_id, kadastraalobject_volgnummer;

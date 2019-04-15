@@ -23,7 +23,7 @@ SELECT kot.identificatie                    AS brk_kot_id
       ,ccb.cultuurbebouwd       AS cultuurcodebebouwd
       ,kot.status_code         AS status_code
       ,coalesce(vkg.vkgrens -- POSTGRES: replaced nvl() with coalesce()
-          ,'Definitieve grens')     AS ind_voorlopige_kadgrens
+          ,'N')     AS ind_voorlopige_kadgrens -- Replaced 'Definitieve grens' with 'N'
       ,kok.omschrijving       AS inonderzoek
     ,kot.toestandsdatum       AS toestandsdatum
       ,kot.creation         AS creation
@@ -52,7 +52,7 @@ SELECT kot.identificatie                    AS brk_kot_id
       ,prc.verschuiving_y       AS perceelnummer_verschuiving_y
       ,prc.geometrie        AS perceelnummer_geometrie
       ,bij.geometrie         AS bijpijling_geometrie
-      ,addr.address as address
+      ,adr.adres as adres
       ,brg.cbscode as brg_gemeente_id
       ,brg.bgmnaam as brg_gemeente_oms
 --
@@ -94,7 +94,7 @@ ON     (kot.id = ccb.nrn_kot_id AND kot.volgnummer = ccb.nrn_kot_volgnr)
 -- Het lijkt erop dat deze beperkingen nooit beeindigd worden door het Kadaster. Dit moet nog nagevraagd worden
 LEFT   JOIN (SELECT akt.kadastraalobject_id AS nrn_kot_id
                    ,akt.kadastraalobject_volgnummer AS nrn_kot_volgnr
-                   ,'Voorlopige grens' AS vkgrens
+                   ,'J' AS vkgrens -- Replace 'Voorlopige grens' with 'J'
              FROM   brk.aantekening_kadastraalobject akt
                    ,brk.aantekening                  atg
              WHERE  atg.id = akt.aantekening_id
@@ -123,7 +123,7 @@ LEFT   OUTER JOIN brk.perceelnummer prc
 ON     (kot.id = prc.id AND kot.volgnummer = prc.volgnummer)
 LEFT   OUTER JOIN brk.bijpijling bij
 ON     (kot.id = bij.id AND kot.volgnummer = bij.volgnummer)
-left outer join brk.baghulptabel addr
-on addr.kadastraalobject_id = kot.id and addr.kadastraalobject_volgnummer = kot.volgnummer
+left outer join brk.baghulptabel adr
+on adr.kadastraalobject_id = kot.id and adr.kadastraalobject_volgnummer = kot.volgnummer
 left join (select cbscode, bgmnaam, kadgemnaam from brk.import_burgerlijke_gemeentes group by cbscode, bgmnaam, kadgemnaam) brg
 on (kge.omschrijving = brg.kadgemnaam);
