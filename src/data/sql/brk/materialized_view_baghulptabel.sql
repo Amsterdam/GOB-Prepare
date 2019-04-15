@@ -1,15 +1,14 @@
 create materialized view brk.baghulptabel as select
 	kadastraalobject_id,
 	kadastraalobject_volgnummer,
-	string_agg(
-	coalesce(bag_id, '') || '|' ||
-	coalesce(openbareruimtenaam, '') || '|' ||
-	coalesce(cast(huisnummer as varchar(255)), '') || '|' ||
-	coalesce(huisletter, '') || '|' ||
-	coalesce(huisnummertoevoeging, '') || '|' ||
-	coalesce(postcode, '') || '|' ||
-	coalesce(woonplaatsnaam, '')
-	, ';') as adres
+	array_to_json(array_agg(json_build_object(
+	    'bag_id', bag_id,
+	    'openbareruimtenaam', openbareruimtenaam,
+	    'huisnummer', huisnummer,
+	    'huisletter', huisletter,
+	    'huisnummertoevoeging', huisnummertoevoeging,
+	    'postcode', postcode,
+	    'woonplaatsnaam', woonplaatsnaam))) as adressen
 from (
 SELECT kas.id
       ,kas.kadastraalobject_id
@@ -41,5 +40,15 @@ LEFT JOIN   brk.adresseerbaar_object aot
 ON     kas.adresseerbaar_object_id = aot.id
 WHERE  kas.adresseerbaar_object_id IS NOT null
 ) adr
-where not (bag_id is null and openbareruimtenaam is null and huisnummer is null and huisletter is null and huisnummertoevoeging is null and postcode is null and woonplaatsnaam is null)
-group by kadastraalobject_id, kadastraalobject_volgnummer;
+where not (
+    bag_id is null and
+    openbareruimtenaam is null and
+    huisnummer is null and
+    huisletter is null and
+    huisnummertoevoeging is null and
+    postcode is null and
+    woonplaatsnaam is null
+)
+group by
+    kadastraalobject_id,
+    kadastraalobject_volgnummer;

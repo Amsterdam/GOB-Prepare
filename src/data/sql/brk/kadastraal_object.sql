@@ -52,7 +52,7 @@ SELECT kot.identificatie                    AS brk_kot_id
       ,prc.verschuiving_y       AS perceelnummer_verschuiving_y
       ,prc.geometrie        AS perceelnummer_geometrie
       ,bij.geometrie         AS bijpijling_geometrie
-      ,adr.adres as adres
+      ,adr.adressen as adressen
       ,brg.cbscode as brg_gemeente_id
       ,brg.bgmnaam as brg_gemeente_oms
 --
@@ -71,8 +71,10 @@ ON     (kot.id = kok.kadastraalobject_id AND
 --Cultuurcode bebouwd, kunnen er meer per kadastraal object zijn
 LEFT   JOIN (SELECT kas.kot_id AS nrn_kot_id
                    ,kas.kot_volgnr AS nrn_kot_volgnr
-                   ,string_agg(kas.cult_beb_code || '|' || kas.cult_beb -- POSTGRES: REMOVED WITHIN GROUP replaced listagg with string_agg
-                           ,';') AS cultuurbebouwd
+                    ,array_to_json(array_agg(json_build_object( -- POSTGRES Changed to JSON
+                        'code', kas.cult_beb_code,
+                        'omschrijving', kas.cult_beb
+                    ))) as cultuurbebouwd
              FROM   (SELECT kasi.kadastraalobject_id         AS kot_id
                            ,kasi.kadastraalobject_volgnummer AS kot_volgnr
                            ,cbd.omschrijving                 AS cult_beb

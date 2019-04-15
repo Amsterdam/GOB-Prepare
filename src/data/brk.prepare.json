@@ -207,7 +207,7 @@
           },
           {
             "name": "cultuurcodebebouwd",
-            "type": "VARCHAR(255)"
+            "type": "JSONB"
           },
           {
             "name": "status_code",
@@ -267,7 +267,7 @@
           },
           {
             "name": "adres",
-            "type": "TEXT"
+            "type": "JSONB"
           }
         ]
       }

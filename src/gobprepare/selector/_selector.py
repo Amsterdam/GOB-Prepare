@@ -81,5 +81,5 @@ class Selector():
                     raise GOBException(f"Missing column {column['name'].lower()} in query result")
                 else:
                     rowvals.append(None)
-            result.append(rowvals)
+            result.append(self._prepare_row(rowvals, columns))
         return result
