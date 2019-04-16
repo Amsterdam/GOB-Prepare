@@ -266,7 +266,7 @@
             "type": "TEXT"
           },
           {
-            "name": "adres",
+            "name": "adressen",
             "type": "JSONB"
           }
         ]
