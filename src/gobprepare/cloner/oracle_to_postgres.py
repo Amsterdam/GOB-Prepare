@@ -25,6 +25,7 @@ class OracleToPostgresCloner():
     _mask_columns = {}
     _ignore_tables = []
     _include_tables = []
+    _order_columns = {}
 
     def __init__(self, oracle_connection, src_schema: str, postgres_connection, dst_schema: str, config: dict):
         """
@@ -46,6 +47,7 @@ class OracleToPostgresCloner():
             self._mask_columns = config.get('mask', {})
             self._ignore_tables = config.get('ignore', [])
             self._include_tables = config.get('include', [])
+            self._order_columns = config.get('order_columns', {})
 
     def _read_source_table_names(self) -> list:
         """Returns a list of table names present in given schema
@@ -158,6 +160,18 @@ class OracleToPostgresCloner():
 
         return rows_copied
 
+    def _get_order_by_clause(self, table_name: str) -> str:
+        """Returns the order by clause for the given table.
+
+        :param table_name:
+        :return:
+        """
+        if table_name in self._order_columns:
+            order_columns = ",".join(self._order_columns[table_name])
+        else:
+            order_columns = ",".join(self._order_columns['_default']) if '_default' in self._order_columns else None
+        return f"ORDER BY {order_columns}" if order_columns else ""
+
     def _copy_table_data(self, table_definition: Tuple[str, List]) -> int:
         """
         Copies table data from source database to destination database
@@ -186,9 +200,11 @@ class OracleToPostgresCloner():
         inner_select = ','.join([column_name for column_name, column_type in column_definitions])
 
         cnt = 0
+        order_by = self._get_order_by_clause(table_name)
+
         while True:
             query = f"SELECT /*+ PARALLEL */ {outer_select} FROM (" \
-                f"SELECT /*+ PARALLEL */ {inner_select} FROM {full_table_name} " \
+                f"SELECT /*+ PARALLEL */ {inner_select} FROM {full_table_name} {order_by} " \
                 f"OFFSET {cnt * self.READ_BATCH_SIZE} ROWS FETCH FIRST {self.READ_BATCH_SIZE} ROWS ONLY" \
                 f")"
             read_start = time.time()
