@@ -172,7 +172,9 @@ class PrepareClient:
         else:
             raise NotImplementedError
 
-        return importer.import_csv()
+        rows_imported = importer.import_csv()
+        logger.info(f"Imported {rows_imported} rows from CSV in table {action['destination']}")
+        return rows_imported
 
     def _get_query(self, action: dict):
         """Extracts query form action. Reads query from action or from file.
