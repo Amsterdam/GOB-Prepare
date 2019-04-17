@@ -47,13 +47,17 @@ class TestOracleToPostgresCloner(TestCase):
             "ignore": [
                 "table_a",
                 "table_b",
-            ]
+            ],
+            "order_columns": {
+                "table": ["cola", "colb"],
+            },
         }
         cloner = OracleToPostgresCloner(self.oracle_connection_mock, self.src_schema, self.postgres_connection_mock,
                                         self.dst_schema, config)
 
         self.assertEquals(config["mask"], cloner._mask_columns)
         self.assertEquals(config["ignore"], cloner._ignore_tables)
+        self.assertEquals(config["order_columns"], cloner._order_columns)
 
     def test_init_with_ignore_and_include(self):
         config = {
@@ -181,6 +185,23 @@ class TestOracleToPostgresCloner(TestCase):
         self.cloner._get_source_table_definition.assert_has_calls([call("table_a"), call("table_b")])
         self.cloner._read_source_table_names.assert_called_once()
 
+    def test_get_order_by_clause_table(self):
+        self.cloner._order_columns = {
+            "tablename": ["id", "code"],
+            "_default": ["def_id"],
+        }
+        self.assertEqual("ORDER BY id,code", self.cloner._get_order_by_clause("tablename"))
+
+    def test_get_order_by_clause_default(self):
+        self.cloner._order_columns = {
+            "_default": ["def_id"]
+        }
+        self.assertEqual("ORDER BY def_id", self.cloner._get_order_by_clause("tablename"))
+
+    def test_get_order_by_clause_none(self):
+        self.cloner._order_columns = {}
+        self.assertEqual("", self.cloner._get_order_by_clause("tablename"))
+
     def test_copy_data(self):
         self.cloner._get_destination_schema_definition = MagicMock(return_value=[
             ("tabledef_a", []), ("tabledef_b", []), ("tabledef_c", [])
@@ -202,6 +223,7 @@ class TestOracleToPostgresCloner(TestCase):
         self.cloner._get_select_list_for_table_definition = MagicMock(return_value="colA, colB, colC")
         self.cloner._insert_rows = MagicMock()
         self.cloner._mask_columns = MagicMock()
+        self.cloner._get_order_by_clause = MagicMock(return_value="ORDERBYCLAUSE")
 
         self.assertEqual(self.cloner.READ_BATCH_SIZE * 2 - 1,
                          self.cloner._copy_table_data(("tableName", [('colA', 'int'), ('colB', 'varchar'), ('colC', 'varchar')]))
@@ -209,10 +231,10 @@ class TestOracleToPostgresCloner(TestCase):
 
         mock_read_from_oracle.assert_has_calls([
             call(self.oracle_connection_mock, [f"SELECT /*+ PARALLEL */ colA, colB, colC FROM ("
-                                               f"SELECT /*+ PARALLEL */ colA,colB,colC FROM {self.src_schema}.tableName "
+                                               f"SELECT /*+ PARALLEL */ colA,colB,colC FROM {self.src_schema}.tableName ORDERBYCLAUSE "
                                                f"OFFSET 0 ROWS FETCH FIRST {self.cloner.READ_BATCH_SIZE} ROWS ONLY)"]),
             call(self.oracle_connection_mock, [f"SELECT /*+ PARALLEL */ colA, colB, colC FROM ("
-                                               f"SELECT /*+ PARALLEL */ colA,colB,colC FROM {self.src_schema}.tableName "
+                                               f"SELECT /*+ PARALLEL */ colA,colB,colC FROM {self.src_schema}.tableName ORDERBYCLAUSE "
                                                f"OFFSET {self.cloner.READ_BATCH_SIZE} ROWS "
                                                f"FETCH FIRST {self.cloner.READ_BATCH_SIZE} ROWS ONLY)"]),
         ])

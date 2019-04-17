@@ -273,6 +273,7 @@ class TestPrepareClient(TestCase):
     def test_action_import_csv(self, mock_importer, mock_logger):
         action = {
             "action": "import_csv",
+            "destination": "some_table",
             "somemore": "configuration",
         }
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)

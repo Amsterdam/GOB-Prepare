@@ -40,6 +40,26 @@ class TestToPostgresSelector(TestCase):
         mock_execute.assert_called_with(self.selector._dst_connection,
                                         "CREATE TABLE dst.table (col_a VARCHAR(20) NULL,col_b TIMESTAMP NULL)")
 
+    @patch("gobprepare.selector._to_postgres.Json")
+    def test_prepare_row(self, mock_json):
+        row = [
+            {"key": "value"},
+            {"key": "value"},
+            {"key": "value"},
+            {"key": "value"},
+        ]
+        columns = [
+            {"type": "SOME_INNOCENT_TYPE"},
+            {"type": "JSONB"},
+            {"type": "SOME_INNOCENT_TYPE"},
+            {"type": "SOME_INNOCENT_TYPE"},
+        ]
+
+        result = self.selector._prepare_row(row, columns)
+        # Row 1 should be replaced with return value
+        row[1] = mock_json.return_value
+        self.assertEqual(row, result)
+
     @patch("gobprepare.selector._to_postgres.write_rows_to_postgresql")
     def test_write_rows(self, mock_write):
         table = "some_table"
