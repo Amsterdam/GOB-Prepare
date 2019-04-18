@@ -2,15 +2,15 @@
 Contains the OracleToPostgresCloner class, which contains the logic to clone an Oracle database schema to a Postgres
 database.
 """
-
+import itertools
 import time
 from math import ceil
 from typing import Dict, List, Tuple
 
 from gobprepare.config import DEBUG
-from gobcore.exceptions import GOBEmptyResultException, GOBException
+from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
-from gobcore.database.reader.oracle import read_from_oracle
+from gobcore.database.reader.oracle import read_from_oracle, query_oracle
 from gobprepare.cloner.mapping.oracle_to_postgres import \
     get_postgres_column_definition
 from gobcore.database.writer.postgresql import (drop_table, execute_postgresql_query,
@@ -25,7 +25,6 @@ class OracleToPostgresCloner():
     _mask_columns = {}
     _ignore_tables = []
     _include_tables = []
-    _order_columns = {}
 
     def __init__(self, oracle_connection, src_schema: str, postgres_connection, dst_schema: str, config: dict):
         """
@@ -47,7 +46,6 @@ class OracleToPostgresCloner():
             self._mask_columns = config.get('mask', {})
             self._ignore_tables = config.get('ignore', [])
             self._include_tables = config.get('include', [])
-            self._order_columns = config.get('order_columns', {})
 
     def _read_source_table_names(self) -> list:
         """Returns a list of table names present in given schema
@@ -160,18 +158,6 @@ class OracleToPostgresCloner():
 
         return rows_copied
 
-    def _get_order_by_clause(self, table_name: str) -> str:
-        """Returns the order by clause for the given table.
-
-        :param table_name:
-        :return:
-        """
-        if table_name in self._order_columns:
-            order_columns = ",".join(self._order_columns[table_name])
-        else:
-            order_columns = ",".join(self._order_columns['_default']) if '_default' in self._order_columns else None
-        return f"ORDER BY {order_columns}" if order_columns else ""
-
     def _copy_table_data(self, table_definition: Tuple[str, List]) -> int:
         """
         Copies table data from source database to destination database
@@ -199,23 +185,18 @@ class OracleToPostgresCloner():
         outer_select = self._get_select_list_for_table_definition(table_definition)
         inner_select = ','.join([column_name for column_name, column_type in column_definitions])
 
-        cnt = 0
-        order_by = self._get_order_by_clause(table_name)
+        query = f"SELECT /*+ PARALLEL */ {outer_select} FROM (SELECT {inner_select} FROM {full_table_name})"
+        cursor = query_oracle(self._src_connection, [query])
 
+        row_cnt = 0
         while True:
-            query = f"SELECT /*+ PARALLEL */ {outer_select} FROM (" \
-                f"SELECT /*+ PARALLEL */ {inner_select} FROM {full_table_name} {order_by} " \
-                f"OFFSET {cnt * self.READ_BATCH_SIZE} ROWS FETCH FIRST {self.READ_BATCH_SIZE} ROWS ONLY" \
-                f")"
-            read_start = time.time()
-            try:
-                results = read_from_oracle(self._src_connection, [query])
-            except GOBEmptyResultException:
-                results = []
-            read_time = time.time() - read_start
+            read_time = time.time()
+            chunk = list(itertools.islice(cursor, self.READ_BATCH_SIZE))
+            read_time = time.time() - read_time
+            row_cnt += len(chunk)
 
             write_start = time.time()
-            self._insert_rows(table_definition, results)
+            self._insert_rows(table_definition, chunk)
             write_time = time.time() - write_start
 
             if DEBUG:
@@ -223,16 +204,14 @@ class OracleToPostgresCloner():
                     read_time + write_time,
                     read_time,
                     write_time,
-                    len(results),
+                    len(chunk),
                     table_name
                 ))
 
-            if len(results) < self.READ_BATCH_SIZE:
+            if len(chunk) < self.READ_BATCH_SIZE:
                 # We're done
-                total_cnt = cnt * self.READ_BATCH_SIZE + len(results)
-                logger.info(f"Written {total_cnt} rows to destination table {full_table_name}")
-                return total_cnt
-            cnt += 1
+                logger.info(f"Written {row_cnt} rows to destination table {full_table_name}")
+                return row_cnt
 
     def _mask_rows(self, table_name: str, row_data: List[Dict]) -> List[Dict]:
         """
