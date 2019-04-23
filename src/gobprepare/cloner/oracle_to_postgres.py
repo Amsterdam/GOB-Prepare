@@ -183,6 +183,11 @@ class OracleToPostgresCloner():
         return result
 
     def _get_id_columns_for_table(self, table_name: str):
+        """Returns the list of id columns for table (as defined in the prepare definition)
+
+        :param table_name:
+        :return:
+        """
         table_name = table_name.split('.')[-1]
 
         if table_name in self._id_columns:
@@ -193,6 +198,11 @@ class OracleToPostgresCloner():
             raise GOBException(f"Missing id columns for table {table_name}")
 
     def _get_ids_for_table(self, full_table_name: str) -> list:
+        """Returns a list of the id's present in the source table
+
+        :param full_table_name:
+        :return:
+        """
         order_field = self._get_id_columns_for_table(full_table_name)[0]
         query = f"SELECT {order_field} FROM {full_table_name} ORDER BY {order_field}"
 
