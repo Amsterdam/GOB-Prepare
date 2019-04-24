@@ -424,6 +424,87 @@
           }
         ]
       }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/tenaamstelling.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.tenaamstelling",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_tng_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_tng_id",
+            "type": "INT"
+          },
+          {
+            "name": "van_subject_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "van_nrn_subject_id",
+            "type": "INT"
+          },
+          {
+            "name": "aandeel_teller",
+            "type": "INT"
+          },
+          {
+            "name": "aandeel_noemer",
+            "type": "INT"
+          },
+          {
+            "name": "geldt_voor_teller",
+            "type": "INT"
+          },
+          {
+            "name": "geldt_voor_noemer",
+            "type": "INT"
+          },
+          {
+            "name": "burgerlijkestaat_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "burgerlijkestaat_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "verkrnamens_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "verkrnamens_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "inonderzoek",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "van_zakelijkrecht_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "van_nrn_zakelijkrecht_id",
+            "type": "INT"
+          },
+          {
+            "name": "gebaseerdop_stukdeel_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP"
+          }
+        ]
+      }
     }
   ]
 }
