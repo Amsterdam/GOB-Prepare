@@ -59,6 +59,10 @@
         // Include and ignore can't be used at the same time
         "KADASTRAAL_OBJECT"
       ],
+      "id_columns": { // Columns that uniquely identify a row in the table
+        "_default": ["ID"],
+        "KADASTRAAL_OBJECT": ["ID", "VOLGNUMMER"] // May be multiple. Place in order of importance
+      },
       "ignore": [
         // Include and ignore can't be used at the same time
         "MDRT_2DD90$",

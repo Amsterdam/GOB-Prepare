@@ -2,15 +2,14 @@
 Contains the OracleToPostgresCloner class, which contains the logic to clone an Oracle database schema to a Postgres
 database.
 """
-import itertools
 import time
 from math import ceil
 from typing import Dict, List, Tuple
 
 from gobprepare.config import DEBUG
-from gobcore.exceptions import GOBException
+from gobcore.exceptions import GOBException, GOBEmptyResultException
 from gobcore.logging.logger import logger
-from gobcore.database.reader.oracle import read_from_oracle, query_oracle
+from gobcore.database.reader.oracle import read_from_oracle
 from gobprepare.cloner.mapping.oracle_to_postgres import \
     get_postgres_column_definition
 from gobcore.database.writer.postgresql import (drop_table, execute_postgresql_query,
@@ -25,6 +24,7 @@ class OracleToPostgresCloner():
     _mask_columns = {}
     _ignore_tables = []
     _include_tables = []
+    _id_columns = {}
 
     def __init__(self, oracle_connection, src_schema: str, postgres_connection, dst_schema: str, config: dict):
         """
@@ -46,6 +46,7 @@ class OracleToPostgresCloner():
             self._mask_columns = config.get('mask', {})
             self._ignore_tables = config.get('ignore', [])
             self._include_tables = config.get('include', [])
+            self._id_columns = config.get('id_columns', {})
 
     def _read_source_table_names(self) -> list:
         """Returns a list of table names present in given schema
@@ -158,6 +159,60 @@ class OracleToPostgresCloner():
 
         return rows_copied
 
+    def _list_to_chunks(self, lst: list, chunk_size: int):
+        """Divides a list in chunks of chunk_size. Returns a list of dictionaries with "min" and "max" as keys, where
+        "min" is inclusive, and "max" is exclusive.
+
+        :param lst:
+        :param chunk_size:
+        :return:
+        """
+        assert chunk_size > 0
+
+        result = []
+        min_idx = 0
+
+        while min_idx < len(lst):
+            max_idx = min_idx + chunk_size
+            result.append({
+                'min': lst[min_idx] if min_idx > 0 else None,
+                'max': lst[max_idx] if max_idx < len(lst) else None,
+            })
+            min_idx = max_idx
+
+        return result
+
+    def _get_id_columns_for_table(self, table_name: str):
+        """Returns the list of id columns for table (as defined in the prepare definition)
+
+        :param table_name:
+        :return:
+        """
+        table_name = table_name.split('.')[-1]
+
+        if table_name in self._id_columns:
+            return self._id_columns[table_name]
+        elif "_default" in self._id_columns:
+            return self._id_columns["_default"]
+        else:
+            raise GOBException(f"Missing id columns for table {table_name}")
+
+    def _get_ids_for_table(self, full_table_name: str) -> list:
+        """Returns a list of the id's present in the source table
+
+        :param full_table_name:
+        :return:
+        """
+        order_field = self._get_id_columns_for_table(full_table_name)[0]
+        query = f"SELECT {order_field} FROM {full_table_name} ORDER BY {order_field}"
+
+        try:
+            result = read_from_oracle(self._src_connection, [query])
+        except GOBEmptyResultException:
+            result = []
+
+        return [row[order_field.lower()] for row in result]
+
     def _copy_table_data(self, table_definition: Tuple[str, List]) -> int:
         """
         Copies table data from source database to destination database
@@ -185,33 +240,54 @@ class OracleToPostgresCloner():
         outer_select = self._get_select_list_for_table_definition(table_definition)
         inner_select = ','.join([column_name for column_name, column_type in column_definitions])
 
-        query = f"SELECT /*+ PARALLEL */ {outer_select} FROM (SELECT {inner_select} FROM {full_table_name})"
-        cursor = query_oracle(self._src_connection, [query])
-
+        ids = self._get_ids_for_table(full_table_name)
         row_cnt = 0
-        while True:
+
+        chunks = self._list_to_chunks(ids, self.READ_BATCH_SIZE)
+        order_field = self._get_id_columns_for_table(full_table_name)[0]
+
+        for chunk in chunks:
+            if chunk['min'] or chunk['max']:
+                where_max = f"{order_field} < '{chunk['max']}'" if chunk['max'] is not None else ""
+                where_min = f"{order_field} >= '{chunk['min']}'" if chunk['min'] is not None else ""
+                where = f"WHERE {where_min} {'AND' if where_min and where_max else ''} {where_max}"
+            else:
+                where = ""
+            query = "" \
+                f"SELECT /*+ PARALLEL */ {outer_select} FROM (" \
+                f"  SELECT {inner_select} FROM {full_table_name} {where}" \
+                f")"
+
             read_time = time.time()
-            chunk = list(itertools.islice(cursor, self.READ_BATCH_SIZE))
+            try:
+                results = read_from_oracle(self._src_connection, [query])
+            except GOBEmptyResultException:
+                results = []
             read_time = time.time() - read_time
-            row_cnt += len(chunk)
+
+            row_cnt += len(results)
 
             write_start = time.time()
-            self._insert_rows(table_definition, chunk)
+            self._insert_rows(table_definition, results)
             write_time = time.time() - write_start
 
             if DEBUG:
-                logger.info("Total: {:>8.1f}s  Read: {:>8.1f}s  Write: {:>8.1f}s  Length: {:>8} rows  ({})".format(
-                    read_time + write_time,
-                    read_time,
-                    write_time,
-                    len(chunk),
-                    table_name
-                ))
-
-            if len(chunk) < self.READ_BATCH_SIZE:
-                # We're done
-                logger.info(f"Written {row_cnt} rows to destination table {full_table_name}")
-                return row_cnt
+                logger.info("Total: {:>8.1f}s  "
+                            "Read: {:>8.1f}s  "
+                            "Write: {:>8.1f}s  "
+                            "This: {:>8} rows  "
+                            "Total: {:>8} rows  ({})".format(
+                                read_time + write_time,
+                                read_time,
+                                write_time,
+                                len(results),
+                                row_cnt,
+                                table_name
+                            )
+                            )
+        # We're done
+        logger.info(f"Written {row_cnt} rows to destination table {full_table_name}")
+        return row_cnt
 
     def _mask_rows(self, table_name: str, row_data: List[Dict]) -> List[Dict]:
         """

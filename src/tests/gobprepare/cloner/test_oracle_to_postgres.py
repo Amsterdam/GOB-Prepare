@@ -193,46 +193,131 @@ class TestOracleToPostgresCloner(TestCase):
             call("tabledef_c"),
         ])
 
+    def test_list_to_chunks(self):
+        testcases = [
+            (([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3), [{"min": None, "max": 4}, {"min": 4, "max": 7}, {"min": 7, "max": 10}, {"min": 10, "max": None}]),
+            (([1, 2, 3], 1), [{"min": None, "max": 2}, {"min": 2, "max": 3}, {"min": 3, "max": None}]),
+            (([], 4), []),
+            (([1, 3], 2), [{"min": None, "max": None}]),
+            (([1, 3], 5), [{"min": None, "max": None}]),
+        ]
+
+        for input, result in testcases:
+            lst, chunk_size = input
+            self.assertEqual(result, self.cloner._list_to_chunks(lst, chunk_size))
+
+        with self.assertRaises(AssertionError):
+            self.cloner._list_to_chunks([], 0)
+
+        with self.assertRaises(AssertionError):
+            self.cloner._list_to_chunks([], -1)
+
+    def test_get_id_columns_for_table(self):
+        self.cloner._id_columns = {
+            "table_a": ["a_id", "a_id2"],
+        }
+        self.assertEqual(["a_id", "a_id2"], self.cloner._get_id_columns_for_table("schema.table_a"))
+
+        with self.assertRaises(GOBException):
+            self.cloner._get_id_columns_for_table("table_b")
+
+        self.cloner._id_columns['_default'] = ['id']
+        self.assertEqual(["id"], self.cloner._get_id_columns_for_table("table_b"))
+
+    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
+    def test_get_ids_for_table(self, mock_read_oracle):
+        self.cloner._get_id_columns_for_table = MagicMock(return_value=['id', 'id2'])
+        expected_query = f"SELECT id FROM tableName ORDER BY id"
+        mock_read_oracle.return_value = [{"id": 224}, {"id": 2904}, {"id": 920}]
+        expected_result = [224, 2904, 920]
+
+        self.assertEqual(expected_result, self.cloner._get_ids_for_table('tableName'))
+        mock_read_oracle.assert_called_with(self.cloner._src_connection, [expected_query])
+
+    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
+    def test_get_ids_for_table_empty_table(self, mock_read_oracle):
+        self.cloner._get_id_columns_for_table = MagicMock()
+        mock_read_oracle.side_effect = GOBEmptyResultException
+
+        self.assertEqual([], self.cloner._get_ids_for_table('tableName'))
+
     @patch("gobprepare.cloner.oracle_to_postgres.logger")
-    @patch("gobprepare.cloner.oracle_to_postgres.query_oracle")
-    def test_copy_table_data(self, mock_query_oracle, mock_logger):
+    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
+    def test_copy_table_data(self, mock_read_oracle, mock_logger):
         # Mock result as list of 0's
-        mock_query_oracle.side_effect = [
-            (i for i in self.cloner.READ_BATCH_SIZE * [0] + (self.cloner.READ_BATCH_SIZE - 1) * [0])
+        mock_read_oracle.side_effect = [
+            self.cloner.READ_BATCH_SIZE * [0] + (self.cloner.READ_BATCH_SIZE - 1) * [0]
         ]
 
         self.cloner._get_select_list_for_table_definition = MagicMock(return_value="colA, colB, colC")
         self.cloner._insert_rows = MagicMock()
         self.cloner._mask_columns = MagicMock()
         self.cloner._get_order_by_clause = MagicMock(return_value="ORDERBYCLAUSE")
+        self.cloner._get_ids_for_table = MagicMock(return_value='list of ids')
+        self.cloner._get_id_columns_for_table = MagicMock()
+        self.cloner._list_to_chunks = MagicMock(return_value=[{"min": None, "max": None}])
 
         self.assertEqual(self.cloner.READ_BATCH_SIZE * 2 - 1,
-                         self.cloner._copy_table_data(("tableName", [('colA', 'int'), ('colB', 'varchar'), ('colC', 'varchar')]))
-        )
+                         self.cloner._copy_table_data(
+                             ("tableName", [('colA', 'int'), ('colB', 'varchar'), ('colC', 'varchar')]))
+                         )
 
-        mock_query_oracle.assert_has_calls([
-            call(self.oracle_connection_mock, [f"SELECT /*+ PARALLEL */ colA, colB, colC FROM ("
-                                               f"SELECT colA,colB,colC FROM {self.src_schema}.tableName)"]),
+        mock_read_oracle.assert_has_calls([
+            call(self.oracle_connection_mock, [f"SELECT /*+ PARALLEL */ colA, colB, colC FROM (  "
+                                               f"SELECT colA,colB,colC FROM {self.src_schema}.tableName )"]),
         ])
 
         mock_logger.info.assert_called_once()
         self.cloner._mask_columns.assert_not_called()
+        self.cloner._get_ids_for_table(f"{self.cloner._src_schema}.tableName")
+        self.cloner._get_id_columns_for_table.assert_called_with(f"{self.cloner._src_schema}.tableName")
+        self.cloner._list_to_chunks.assert_called_with('list of ids', self.cloner.READ_BATCH_SIZE)
+
+    @patch("gobprepare.cloner.oracle_to_postgres.logger")
+    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
+    def test_copy_table_data_chunk_minmax(self, mock_read_oracle, mock_logger):
+        self.cloner._get_select_list_for_table_definition = MagicMock(return_value='cols')
+        self.cloner._insert_rows = MagicMock()
+        self.cloner._mask_columns = MagicMock()
+        self.cloner._get_order_by_clause = MagicMock()
+        self.cloner._get_ids_for_table = MagicMock()
+        self.cloner._get_id_columns_for_table = MagicMock(return_value=["order_column", "other_order_column"])
+        self.cloner._list_to_chunks = MagicMock()
+
+        cases = [
+            ([{'min': None, 'max': 10}], " WHERE   order_column < '10'"),
+            ([{'min': 10, 'max': None}], " WHERE order_column >= '10'  "),
+            ([{'min': 10, 'max': 100}], " WHERE order_column >= '10' AND order_column < '100'"),
+            ([{'min': None, 'max': None}], " "),
+        ]
+        expected_query_start = f"SELECT /*+ PARALLEL */ cols FROM (  " \
+            f"SELECT col_name FROM {self.cloner._src_schema}.tableName"
+
+        for arg, where_clause in cases:
+            self.cloner._list_to_chunks.return_value = arg
+            self.cloner._copy_table_data(('tableName', [('col_name', 'col_type')]))
+            expected_query = expected_query_start + where_clause + ')'
+            mock_read_oracle.assert_called_with(self.cloner._src_connection, [expected_query])
+
 
     @patch("gobprepare.cloner.oracle_to_postgres.logger")
     @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
     @patch("gobprepare.cloner.oracle_to_postgres.DEBUG", True)
     def test_copy_table_data_with_debug(self, mock_read_from_oracle, mock_logger):
         # Mock result as list of 0's
-        mock_read_from_oracle.side_effect = [self.cloner.READ_BATCH_SIZE * [0], (self.cloner.READ_BATCH_SIZE - 1) * [0]]
+        mock_read_from_oracle.side_effect = [self.cloner.READ_BATCH_SIZE * [0],
+                                             (self.cloner.READ_BATCH_SIZE - 1) * [0]]
 
         self.cloner._get_select_list_for_table_definition = MagicMock(return_value="colA, colB, colC")
         self.cloner._insert_rows = MagicMock()
         self.cloner._mask_columns = MagicMock()
+        self.cloner._get_ids_for_table = MagicMock()
+        self.cloner._get_id_columns_for_table = MagicMock()
+        self.cloner._list_to_chunks = MagicMock(return_value=[{"min": None, "max": None}])
         self.cloner._copy_table_data(("tableName", [('colA', 'int'), ('colB', 'varchar'), ('colC', 'varchar')]))
 
         self.assertEqual(2, mock_logger.info.call_count)
         self.cloner._mask_columns.assert_not_called()
-
 
     def test_mask_rows(self):
         self.cloner._mask_columns = {
@@ -262,13 +347,15 @@ class TestOracleToPostgresCloner(TestCase):
         ]
         self.assertEqual(row_data, self.cloner._mask_rows("table_name_not_in_mask_columns", row_data))
 
-
     @patch("gobprepare.cloner.oracle_to_postgres.logger")
     @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
     def test_copy_table_data_empty_table(self, mock_read_from_oracle, mock_logger):
         mock_read_from_oracle.side_effect = GOBEmptyResultException
         self.cloner._get_select_list_for_table_definition = MagicMock(return_value="colA, colB, colC")
         self.cloner._insert_rows = MagicMock()
+        self.cloner._get_ids_for_table = MagicMock()
+        self.cloner._get_id_columns_for_table = MagicMock()
+        self.cloner._list_to_chunks = MagicMock(return_value=[{"min": None, "max": None}])
 
         self.assertEqual(0, self.cloner._copy_table_data(("tableName", [])))
         mock_logger.info.assert_called_once()
