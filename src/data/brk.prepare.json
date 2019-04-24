@@ -331,6 +331,180 @@
           }
         ]
       }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/zakelijk_recht.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.zakelijk_recht",
+        "create": true,
+        "columns": [
+          {
+            "name": "id",
+            "type": "INT"
+          },
+          {
+            "name": "identificatie",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "aardzakelijkrecht_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "aardzakelijkrecht_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "aardzakelijkrecht_akr_code",
+            "type": "VARCHAR(10)"
+          },
+          {
+            "name": "is_belast_met_nrn_zrt_id",
+            "type": "JSON"
+          },
+          {
+            "name": "ontstaan_uit",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "betrokken_bij",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "isbeperkt_tot",
+            "type": "INT"
+          },
+          {
+            "name": "nrn_asg_id",
+            "type": "INT"
+          },
+          {
+            "name": "asg_app_rechtsplitstype_code",
+            "type": "VARCHAR(500)"
+          },
+          {
+            "name": "asg_app_rechtsplitstype_oms",
+            "type": "VARCHAR(10000)"
+          },
+          {
+            "name": "asg_einddatum",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "asg_actueel",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "rust_op_kadastraalobject_id",
+            "type": "INT"
+          },
+          {
+            "name": "rust_op_kadastraalobj_volgnr",
+            "type": "INT"
+          },
+          {
+            "name": "kadastraal_object_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "zrt_einddatum",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "kot_status_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/tenaamstelling.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.tenaamstelling",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_tng_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_tng_id",
+            "type": "INT"
+          },
+          {
+            "name": "van_subject_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "van_nrn_subject_id",
+            "type": "INT"
+          },
+          {
+            "name": "aandeel_teller",
+            "type": "INT"
+          },
+          {
+            "name": "aandeel_noemer",
+            "type": "INT"
+          },
+          {
+            "name": "geldt_voor_teller",
+            "type": "INT"
+          },
+          {
+            "name": "geldt_voor_noemer",
+            "type": "INT"
+          },
+          {
+            "name": "burgerlijkestaat_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "burgerlijkestaat_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "verkrnamens_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "verkrnamens_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "inonderzoek",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "van_zakelijkrecht_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "van_nrn_zakelijkrecht_id",
+            "type": "INT"
+          },
+          {
+            "name": "gebaseerdop_stukdeel_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP"
+          }
+        ]
+      }
     }
   ]
 }
