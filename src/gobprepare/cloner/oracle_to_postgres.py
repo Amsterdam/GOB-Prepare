@@ -167,17 +167,17 @@ class OracleToPostgresCloner():
         :param chunk_size:
         :return:
         """
+        assert chunk_size > 0
+
         result = []
         min_idx = 0
 
         while min_idx < len(lst):
-            row = {}
             max_idx = min_idx + chunk_size
-
-            row['min'] = lst[min_idx] if min_idx > 0 else None
-            row['max'] = lst[max_idx] if max_idx < len(lst) else None
-
-            result.append(row)
+            result.append({
+                'min': lst[min_idx] if min_idx > 0 else None,
+                'max': lst[max_idx] if max_idx < len(lst) else None,
+            })
             min_idx = max_idx
 
         return result
