@@ -206,6 +206,12 @@ class TestOracleToPostgresCloner(TestCase):
             lst, chunk_size = input
             self.assertEqual(result, self.cloner._list_to_chunks(lst, chunk_size))
 
+        with self.assertRaises(AssertionError):
+            self.cloner._list_to_chunks([], 0)
+
+        with self.assertRaises(AssertionError):
+            self.cloner._list_to_chunks([], -1)
+
     def test_get_id_columns_for_table(self):
         self.cloner._id_columns = {
             "table_a": ["a_id", "a_id2"],
