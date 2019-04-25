@@ -562,7 +562,11 @@
           },
           {
             "name": "toestandsdatum",
-            "type": "TIMESTAMP"
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "einddatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
           }
         ]
       }
@@ -867,7 +871,15 @@
             "type": "VARCHAR(240)"
           },
           {
+            "name": "brk_sdl_id",
+            "type": "VARCHAR(240)"
+          },
+          {
             "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "expiration_date",
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           }
         ]
@@ -922,6 +934,119 @@
           {
             "name": "brk_sjt_id",
             "type": "VARCHAR(240)"
+          },
+          {
+            "name": "brk_sdl_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "expiration_date",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/stukdeel.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.stukdeel",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_sdl_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_sdl_id",
+            "type": "INT"
+          },
+          {
+            "name": "sdl_aard_stukdeel_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "sdl_aard_stukdeel_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "sdl_koopsom",
+            "type": "INT"
+          },
+          {
+            "name": "sdl_koopsom_valuta",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "brk_stk_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_stk_id",
+            "type": "INT"
+          },
+          {
+            "name": "stk_akr_portefeuillenr",
+            "type": "VARCHAR(64)"
+          },
+          {
+            "name": "stk_tijdstip_aanbieding",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "stk_reeks_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "stk_volgnummer",
+            "type": "INT"
+          },
+          {
+            "name": "stk_registercode_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "stk_registercode_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "stk_soortregister_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "stk_soortregister_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "stk_deel_soort",
+            "type": "VARCHAR(20)"
+          },
+          {
+            "name": "brk_tng_id",
+            "type": "TEXT"
+          },
+          {
+            "name": "nrn_tng_id",
+            "type": "TEXT"
+          },
+          {
+            "name": "brk_atg_id",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "nrn_atg_id",
+            "type": "INT"
+          },
+          {
+            "name": "brk_asg_vve",
+            "type": "VARCHAR"
           },
           {
             "name": "toestandsdatum",

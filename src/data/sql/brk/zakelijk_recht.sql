@@ -84,12 +84,12 @@ LEFT JOIN (SELECT zakelijkrecht_id
           		'zakelijkrecht_id', is_belast_met
           ))) as is_belast_met
           FROM BRK.ZAKELIJKRECHT_ISBELASTMET t
-          GROUP BY zakelijkrecht_id) q ON zrt.id = q.zakelijkrecht_id
-LEFT JOIN BRK.C_AARDZAKELIJKRECHT a ON zrt.aardzakelijkrecht_code=a.code
-LEFT JOIN BRK.KADASTRAAL_OBJECT kot ON (zrt.rust_op_kadastraalobject_id=kot.id
-                                        AND zrt.rust_op_kadastraalobj_volgnr=kot.volgnummer)
-LEFT JOIN brk.appartementsrechtsplitsing asg1 ON (asg1.id = zrt.betrokken_bij)
-LEFT JOIN brk.appartementsrechtsplitsing asg2 ON (asg2.id = zrt.ontstaan_uit)
+          GROUP BY zakelijkrecht_id) q          ON zrt.id = q.zakelijkrecht_id
+LEFT JOIN BRK.C_AARDZAKELIJKRECHT a             ON zrt.aardzakelijkrecht_code=a.code
+LEFT JOIN BRK.KADASTRAAL_OBJECT kot             ON (zrt.rust_op_kadastraalobject_id=kot.id
+                                                    AND zrt.rust_op_kadastraalobj_volgnr=kot.volgnummer)
+LEFT JOIN brk.appartementsrechtsplitsing asg1   ON (asg1.id = zrt.betrokken_bij)
+LEFT JOIN brk.appartementsrechtsplitsing asg2   ON (asg2.id = zrt.ontstaan_uit)
            -- ndg, 10-12-2015: workaround t.b.v. ophalen asg-informatie vves
 LEFT JOIN brk.c_appartementsrechtsplitstype ase1 ON (ase1.code = asg1.app_rechtsplitstype_code)
 LEFT JOIN brk.c_appartementsrechtsplitstype ase2 ON   (ase2.code = asg2.app_rechtsplitstype_code)
