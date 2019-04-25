@@ -819,6 +819,116 @@
           }
         ]
       }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/aantekening_recht.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.aantekening_recht",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_atg_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_atg_id",
+            "type": "INT"
+          },
+          {
+            "name": "atg_aardaantekening_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "atg_aardaantekening_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_omschrijving",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_einddatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "atg_type",
+            "type": "TEXT"
+          },
+          {
+            "name": "brk_sjt_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_tng_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/aantekening_kadastraal_object.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.aantekening_kadastraal_object",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_atg_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_atg_id",
+            "type": "INT"
+          },
+          {
+            "name": "atg_aardaantekening_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "atg_aardaantekening_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_omschrijving",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_einddatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "brk_kot_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_kot_id",
+            "type": "INT"
+          },
+          {
+            "name": "nrn_kot_volgnr",
+            "type": "INT"
+          },
+          {
+            "name": "brk_sjt_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          }
+        ]
+      }
     }
   ]
 }
