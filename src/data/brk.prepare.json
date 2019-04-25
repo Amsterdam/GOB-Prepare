@@ -364,7 +364,7 @@
           },
           {
             "name": "is_belast_met_nrn_zrt_id",
-            "type": "JSON"
+            "type": "JSONB"
           },
           {
             "name": "ontstaan_uit",

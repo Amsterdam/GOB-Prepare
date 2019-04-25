@@ -22,7 +22,7 @@ class ToPostgresSelector():
         :return:
         """
         for idx, val in enumerate(row):
-            if columns[idx]['type'] == "JSONB":
+            if columns[idx]['type'] in ["JSON", "JSONB"]:
                 row[idx] = Json(val)
         return row
 
