@@ -47,17 +47,19 @@ class TestToPostgresSelector(TestCase):
             {"key": "value"},
             {"key": "value"},
             {"key": "value"},
+            {"key": "value"},
         ]
         columns = [
             {"type": "SOME_INNOCENT_TYPE"},
             {"type": "JSONB"},
             {"type": "SOME_INNOCENT_TYPE"},
             {"type": "SOME_INNOCENT_TYPE"},
+            {"type": "JSON"},
         ]
 
         result = self.selector._prepare_row(row, columns)
-        # Row 1 should be replaced with return value
-        row[1] = mock_json.return_value
+        # Rows 1 and 4 should be replaced with return value
+        row[1] = row[4] = mock_json.return_value
         self.assertEqual(row, result)
 
     @patch("gobprepare.selector._to_postgres.write_rows_to_postgresql")

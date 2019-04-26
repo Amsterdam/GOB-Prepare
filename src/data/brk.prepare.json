@@ -46,36 +46,97 @@
       "source_schema": "BRK",
       "destination_schema": "brk",
       "id_columns": {
-        "_default": ["ID"],
-        "C_AANDUIDINGGESLACHT": ["CODE"],
-        "C_AARDAANTEKENING": ["CODE"],
-        "C_AARDFILIATIE": ["CODE"],
-        "C_AARDSTUKDEEL": ["CODE"],
-        "C_AARDZAKELIJKRECHT": ["CODE"],
-        "C_AKRKADASTRALEGEMEENTECODE": ["CODE"],
-        "C_APPARTEMENTSRECHTSPLITSTYPE": ["CODE"],
-        "C_BESCHIKKINGSBEVOEGDHEID": ["CODE"],
-        "C_BURGERLIJKEGEMEENTE": ["CODE"],
-        "C_BURGERLIJKESTAAT": ["CODE"],
-        "C_CULTUURCODEBEBOUWD": ["CODE"],
-        "C_CULTUURCODEONBEBOUWD": ["CODE"],
-        "C_GBAAANDUIDINGGESLACHT": ["CODE"],
-        "C_GBAAANDUIDINGNAAMGEBRUIK": ["CODE"],
-        "C_GBALAND": ["CODE"],
-        "C_KADASTRALEGEMEENTE": ["CODE"],
-        "C_LAND": ["CODE"],
-        "C_NHRRECHTSVORM": ["CODE"],
-        "C_RECHTSVORM": ["CODE"],
-        "C_REEKSCODE": ["CODE"],
-        "C_REGISTERCODE": ["CODE"],
-        "C_SAMENWERKINGSVERBAND": ["CODE"],
-        "C_SOORTGROOTTE": ["CODE"],
-        "C_SOORTREGISTER": ["CODE"],
-        "C_STATUS": ["CODE"],
-        "C_SUBJECT_STATUS": ["CODE"],
-        "C_VALUTA": ["CODE"],
-        "KADASTRAAL_OBJECT": ["ID", "VOLGNUMMER"],
-        "VERSIE": ["NUMMER"]
+        "_default": [
+          "ID"
+        ],
+        "C_AANDUIDINGGESLACHT": [
+          "CODE"
+        ],
+        "C_AARDAANTEKENING": [
+          "CODE"
+        ],
+        "C_AARDFILIATIE": [
+          "CODE"
+        ],
+        "C_AARDSTUKDEEL": [
+          "CODE"
+        ],
+        "C_AARDZAKELIJKRECHT": [
+          "CODE"
+        ],
+        "C_AKRKADASTRALEGEMEENTECODE": [
+          "CODE"
+        ],
+        "C_APPARTEMENTSRECHTSPLITSTYPE": [
+          "CODE"
+        ],
+        "C_BESCHIKKINGSBEVOEGDHEID": [
+          "CODE"
+        ],
+        "C_BURGERLIJKEGEMEENTE": [
+          "CODE"
+        ],
+        "C_BURGERLIJKESTAAT": [
+          "CODE"
+        ],
+        "C_CULTUURCODEBEBOUWD": [
+          "CODE"
+        ],
+        "C_CULTUURCODEONBEBOUWD": [
+          "CODE"
+        ],
+        "C_GBAAANDUIDINGGESLACHT": [
+          "CODE"
+        ],
+        "C_GBAAANDUIDINGNAAMGEBRUIK": [
+          "CODE"
+        ],
+        "C_GBALAND": [
+          "CODE"
+        ],
+        "C_KADASTRALEGEMEENTE": [
+          "CODE"
+        ],
+        "C_LAND": [
+          "CODE"
+        ],
+        "C_NHRRECHTSVORM": [
+          "CODE"
+        ],
+        "C_RECHTSVORM": [
+          "CODE"
+        ],
+        "C_REEKSCODE": [
+          "CODE"
+        ],
+        "C_REGISTERCODE": [
+          "CODE"
+        ],
+        "C_SAMENWERKINGSVERBAND": [
+          "CODE"
+        ],
+        "C_SOORTGROOTTE": [
+          "CODE"
+        ],
+        "C_SOORTREGISTER": [
+          "CODE"
+        ],
+        "C_STATUS": [
+          "CODE"
+        ],
+        "C_SUBJECT_STATUS": [
+          "CODE"
+        ],
+        "C_VALUTA": [
+          "CODE"
+        ],
+        "KADASTRAAL_OBJECT": [
+          "ID",
+          "VOLGNUMMER"
+        ],
+        "VERSIE": [
+          "NUMMER"
+        ]
       },
       "ignore": [
         "CONV_AANDUIDINGGESLACHT",
@@ -364,7 +425,7 @@
           },
           {
             "name": "is_belast_met_nrn_zrt_id",
-            "type": "JSON"
+            "type": "JSONB"
           },
           {
             "name": "ontstaan_uit",
@@ -501,7 +562,495 @@
           },
           {
             "name": "toestandsdatum",
-            "type": "TIMESTAMP"
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "einddatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/kadastraal_subject.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.kadastraal_subject",
+        "create": true,
+        "columns": [
+          {
+            "name": "identificatie_subject",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_sjt_id",
+            "type": "INT"
+          },
+          {
+            "name": "type_subject",
+            "type": "TEXT"
+          },
+          {
+            "name": "code_beschikkingsbevoegdheid",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "oms_beschikkingsbevoegdheid",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "heeft_bsn_voor",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "voornamen",
+            "type": "VARCHAR(800)"
+          },
+          {
+            "name": "voorvoegsels",
+            "type": "VARCHAR(40)"
+          },
+          {
+            "name": "geslachtsnaam",
+            "type": "VARCHAR(800)"
+          },
+          {
+            "name": "code_geslacht",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "omschrijving_geslacht",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "code_naam_gebruik",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "omschrijving_naam_gebruik",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "geboortedatum",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "geboorteplaats",
+            "type": "VARCHAR(320)"
+          },
+          {
+            "name": "code_geboorteland",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "omschrijving_geboorteland",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "datum_overlijden",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "indicatieoverleden",
+            "type": "VARCHAR(4)"
+          },
+          {
+            "name": "voornamen_partner",
+            "type": "VARCHAR(800)"
+          },
+          {
+            "name": "voorvoegsel_partner",
+            "type": "VARCHAR(40)"
+          },
+          {
+            "name": "geslachtsnaam_partner",
+            "type": "VARCHAR(800)"
+          },
+          {
+            "name": "code_land_waarnaar_vertrokken",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "omsch_land_waarnaar_vertrokken",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "heeft_rsin_voor",
+            "type": "VARCHAR(320)"
+          },
+          {
+            "name": "heeft_kvknummer_voor",
+            "type": "VARCHAR(32)"
+          },
+          {
+            "name": "code_rechtsvorm",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "omschrijving_rechtsvorm",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "statutaire_zetel",
+            "type": "VARCHAR(96)"
+          },
+          {
+            "name": "statutaire_naam",
+            "type": "VARCHAR(800)"
+          },
+          {
+            "name": "adresseerbaarobject",
+            "type": "INT"
+          },
+          {
+            "name": "openbareruimtenaam",
+            "type": "VARCHAR(320)"
+          },
+          {
+            "name": "huisnummer",
+            "type": "INT"
+          },
+          {
+            "name": "huisletter",
+            "type": "VARCHAR(4)"
+          },
+          {
+            "name": "huisnummertoevoeging",
+            "type": "VARCHAR(16)"
+          },
+          {
+            "name": "postcode",
+            "type": "VARCHAR(24)"
+          },
+          {
+            "name": "woonplaatsnaam",
+            "type": "VARCHAR(320)"
+          },
+          {
+            "name": "buitenland_adres",
+            "type": "VARCHAR(400)"
+          },
+          {
+            "name": "buitenland_woonplaats",
+            "type": "VARCHAR(400)"
+          },
+          {
+            "name": "buitenland_regio",
+            "type": "VARCHAR(400)"
+          },
+          {
+            "name": "buitenland_naam",
+            "type": "VARCHAR(400)"
+          },
+          {
+            "name": "buitenland_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "omschrijving_buitenland",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "postbusnummer",
+            "type": "INT"
+          },
+          {
+            "name": "postbus_postcode",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "postbus_woonplaatsnaam",
+            "type": "VARCHAR(320)"
+          },
+          {
+            "name": "nrn_sps_aot_id",
+            "type": "INT"
+          },
+          {
+            "name": "post_openbareruimtenaam",
+            "type": "VARCHAR(320)"
+          },
+          {
+            "name": "post_huisnummer",
+            "type": "INT"
+          },
+          {
+            "name": "post_huisletter",
+            "type": "VARCHAR(4)"
+          },
+          {
+            "name": "post_huisnummertoevoeging",
+            "type": "VARCHAR(16)"
+          },
+          {
+            "name": "post_postcode",
+            "type": "VARCHAR(24)"
+          },
+          {
+            "name": "post_woonplaatsnaam",
+            "type": "VARCHAR(320)"
+          },
+          {
+            "name": "post_buitenland_adres",
+            "type": "VARCHAR(400)"
+          },
+          {
+            "name": "post_buitenland_woonplaats",
+            "type": "VARCHAR(400)"
+          },
+          {
+            "name": "post_buitenland_regio",
+            "type": "VARCHAR(400)"
+          },
+          {
+            "name": "post_buitenland_naam",
+            "type": "VARCHAR(400)"
+          },
+          {
+            "name": "post_buitenland_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "post_buitenland_oms",
+            "type": "VARCHAR(4000)"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/aantekening_recht.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.aantekening_recht",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_atg_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_atg_id",
+            "type": "INT"
+          },
+          {
+            "name": "atg_aardaantekening_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "atg_aardaantekening_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_omschrijving",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_einddatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "atg_type",
+            "type": "TEXT"
+          },
+          {
+            "name": "brk_sjt_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_tng_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "brk_sdl_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "expiration_date",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/aantekening_kadastraal_object.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.aantekening_kadastraal_object",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_atg_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_atg_id",
+            "type": "INT"
+          },
+          {
+            "name": "atg_aardaantekening_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "atg_aardaantekening_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_omschrijving",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_einddatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "brk_kot_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_kot_id",
+            "type": "INT"
+          },
+          {
+            "name": "nrn_kot_volgnr",
+            "type": "INT"
+          },
+          {
+            "name": "brk_sjt_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "brk_sdl_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "expiration_date",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "query": "data/sql/brk/stukdeel.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.stukdeel",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_sdl_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_sdl_id",
+            "type": "INT"
+          },
+          {
+            "name": "sdl_aard_stukdeel_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "sdl_aard_stukdeel_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "sdl_koopsom",
+            "type": "INT"
+          },
+          {
+            "name": "sdl_koopsom_valuta",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "brk_stk_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_stk_id",
+            "type": "INT"
+          },
+          {
+            "name": "stk_akr_portefeuillenr",
+            "type": "VARCHAR(64)"
+          },
+          {
+            "name": "stk_tijdstip_aanbieding",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "stk_reeks_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "stk_volgnummer",
+            "type": "INT"
+          },
+          {
+            "name": "stk_registercode_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "stk_registercode_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "stk_soortregister_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "stk_soortregister_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "stk_deel_soort",
+            "type": "VARCHAR(20)"
+          },
+          {
+            "name": "brk_tng_id",
+            "type": "TEXT"
+          },
+          {
+            "name": "nrn_tng_id",
+            "type": "TEXT"
+          },
+          {
+            "name": "brk_atg_id",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "nrn_atg_id",
+            "type": "INT"
+          },
+          {
+            "name": "brk_asg_vve",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
           }
         ]
       }
