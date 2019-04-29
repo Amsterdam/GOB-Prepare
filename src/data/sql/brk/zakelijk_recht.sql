@@ -76,6 +76,7 @@ SELECT zrt.id
                  (CASE kot.status_code
                   WHEN 'H' THEN kot.creation
                      ELSE NULL END)  END AS zrt_einddatum
+      ,kot.creation AS zrt_begindatum
       ,kot.status_code AS kot_status_code
       ,bsd.brk_bsd_toestandsdatum       AS toestandsdatum
 FROM   brk.zakelijkrecht zrt
