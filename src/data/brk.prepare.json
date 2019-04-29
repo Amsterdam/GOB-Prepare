@@ -476,6 +476,10 @@
             "type": "TIMESTAMP"
           },
           {
+            "name": "zrt_begindatum",
+            "type": "TIMESTAMP"
+          },
+          {
             "name": "kot_status_code",
             "type": "VARCHAR(200)"
           },
