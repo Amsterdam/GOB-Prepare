@@ -476,6 +476,10 @@
             "type": "TIMESTAMP"
           },
           {
+            "name": "zrt_begindatum",
+            "type": "TIMESTAMP"
+          },
+          {
             "name": "kot_status_code",
             "type": "VARCHAR(200)"
           },
@@ -1054,6 +1058,12 @@
           }
         ]
       }
+    },
+    {
+      "type": "execute_sql",
+      "description": "Add kadastraal object references to zakelijk recht",
+      "query_src": "file",
+      "query": "data/sql/brk/add_kot_to_zrt.sql"
     }
   ]
 }
