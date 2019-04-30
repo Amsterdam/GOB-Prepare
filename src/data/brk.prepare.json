@@ -9,6 +9,10 @@
     "application": "GOBPrepare",
     "type": "postgres"
   },
+  "prepares_imports": [
+    "brk:kadastraleobjecten",
+    "brk:zakelijkerechten"
+  ],
   "actions": [
     {
       "type": "clear",

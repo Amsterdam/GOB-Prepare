@@ -21,6 +21,10 @@ class TestPrepareClient(TestCase):
                 'application': fixtures.random_string(),
                 'type': 'postgres',
             },
+            'prepares_imports': [
+                fixtures.random_string(),
+                fixtures.random_string(),
+            ],
             'actions': [{
                 'source_schema': fixtures.random_string(),
                 'destination_schema': fixtures.random_string(),
@@ -45,11 +49,17 @@ class TestPrepareClient(TestCase):
         # Expect a process_id is created
         self.assertTrue(prepare_client.process_id)
         self.assertEqual(self.mock_msg['header'], prepare_client.header)
+        self.assertEqual(self.mock_dataset['prepares_imports'], prepare_client.prepares_imports)
 
         # Assert the logger is configured and called
         mock_logger.set_name.assert_called()
         mock_logger.set_default_args.assert_called()
         mock_logger.info.assert_called()
+
+    def test_init_warning_no_imports(self, mock_logger):
+        del self.mock_dataset['prepares_imports']
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        mock_logger.warning.assert_called_once()
 
     def test_connect(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
@@ -453,6 +463,9 @@ class TestPrepareClient(TestCase):
 
         self.assertTrue(keys_in_dict(header_keys, result['header']))
         self.assertTrue(keys_in_dict(summary_keys, result['summary']['actions'][0]))
+
+        contents = [{"dataset": dataset} for dataset in self.mock_dataset['prepares_imports']]
+        self.assertEquals(contents, result['contents'])
 
     def test_start_prepare_process(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
