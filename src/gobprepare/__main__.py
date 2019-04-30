@@ -18,7 +18,7 @@ SERVICE_DEFINITION = {
         'exchange': WORKFLOW_EXCHANGE,
         'queue': PREPARE_QUEUE,
         'report': {
-            'key': 'import.start',
+            'key': 'import.result',
             'exchange': WORKFLOW_EXCHANGE,
         },
         'key': 'prepare.start',

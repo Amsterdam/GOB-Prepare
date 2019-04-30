@@ -37,6 +37,7 @@ class PrepareClient:
     _dst_connection = None
     _dst_user = None
     result = {}
+    prepares_imports = []
 
     def __init__(self, prepare_config, msg):
         self.header = msg.get('header', {})
@@ -48,6 +49,7 @@ class PrepareClient:
         self.source_app = self._prepare_config['source']['application']
         self.destination = self._prepare_config['destination']
         self.destination_app = self._prepare_config['destination']['application']
+        self.prepares_imports = self._prepare_config.get('prepares_imports', [])
 
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
         self.process_id = f"{start_timestamp}.{self.source_app}{self._name}"
@@ -62,6 +64,9 @@ class PrepareClient:
         logger.set_name("PREPARE")
         logger.set_default_args(extra_log_kwargs)
         logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
+
+        if len(self.prepares_imports) == 0:
+            logger.warning("No prepared imports defined")
 
     def connect(self):
         """Connects to data source and destination database
@@ -245,7 +250,12 @@ class PrepareClient:
         }
         result = {
             "header": metadata,
-            "summary": self.result,
+            "summary": {
+                **self.result,
+                "warnings": logger.get_warnings(),
+                "errors": logger.get_errors(),
+            },
+            "contents": [{"dataset": dataset} for dataset in self.prepares_imports],
         }
         return result
 
