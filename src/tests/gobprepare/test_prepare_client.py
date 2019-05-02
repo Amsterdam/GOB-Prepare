@@ -21,10 +21,11 @@ class TestPrepareClient(TestCase):
                 'application': fixtures.random_string(),
                 'type': 'postgres',
             },
-            'prepares_imports': [
-                fixtures.random_string(),
-                fixtures.random_string(),
-            ],
+            'prepares_imports': [{
+                'catalogue': fixtures.random_string(),
+                'collections': [fixtures.random_string() for _ in range(2)],
+                'application': fixtures.random_string(),
+            }],
             'actions': [{
                 'source_schema': fixtures.random_string(),
                 'destination_schema': fixtures.random_string(),
@@ -49,17 +50,72 @@ class TestPrepareClient(TestCase):
         # Expect a process_id is created
         self.assertTrue(prepare_client.process_id)
         self.assertEqual(self.mock_msg['header'], prepare_client.header)
-        self.assertEqual(self.mock_dataset['prepares_imports'], prepare_client.prepares_imports)
+        self.assertEqual(2, len(prepare_client.prepares_imports))
 
         # Assert the logger is configured and called
         mock_logger.set_name.assert_called()
         mock_logger.set_default_args.assert_called()
         mock_logger.info.assert_called()
 
-    def test_init_warning_no_imports(self, mock_logger):
-        del self.mock_dataset['prepares_imports']
+    def test_build_prepare_imports(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        mock_logger.warning.assert_called_once()
+
+        imports = [{
+            "catalogue": "cat",
+            "collections": ["collection1", "collection2"],
+            "application": "Application"
+        }]
+        expected_result = [
+            {
+                "catalogue": "cat",
+                "collection": "collection1",
+                "application": "Application"
+            },
+            {
+                "catalogue": "cat",
+                "collection": "collection2",
+                "application": "Application"
+            },
+        ]
+        result = prepare_client._build_prepare_imports(imports)
+        self.assertEquals(expected_result, result)
+
+    def test_build_prepare_imports_warnings(self, mock_logger):
+        warning_cases = [
+            [{
+                "catalogue": "cat",
+                "collections": ["collection1", "collection2"],
+            }],
+            [{
+                "collections": ["collection1", "collection2"],
+                "application": "Application"
+            }],
+            [{
+                "catalogue": "cat",
+                "application": "Application"
+            }],
+            [{
+                "catalogue": "cat",
+                "collections": [],
+                "application": "Application"
+            }],
+            [{
+                "catalogue": "cat",
+                "collections": ["collection1", "collection2"],
+                "application": "Application"
+            }],
+            [{
+                "catalogue": "cat",
+                "collections": ["collection1", "collection2"],
+                "application": "Application"
+            }],
+        ]
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+
+        for warning_case in warning_cases:
+            mock_logger.reset()
+            prepare_client._build_prepare_imports(warning_case)
+            mock_logger.warning.assert_called()
 
     def test_connect(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
@@ -464,7 +520,7 @@ class TestPrepareClient(TestCase):
         self.assertTrue(keys_in_dict(header_keys, result['header']))
         self.assertTrue(keys_in_dict(summary_keys, result['summary']['actions'][0]))
 
-        contents = [{"dataset": dataset} for dataset in self.mock_dataset['prepares_imports']]
+        contents = [{"dataset": dataset} for dataset in prepare_client.prepares_imports]
         self.assertEquals(contents, result['contents'])
 
     def test_start_prepare_process(self, mock_logger):
