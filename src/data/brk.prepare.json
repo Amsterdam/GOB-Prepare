@@ -10,8 +10,11 @@
     "type": "postgres"
   },
   "prepares_imports": [
-    "brk:kadastraleobjecten",
-    "brk:zakelijkerechten"
+    {
+      "catalogue": "brk",
+      "collections": ["kadastraleobjecten", "zakelijkerechten"],
+      "application": "GOBPrepare"
+    }
   ],
   "actions": [
     {
