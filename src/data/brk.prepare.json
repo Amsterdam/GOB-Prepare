@@ -12,7 +12,7 @@
   "prepares_imports": [
     {
       "catalogue": "brk",
-      "collections": ["kadastraleobjecten", "zakelijkerechten"],
+      "collections": ["kadastraleobjecten", "zakelijkerechten", "kadastralesubjecten"],
       "application": "GOBPrepare"
     }
   ],
