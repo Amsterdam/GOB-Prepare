@@ -43,8 +43,9 @@ SELECT zrt.id
               '?'
           END AS aardzakelijkrecht_akr_code
       ,q.is_belast_met AS is_belast_met_nrn_zrt_id
-      ,asg2.vve AS ontstaan_uit -- NDG, 10-12-2015: workaround t.b.v. ophalen ASG-informatie VVEs
-      ,asg1.vve AS betrokken_bij -- NDG, 10-12-2015: workaround t.b.v. ophalen ASG-informatie VVEs
+      -- onstaan_uit_ref and betrokken_bij_ref. populate later
+      ,asg2.vve AS ontstaan_uit_ref -- NDG, 10-12-2015: workaround t.b.v. ophalen ASG-informatie VVEs
+      ,asg1.vve AS betrokken_bij_ref -- NDG, 10-12-2015: workaround t.b.v. ophalen ASG-informatie VVEs
     ,zrt.isbeperkt_tot
     ,asg1.id AS nrn_asg_id -- t.b.v. mview met actuele Zakelijk-rechtgegevens
       ,CASE

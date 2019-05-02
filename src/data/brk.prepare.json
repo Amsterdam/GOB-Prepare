@@ -9,6 +9,13 @@
     "application": "GOBPrepare",
     "type": "postgres"
   },
+  "prepares_imports": [
+    {
+      "catalogue": "brk",
+      "collections": ["kadastraleobjecten", "zakelijkerechten", "kadastralesubjecten"],
+      "application": "GOBPrepare"
+    }
+  ],
   "actions": [
     {
       "type": "clear",
@@ -428,12 +435,20 @@
             "type": "JSONB"
           },
           {
+            "name": "ontstaan_uit_ref",
+            "type": "VARCHAR(240)"
+          },
+          {
             "name": "ontstaan_uit",
+            "type": "JSONB"
+          },
+          {
+            "name": "betrokken_bij_ref",
             "type": "VARCHAR(240)"
           },
           {
             "name": "betrokken_bij",
-            "type": "VARCHAR(240)"
+            "type": "JSONB"
           },
           {
             "name": "isbeperkt_tot",

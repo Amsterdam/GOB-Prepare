@@ -37,6 +37,7 @@ class PrepareClient:
     _dst_connection = None
     _dst_user = None
     result = {}
+    prepares_imports = None
 
     def __init__(self, prepare_config, msg):
         self.header = msg.get('header', {})
@@ -48,6 +49,7 @@ class PrepareClient:
         self.source_app = self._prepare_config['source']['application']
         self.destination = self._prepare_config['destination']
         self.destination_app = self._prepare_config['destination']['application']
+        self.prepares_imports = self._build_prepare_imports(self._prepare_config.get('prepares_imports', []))
 
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
         self.process_id = f"{start_timestamp}.{self.source_app}{self._name}"
@@ -62,6 +64,25 @@ class PrepareClient:
         logger.set_name("PREPARE")
         logger.set_default_args(extra_log_kwargs)
         logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
+
+    def _build_prepare_imports(self, imports: list):
+        result = []
+
+        for prepared_import in imports:
+            if not all([key in prepared_import for key in ['catalogue', 'application', 'collections']]):
+                logger.warning("Skipping prepared import, invalid definition")
+                continue
+
+            result.extend([{
+                "catalogue": prepared_import['catalogue'],
+                "application": prepared_import['application'],
+                "collection": collection
+            } for collection in prepared_import['collections']])
+
+        if len(result) == 0:
+            logger.warning("No prepared imports defined")
+
+        return result
 
     def connect(self):
         """Connects to data source and destination database
@@ -243,9 +264,15 @@ class PrepareClient:
             "version": self._prepare_config['version'],
             "timestamp": datetime.datetime.utcnow().isoformat()
         }
+
         result = {
             "header": metadata,
-            "summary": self.result,
+            "summary": {
+                **self.result,
+                "warnings": logger.get_warnings(),
+                "errors": logger.get_errors(),
+            },
+            "contents": [{"dataset": dataset} for dataset in self.prepares_imports],
         }
         return result
 
