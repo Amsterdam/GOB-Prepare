@@ -141,7 +141,7 @@ class TestOracleToPostgresCloner(TestCase):
         mock_read_from_oracle.assert_called_with(
             self.oracle_connection_mock,
             [f"SELECT column_name, data_type, data_length, data_precision, data_scale FROM all_tab_columns WHERE "
-             f"owner='{self.src_schema}' AND table_name='{table_name}'"],
+             f"owner='{self.src_schema}' AND table_name='{table_name}' ORDER BY column_id"],
         )
 
     @patch("gobprepare.cloner.oracle_to_postgres.logger")

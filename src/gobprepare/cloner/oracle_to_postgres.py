@@ -82,7 +82,7 @@ class OracleToPostgresCloner():
         :return:
         """
         query = f"SELECT column_name, data_type, data_length, data_precision, data_scale " \
-            f"FROM all_tab_columns WHERE owner='{self._src_schema}' AND table_name='{table}'"
+            f"FROM all_tab_columns WHERE owner='{self._src_schema}' AND table_name='{table}' ORDER BY column_id"
         columns = read_from_oracle(self._src_connection, [query])
 
         table_definition = [
