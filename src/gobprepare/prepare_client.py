@@ -53,16 +53,18 @@ class PrepareClient:
 
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
         self.process_id = f"{start_timestamp}.{self.source_app}{self._name}"
-        extra_log_kwargs = {
-            'job': self._name,
-            'process_id': self.process_id,
-            'application': self.source.get('application'),
-            'actions': [action["type"] for action in self._actions]
-        }
 
-        # Log start of import process
-        logger.set_name("PREPARE")
-        logger.set_default_args(extra_log_kwargs)
+        # Do not set catalogue/collection, this depends on the specific prepare_import
+        # and collection being processed
+        self.header.update({
+            'process_id': self.process_id,
+            'source': self.source_app,
+            'application': self.source.get('application')
+        })
+        msg["header"] = self.header
+
+        logger.configure(msg, "PREPARE")
+
         logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
 
     def _build_prepare_imports(self, imports: list):
@@ -258,7 +260,6 @@ class PrepareClient:
         metadata = {
             **self.header,
             **self.msg,  # Return original message in header
-            "process_id": self.process_id,
             "source_application": self.source_app,
             "destination_application": self.destination_app,
             "version": self._prepare_config['version'],

@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call, mock_open
+from unittest.mock import MagicMock, patch, call, mock_open, ANY
 
 from gobcore.exceptions import GOBException
 from gobprepare.prepare_client import PrepareClient
@@ -53,8 +53,7 @@ class TestPrepareClient(TestCase):
         self.assertEqual(2, len(prepare_client.prepares_imports))
 
         # Assert the logger is configured and called
-        mock_logger.set_name.assert_called()
-        mock_logger.set_default_args.assert_called()
+        mock_logger.configure.assert_called_with({'header': ANY}, "PREPARE")
         mock_logger.info.assert_called()
 
     def test_build_prepare_imports(self, mock_logger):
@@ -503,6 +502,8 @@ class TestPrepareClient(TestCase):
             "someheader",
             "header",
             "process_id",
+            "source",
+            'application',
             "source_application",
             "destination_application",
             "version",
