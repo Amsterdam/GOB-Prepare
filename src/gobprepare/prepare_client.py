@@ -49,7 +49,6 @@ class PrepareClient:
         self.source_app = self._prepare_config['source']['application']
         self.destination = self._prepare_config['destination']
         self.destination_app = self._prepare_config['destination']['application']
-        self.prepares_imports = self._build_prepare_imports(self._prepare_config.get('prepares_imports', []))
 
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
         self.process_id = f"{start_timestamp}.{self.source_app}{self._name}"
@@ -66,6 +65,8 @@ class PrepareClient:
         logger.configure(msg, "PREPARE")
 
         logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
+
+        self.prepares_imports = self._build_prepare_imports(self._prepare_config.get('prepares_imports', []))
 
     def _build_prepare_imports(self, imports: list):
         result = []

@@ -16,6 +16,7 @@ BEGIN
 	SET
 	    rust_op_kadastraalobject_id=kot_id,
 	    rust_op_kadastraalobj_volgnr=kot_volgnr,
+	    kadastraal_object_id=kot_identificatie,
 	    zrt_begindatum=begindatum,
 	    zrt_einddatum=einddatum
 	FROM (
@@ -23,6 +24,7 @@ BEGIN
 		    zrtbelastmet.id,
 		    zrtkot.rust_op_kadastraalobject_id,
 		    zrtkot.rust_op_kadastraalobj_volgnr,
+		    kot.identificatie as kot_identificatie,
 		    kot.creation AS zrt_begindatum,
 		    CASE
                 WHEN kot.modification IS NOT NULL THEN kot.modification
@@ -43,7 +45,7 @@ BEGIN
 	        AND kot.volgnummer = zrtkot.rust_op_kadastraalobj_volgnr
 		WHERE zrtkot.rust_op_kadastraalobject_id IS NOT NULL
 		    AND zrtbelastmet.rust_op_kadastraalobject_id IS NULL
-	) AS v(id, kot_id, kot_volgnr, begindatum, einddatum)
+	) AS v(id, kot_id, kot_volgnr, kot_identificatie, begindatum, einddatum)
 	WHERE v.id = zrt.id;
 
     GET DIAGNOSTICS lastres = ROW_COUNT;
