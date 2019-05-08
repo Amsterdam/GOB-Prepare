@@ -17,6 +17,8 @@ SELECT t.identificatie              	AS brk_tng_id
 ,      t.van_id               			AS van_nrn_zakelijkrecht_id
 ,      g.stukdeel_identificatie         AS gebaseerdop_stukdeel_id
 ,      bsd.brk_bsd_toestandsdatum       AS toestandsdatum
+,      kot.volgnummer                   AS volgnummer
+,      kot.creation                     AS begindatum
 ,	   CASE
              WHEN kot.modification IS NOT NULL
                  THEN kot.modification

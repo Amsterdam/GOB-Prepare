@@ -518,11 +518,18 @@
       }
     },
     {
+      "type": "execute_sql",
+      "description": "Populate ZRT table with KOT references",
+      "query_src": "file",
+      "query": "data/sql/brk/zrt.add_kot.sql"
+    },
+    {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
       "query": "data/sql/brk/tenaamstelling.sql",
       "query_src": "file",
+      "comment": "Assumes ZRT table is populated with KOT references.",
       "destination_table": {
         "name": "brk_prep.tenaamstelling",
         "create": true,
@@ -593,6 +600,14 @@
           },
           {
             "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "volgnummer",
+            "type": "INT"
+          },
+          {
+            "name": "begindatum",
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           },
           {
@@ -1085,12 +1100,6 @@
           }
         ]
       }
-    },
-    {
-      "type": "execute_sql",
-      "description": "Add kadastraal object references to zakelijk recht",
-      "query_src": "file",
-      "query": "data/sql/brk/zrt.add_kot.sql"
     },
     {
       "type": "execute_sql",
