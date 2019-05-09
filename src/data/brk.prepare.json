@@ -529,7 +529,7 @@
       "ignore_missing": true,
       "query": "data/sql/brk/tenaamstelling.sql",
       "query_src": "file",
-      "comment": "Assumes ZRT table is populated with KOT references.",
+      "comment": "Assumes ZRT table is present and filled in brk_prep schema and populated with KOT references.",
       "destination_table": {
         "name": "brk_prep.tenaamstelling",
         "create": true,
