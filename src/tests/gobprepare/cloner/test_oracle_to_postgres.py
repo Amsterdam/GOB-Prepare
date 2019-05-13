@@ -328,10 +328,12 @@ class TestOracleToPostgresCloner(TestCase):
         row_data = [
             {"id": 4, "name": "Sheldon"},
             {"id": 5, "name": "Leonard"},
+            {"id": 6, "name": None},
         ]
         expected_result = [
             {"id": 4, "name": "***"},
             {"id": 5, "name": "***"},
+            {"id": 6, "name": None},
         ]
         self.assertEqual(expected_result, self.cloner._mask_rows("table_name", row_data))
 
@@ -344,6 +346,7 @@ class TestOracleToPostgresCloner(TestCase):
         row_data = [
             {"id": 4, "name": "Sheldon"},
             {"id": 5, "name": "Leonard"},
+            {"id": 6, "name": None},
         ]
         self.assertEqual(row_data, self.cloner._mask_rows("table_name_not_in_mask_columns", row_data))
 
