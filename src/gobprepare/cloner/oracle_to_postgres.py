@@ -301,7 +301,8 @@ class OracleToPostgresCloner():
             return row_data
 
         for row in row_data:
-            row.update(self._mask_columns[table_name])
+            row.update({colname: maskvalue for colname, maskvalue in self._mask_columns[table_name].items()
+                        if row[colname] is not None})
         return row_data
 
     def _insert_rows(self, table_definition: Tuple[str, List], row_data: List[Dict]) -> None:
