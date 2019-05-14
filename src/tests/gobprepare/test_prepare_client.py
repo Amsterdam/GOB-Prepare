@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call, mock_open
+from unittest.mock import MagicMock, patch, call, mock_open, ANY
 
 from gobcore.exceptions import GOBException
 from gobprepare.prepare_client import PrepareClient
@@ -53,8 +53,7 @@ class TestPrepareClient(TestCase):
         self.assertEqual(2, len(prepare_client.prepares_imports))
 
         # Assert the logger is configured and called
-        mock_logger.set_name.assert_called()
-        mock_logger.set_default_args.assert_called()
+        mock_logger.configure.assert_called_with({'header': ANY}, "PREPARE")
         mock_logger.info.assert_called()
 
     def test_build_prepare_imports(self, mock_logger):
@@ -236,9 +235,11 @@ class TestPrepareClient(TestCase):
             with self.assertRaises(NotImplementedError):
                 prepare_client.action_clone({})
 
-    @patch("gobprepare.prepare_client.drop_schema")
+    @patch("gobprepare.prepare_client.drop_table")
     @patch("gobprepare.prepare_client.create_schema")
-    def test_action_clear(self, mock_create_schema, mock_drop_schema, mock_logger):
+    @patch("gobprepare.prepare_client.list_tables_for_schema")
+    def test_action_clear(self, mock_list_tables, mock_create_schema, mock_drop_table, mock_logger):
+        mock_list_tables.return_value = ['table_a', 'table_b']
         action = {
             'type': 'postgres',
             'schemas': ['schema_a', 'schema_b'],
@@ -246,9 +247,15 @@ class TestPrepareClient(TestCase):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.action_clear(action)
 
-        mock_drop_schema.assert_has_calls([
+        mock_list_tables.assert_has_calls([
             call(prepare_client._dst_connection, 'schema_a'),
             call(prepare_client._dst_connection, 'schema_b'),
+        ])
+        mock_drop_table.assert_has_calls([
+            call(prepare_client._dst_connection, 'schema_a.table_a'),
+            call(prepare_client._dst_connection, 'schema_a.table_b'),
+            call(prepare_client._dst_connection, 'schema_b.table_a'),
+            call(prepare_client._dst_connection, 'schema_b.table_b'),
         ])
         mock_create_schema.assert_has_calls([
             call(prepare_client._dst_connection, 'schema_a'),
@@ -503,6 +510,8 @@ class TestPrepareClient(TestCase):
             "someheader",
             "header",
             "process_id",
+            "source",
+            'application',
             "source_application",
             "destination_application",
             "version",

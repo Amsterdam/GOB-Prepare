@@ -42,10 +42,13 @@ SELECT zrt.id
              ELSE
               '?'
           END AS aardzakelijkrecht_akr_code
-      ,q.is_belast_met AS is_belast_met_nrn_zrt_id
+      ,blm.is_belast_met AS is_belast_met
+      ,bel.belast AS belast
       -- onstaan_uit_ref and betrokken_bij_ref. populate later
       ,asg2.vve AS ontstaan_uit_ref -- NDG, 10-12-2015: workaround t.b.v. ophalen ASG-informatie VVEs
       ,asg1.vve AS betrokken_bij_ref -- NDG, 10-12-2015: workaround t.b.v. ophalen ASG-informatie VVEs
+     ,asg2.id AS ontstaan_uit_asg_id
+     ,asg1.id AS betrokken_bij_asg_id
     ,zrt.isbeperkt_tot
     ,asg1.id AS nrn_asg_id -- t.b.v. mview met actuele Zakelijk-rechtgegevens
       ,CASE
@@ -81,12 +84,34 @@ SELECT zrt.id
       ,kot.status_code AS kot_status_code
       ,bsd.brk_bsd_toestandsdatum       AS toestandsdatum
 FROM   brk.zakelijkrecht zrt
-LEFT JOIN (SELECT zakelijkrecht_id
-          , array_to_json(array_agg(json_build_object( -- POSTGRES: replaced LISTAGG(is_belast_met , ';') WITHIN GROUP (ORDER BY id) with string_agg(cast(is_belast_met, blalbla), ';')
-          		'zakelijkrecht_id', is_belast_met
-          ))) as is_belast_met
-          FROM BRK.ZAKELIJKRECHT_ISBELASTMET t
-          GROUP BY zakelijkrecht_id) q          ON zrt.id = q.zakelijkrecht_id
+LEFT JOIN (
+    SELECT
+        zrt_id,
+        array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie))) as is_belast_met
+    FROM (
+        SELECT
+            zit.zakelijkrecht_id AS zrt_id,
+            zrt2.identificatie AS identificatie
+        FROM brk.zakelijkrecht_isbelastmet zit
+        LEFT JOIN brk.zakelijkrecht zrt2
+        ON zrt2.id = zit.is_belast_met
+        ) sq
+     GROUP BY zrt_id
+) blm ON blm.zrt_id=zrt.id
+LEFT JOIN (
+    SELECT
+        zrt_id,
+        array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie))) as belast
+    FROM (
+        SELECT
+            zit.is_belast_met AS zrt_id,
+            zrt2.identificatie AS identificatie
+        FROM brk.zakelijkrecht_isbelastmet zit
+        LEFT JOIN brk.zakelijkrecht zrt2
+        ON zrt2.id = zit.zakelijkrecht_id
+    ) sq
+    GROUP BY zrt_id
+) bel ON bel.zrt_id=zrt.id
 LEFT JOIN BRK.C_AARDZAKELIJKRECHT a             ON zrt.aardzakelijkrecht_code=a.code
 LEFT JOIN BRK.KADASTRAAL_OBJECT kot             ON (zrt.rust_op_kadastraalobject_id=kot.id
                                                     AND zrt.rust_op_kadastraalobj_volgnr=kot.volgnummer)

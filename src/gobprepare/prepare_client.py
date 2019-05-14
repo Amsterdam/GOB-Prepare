@@ -11,7 +11,8 @@ import traceback
 
 from gobcore.database.connector.oracle import connect_to_oracle
 from gobcore.database.connector.postgresql import connect_to_postgresql
-from gobcore.database.writer.postgresql import drop_schema, create_schema, execute_postgresql_query
+from gobcore.database.reader.postgresql import list_tables_for_schema
+from gobcore.database.writer.postgresql import drop_table, create_schema, execute_postgresql_query
 from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
 from gobprepare.config import get_database_config
@@ -49,21 +50,24 @@ class PrepareClient:
         self.source_app = self._prepare_config['source']['application']
         self.destination = self._prepare_config['destination']
         self.destination_app = self._prepare_config['destination']['application']
-        self.prepares_imports = self._build_prepare_imports(self._prepare_config.get('prepares_imports', []))
 
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
         self.process_id = f"{start_timestamp}.{self.source_app}{self._name}"
-        extra_log_kwargs = {
-            'job': self._name,
-            'process_id': self.process_id,
-            'application': self.source.get('application'),
-            'actions': [action["type"] for action in self._actions]
-        }
 
-        # Log start of import process
-        logger.set_name("PREPARE")
-        logger.set_default_args(extra_log_kwargs)
+        # Do not set catalogue/collection, this depends on the specific prepare_import
+        # and collection being processed
+        self.header.update({
+            'process_id': self.process_id,
+            'source': self.source_app,
+            'application': self.source.get('application')
+        })
+        msg["header"] = self.header
+
+        logger.configure(msg, "PREPARE")
+
         logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
+
+        self.prepares_imports = self._build_prepare_imports(self._prepare_config.get('prepares_imports', []))
 
     def _build_prepare_imports(self, imports: list):
         result = []
@@ -146,11 +150,15 @@ class PrepareClient:
         """
         if self.destination['type'] == "postgres":
             for schema in action['schemas']:
-                drop_schema(self._dst_connection, schema)
-                logger.info(f"Drop schema {schema}")
-
                 create_schema(self._dst_connection, schema)
                 logger.info(f"Create schema {schema}")
+
+                tables = list_tables_for_schema(self._dst_connection, schema)
+
+                for table in tables:
+                    full_tablename = f"{schema}.{table}"
+                    logger.info(f"Drop table {full_tablename}")
+                    drop_table(self._dst_connection, full_tablename)
         else:
             raise NotImplementedError
 
@@ -258,7 +266,6 @@ class PrepareClient:
         metadata = {
             **self.header,
             **self.msg,  # Return original message in header
-            "process_id": self.process_id,
             "source_application": self.source_app,
             "destination_application": self.destination_app,
             "version": self._prepare_config['version'],
