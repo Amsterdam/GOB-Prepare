@@ -12,7 +12,13 @@
   "prepares_imports": [
     {
       "catalogue": "brk",
-      "collections": ["kadastraleobjecten", "zakelijkerechten", "kadastralesubjecten"],
+      "collections": [
+        "kadastraleobjecten",
+        "zakelijkerechten",
+        "kadastralesubjecten",
+        "tenaamstellingen",
+        "aantekeningenrechten"
+      ],
       "application": "GOBPrepare"
     }
   ],
@@ -876,6 +882,7 @@
       "ignore_missing": true,
       "query": "data/sql/brk/aantekening_recht.sql",
       "query_src": "file",
+      "comment": "Assumes TNG table is present and populated.",
       "destination_table": {
         "name": "brk_prep.aantekening_recht",
         "create": true,
@@ -909,16 +916,16 @@
             "type": "TEXT"
           },
           {
-            "name": "brk_sjt_id",
-            "type": "VARCHAR(240)"
+            "name": "brk_sjt_ids",
+            "type": "JSONB"
           },
           {
-            "name": "nrn_tng_id",
-            "type": "VARCHAR(240)"
+            "name": "nrn_tng_ids",
+            "type": "JSONB"
           },
           {
-            "name": "brk_sdl_id",
-            "type": "VARCHAR(240)"
+            "name": "nrn_sdl_ids",
+            "type": "JSONB"
           },
           {
             "name": "toestandsdatum",
