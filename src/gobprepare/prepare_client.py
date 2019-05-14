@@ -11,7 +11,8 @@ import traceback
 
 from gobcore.database.connector.oracle import connect_to_oracle
 from gobcore.database.connector.postgresql import connect_to_postgresql
-from gobcore.database.writer.postgresql import drop_schema, create_schema, execute_postgresql_query
+from gobcore.database.reader.postgresql import list_tables_for_schema
+from gobcore.database.writer.postgresql import drop_table, create_schema, execute_postgresql_query
 from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
 from gobprepare.config import get_database_config
@@ -149,11 +150,15 @@ class PrepareClient:
         """
         if self.destination['type'] == "postgres":
             for schema in action['schemas']:
-                drop_schema(self._dst_connection, schema)
-                logger.info(f"Drop schema {schema}")
-
                 create_schema(self._dst_connection, schema)
                 logger.info(f"Create schema {schema}")
+
+                tables = list_tables_for_schema(self._dst_connection, schema)
+
+                for table in tables:
+                    full_tablename = f"{schema}.{table}"
+                    logger.info(f"Drop table {full_tablename}")
+                    drop_table(self._dst_connection, full_tablename)
         else:
             raise NotImplementedError
 
