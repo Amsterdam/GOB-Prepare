@@ -79,8 +79,8 @@ class TestPrepareClient(TestCase):
         result = prepare_client._build_prepare_imports(imports)
         self.assertEquals(expected_result, result)
 
-    def test_build_prepare_imports_warnings(self, mock_logger):
-        warning_cases = [
+    def test_build_prepare_imports_invalid(self, mock_logger):
+        invalid_cases = [
             [{
                 "catalogue": "cat",
                 "collections": ["collection1", "collection2"],
@@ -98,23 +98,18 @@ class TestPrepareClient(TestCase):
                 "collections": [],
                 "application": "Application"
             }],
-            [{
-                "catalogue": "cat",
-                "collections": ["collection1", "collection2"],
-                "application": "Application"
-            }],
-            [{
-                "catalogue": "cat",
-                "collections": ["collection1", "collection2"],
-                "application": "Application"
-            }],
         ]
+
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
 
-        for warning_case in warning_cases:
-            mock_logger.reset()
-            prepare_client._build_prepare_imports(warning_case)
-            mock_logger.warning.assert_called()
+        for case in invalid_cases:
+            res = prepare_client._build_prepare_imports(case)
+            self.assertEqual(0, len(res))
+
+    def test_no_imports_defined_warning(self, mock_logger):
+        del self.mock_dataset['prepares_imports']
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        mock_logger.warning.assert_called_once()
 
     def test_connect(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
@@ -515,7 +510,8 @@ class TestPrepareClient(TestCase):
             "source_application",
             "destination_application",
             "version",
-            "timestamp"
+            "timestamp",
+            "entity",
         ]
         summary_keys = [
             "rows_copied",
