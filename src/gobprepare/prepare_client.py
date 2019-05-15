@@ -54,27 +54,28 @@ class PrepareClient:
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
         self.process_id = f"{start_timestamp}.{self.source_app}{self._name}"
 
-        # Do not set catalogue/collection, this depends on the specific prepare_import
-        # and collection being processed
+        self.prepares_imports = self._build_prepare_imports(self._prepare_config.get('prepares_imports', []))
+        catalogues = set([item['catalogue'] for item in self.prepares_imports])
+
         self.header.update({
             'process_id': self.process_id,
             'source': self.source_app,
-            'application': self.source.get('application')
+            'application': self.source.get('application'),
+            'entity': ",".join(catalogues),
         })
         msg["header"] = self.header
 
         logger.configure(msg, "PREPARE")
-
         logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
 
-        self.prepares_imports = self._build_prepare_imports(self._prepare_config.get('prepares_imports', []))
+        if len(self.prepares_imports) == 0:
+            logger.warning(f"No prepared imports defined")
 
     def _build_prepare_imports(self, imports: list):
         result = []
 
         for prepared_import in imports:
             if not all([key in prepared_import for key in ['catalogue', 'application', 'collections']]):
-                logger.warning("Skipping prepared import, invalid definition")
                 continue
 
             result.extend([{
@@ -82,9 +83,6 @@ class PrepareClient:
                 "application": prepared_import['application'],
                 "collection": collection
             } for collection in prepared_import['collections']])
-
-        if len(result) == 0:
-            logger.warning("No prepared imports defined")
 
         return result
 
