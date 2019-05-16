@@ -176,6 +176,7 @@ class TestPrepareClient(TestCase):
 
     def test_disconnect(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._close_connection = MagicMock()
         src_mock = MagicMock()
         dst_mock = MagicMock()
         prepare_client._src_connection = src_mock
@@ -184,16 +185,31 @@ class TestPrepareClient(TestCase):
         prepare_client._dst_user = "DST USER"
 
         prepare_client.disconnect()
-        src_mock.close.assert_called_once()
-        dst_mock.close.assert_called_once()
 
         self.assertIsNone(prepare_client._src_connection)
         self.assertIsNone(prepare_client._dst_connection)
         self.assertIsNone(prepare_client._src_user)
         self.assertIsNone(prepare_client._dst_user)
 
+        prepare_client._close_connection.assert_has_calls([
+            call(src_mock),
+            call(dst_mock),
+        ])
+
         # Should not raise any errors when already closed (such as when close() is called on a None object)
         prepare_client.disconnect()
+
+    def test_close_connection(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        connection = MagicMock()
+        prepare_client._close_connection(connection)
+        connection.close.assert_called_once()
+
+    def test_close_connection_exception(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        connection = MagicMock()
+        connection.close.side_effect = Exception
+        prepare_client._close_connection(connection)
 
     def test_connect_invalid_source_type(self, mock_logger):
         self.mock_dataset['source']['type'] = 'nonexistent'

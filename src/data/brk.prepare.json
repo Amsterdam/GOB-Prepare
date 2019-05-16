@@ -397,10 +397,14 @@
           },
           {
             "name": "relatie_g_perceel",
-            "type": "TEXT"
+            "type": "JSONB"
           },
           {
             "name": "adressen",
+            "type": "JSONB"
+          },
+          {
+            "name": "ontstaan_uit_kadastraalobject",
             "type": "JSONB"
           }
         ]
@@ -1113,6 +1117,12 @@
       "description": "Create references between ZRT's on betrokken_bij and ontstaan_uit",
       "query_src": "file",
       "query": "data/sql/brk/zrt.reference_ontstaan_uit_betrokken_bij.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create references between A-percelen and G-percelen in KOT",
+      "query_src": "file",
+      "query": "data/sql/brk/kot.add_relatie_g_perceel.sql"
     }
   ]
 }
