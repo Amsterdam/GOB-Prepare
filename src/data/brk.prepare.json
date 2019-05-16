@@ -17,7 +17,8 @@
         "zakelijkerechten",
         "kadastralesubjecten",
         "tenaamstellingen",
-        "aantekeningenrechten"
+        "aantekeningenrechten",
+        "aantekeningenkadastraleobjecten"
       ],
       "application": "GOBPrepare"
     }
