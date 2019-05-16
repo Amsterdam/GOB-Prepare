@@ -989,12 +989,12 @@
             "type": "INT"
           },
           {
-            "name": "brk_sjt_id",
-            "type": "VARCHAR(240)"
+            "name": "brk_sjt_ids",
+            "type": "JSONB"
           },
           {
-            "name": "brk_sdl_id",
-            "type": "VARCHAR(240)"
+            "name": "nrn_sdl_ids",
+            "type": "JSONB"
           },
           {
             "name": "toestandsdatum",
@@ -1002,6 +1002,10 @@
           },
           {
             "name": "expiration_date",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "begindatum",
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           }
         ]
