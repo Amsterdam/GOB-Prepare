@@ -378,15 +378,15 @@
           },
           {
             "name": "perceelnummer_rotatie",
-            "type": "INT"
+            "type": "NUMERIC(10,3)"
           },
           {
             "name": "perceelnummer_verschuiving_x",
-            "type": "INT"
+            "type": "NUMERIC(10,3)"
           },
           {
             "name": "perceelnummer_verschuiving_y",
-            "type": "INT"
+            "type": "NUMERIC(10,3)"
           },
           {
             "name": "perceelnummer_geometrie",
