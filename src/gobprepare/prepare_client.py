@@ -111,20 +111,26 @@ class PrepareClient:
 
         return connection, user
 
+    def _close_connection(self, connection):
+        if connection is not None:
+            try:
+                connection.close()
+            except Exception:
+                # Connection already closed?
+                pass
+
     def disconnect(self):
         """Closes open database connections
 
         :return:
         """
-        if self._src_connection is not None:
-            self._src_connection.close()
-            self._src_connection = None
-            self._src_user = None
+        self._close_connection(self._src_connection)
+        self._close_connection(self._dst_connection)
 
-        if self._dst_connection is not None:
-            self._dst_connection.close()
-            self._dst_connection = None
-            self._dst_user = None
+        self._src_connection = None
+        self._dst_connection = None
+        self._src_user = None
+        self._dst_user = None
 
     def action_clone(self, action: dict) -> int:
         """Clones the source data using an external Cloner class.

@@ -1,4 +1,3 @@
--- NB relatie_g_perceel komt er nog bij
 SELECT kot.identificatie                    AS brk_kot_id
       ,kot.id                               AS nrn_kot_id
       ,kot.id                        AS source_id

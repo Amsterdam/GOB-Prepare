@@ -17,7 +17,8 @@
         "zakelijkerechten",
         "kadastralesubjecten",
         "tenaamstellingen",
-        "aantekeningenrechten"
+        "aantekeningenrechten",
+        "aantekeningenkadastraleobjecten"
       ],
       "application": "GOBPrepare"
     }
@@ -377,15 +378,15 @@
           },
           {
             "name": "perceelnummer_rotatie",
-            "type": "INT"
+            "type": "NUMERIC(10,3)"
           },
           {
             "name": "perceelnummer_verschuiving_x",
-            "type": "INT"
+            "type": "NUMERIC(10,3)"
           },
           {
             "name": "perceelnummer_verschuiving_y",
-            "type": "INT"
+            "type": "NUMERIC(10,3)"
           },
           {
             "name": "perceelnummer_geometrie",
@@ -397,10 +398,14 @@
           },
           {
             "name": "relatie_g_perceel",
-            "type": "TEXT"
+            "type": "JSONB"
           },
           {
             "name": "adressen",
+            "type": "JSONB"
+          },
+          {
+            "name": "ontstaan_uit_kadastraalobject",
             "type": "JSONB"
           }
         ]
@@ -985,12 +990,12 @@
             "type": "INT"
           },
           {
-            "name": "brk_sjt_id",
-            "type": "VARCHAR(240)"
+            "name": "brk_sjt_ids",
+            "type": "JSONB"
           },
           {
-            "name": "brk_sdl_id",
-            "type": "VARCHAR(240)"
+            "name": "nrn_sdl_ids",
+            "type": "JSONB"
           },
           {
             "name": "toestandsdatum",
@@ -998,6 +1003,10 @@
           },
           {
             "name": "expiration_date",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "begindatum",
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           }
         ]
@@ -1113,6 +1122,12 @@
       "description": "Create references between ZRT's on betrokken_bij and ontstaan_uit",
       "query_src": "file",
       "query": "data/sql/brk/zrt.reference_ontstaan_uit_betrokken_bij.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create references between A-percelen and G-percelen in KOT",
+      "query_src": "file",
+      "query": "data/sql/brk/kot.add_relatie_g_perceel.sql"
     }
   ]
 }
