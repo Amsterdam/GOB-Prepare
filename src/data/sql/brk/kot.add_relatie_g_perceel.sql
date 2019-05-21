@@ -15,6 +15,7 @@ CREATE INDEX ON brk_prep.kadastraal_object (nrn_kot_volgnr);
 CREATE INDEX ON brk_prep.kadastraal_object (nrn_kot_id, nrn_kot_volgnr);
 CREATE INDEX ON brk_prep.kadastraal_object (brk_kot_id, nrn_kot_volgnr);
 CREATE INDEX ON brk_prep.kadastraal_object USING gin (relatie_g_perceel);
+CREATE INDEX ON brk_prep.kadastraal_object USING gin (ontstaan_uit_kadastraalobject);
 
 -- Add first order relation
 UPDATE brk_prep.kadastraal_object kot
@@ -70,7 +71,7 @@ BEGIN
                       LEFT JOIN brk_prep.kadastraal_object kot2
                                 ON kot2.brk_kot_id = ontstaan_uit_kadastraalobject.item ->> 'brk_kot_id'
              WHERE kot2.index_letter = 'G'
-
+             AND kot.ontstaan_uit_kadastraalobject <> 'null'
              GROUP BY kot.brk_kot_id, kot.nrn_kot_volgnr
          ) AS rel(brk_kot_id, kot_volgnr, relatie_g_perceel)
     WHERE updatekot.relatie_g_perceel = 'null'
