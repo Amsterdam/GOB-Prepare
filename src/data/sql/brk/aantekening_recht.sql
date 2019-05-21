@@ -29,7 +29,7 @@ LEFT JOIN (
 	ON sdl.identificatie=geb.stukdeel_identificatie
 	GROUP BY geb.aantekening_id
 ) geb ON (geb.aantekening_id=atg.id)
-LEFT JOIN (
+JOIN (
 	SELECT
 		art.aantekening_id,
 		max(tng.einddatum) AS einddatum,

@@ -18,7 +18,8 @@
         "kadastralesubjecten",
         "tenaamstellingen",
         "aantekeningenrechten",
-        "aantekeningenkadastraleobjecten"
+        "aantekeningenkadastraleobjecten",
+        "stukdelen"
       ],
       "application": "GOBPrepare"
     }
@@ -1013,6 +1014,12 @@
       }
     },
     {
+      "type": "execute_sql",
+      "description": "Create indexes on ZRT prep table for SDL select",
+      "query_src": "file",
+      "query": "data/sql/brk/zrt.sdl_indexes.sql"
+    },
+    {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
@@ -1091,24 +1098,16 @@
             "type": "VARCHAR(20)"
           },
           {
-            "name": "brk_tng_id",
-            "type": "TEXT"
+            "name": "tng_ids",
+            "type": "JSONB"
           },
           {
-            "name": "nrn_tng_id",
-            "type": "TEXT"
+            "name": "atg_ids",
+            "type": "JSONB"
           },
           {
-            "name": "brk_atg_id",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "nrn_atg_id",
-            "type": "INT"
-          },
-          {
-            "name": "brk_asg_vve",
-            "type": "VARCHAR"
+            "name": "zrt_ids",
+            "type": "JSONB"
           },
           {
             "name": "toestandsdatum",
