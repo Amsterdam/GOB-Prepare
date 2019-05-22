@@ -66,9 +66,9 @@ SELECT zrt.id
           ELSE
            ase2.omschrijving || ase1.omschrijving
        END AS asg_app_rechtsplitstype_oms -- NDG, 10-12-2015: workaround t.b.v. ophalen ASG-informatie VVEs
-      ,'nog niet beschikbaar' -- BRK_EXTRACTIE_PCK.geef_einddatum_asg_fnc(tng.id)
+       ,CASE WHEN asg2.id IS NOT NULL THEN 'nog niet beschikbaar' END-- BRK_EXTRACTIE_PCK.geef_einddatum_asg_fnc(tng.id)
                     AS asg_einddatum -- t.b.v. mview met actuele Zakelijk-rechtgegevens
-      ,'nog niet beschikbaar' -- BRK_EXTRACTIE_PCK.geef_asg_actueel_fnc(tng.id)
+      ,CASE WHEN asg2.id IS NOT NULL THEN 'nog niet beschikbaar' END -- BRK_EXTRACTIE_PCK.geef_asg_actueel_fnc(tng.id)
                       AS asg_actueel -- t.b.v. mview met actuele Zakelijk-rechtgegevens
       ,zrt.rust_op_kadastraalobject_id
       ,zrt.rust_op_kadastraalobj_volgnr
