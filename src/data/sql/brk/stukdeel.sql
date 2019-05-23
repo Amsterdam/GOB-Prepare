@@ -1,3 +1,4 @@
+-- Expects ZRT and TNG to be prepared
 SELECT
     sdl.identificatie                    AS brk_sdl_id
      , sdl.id                            AS nrn_sdl_id
@@ -19,6 +20,13 @@ SELECT
      , tng.tng_ids						 AS tng_ids
      , atg.atg_ids						 AS atg_ids
      , asg.zrt_ids 						 AS zrt_ids
+     , least(tng.begindatum, asg.zrt_begindatum) AS begindatum
+     , CASE
+         -- If any einddatum is NULL this stukdeel is still valid. Otherwise get the max
+        WHEN tng.einddatum IS NULL OR asg.zrt_begindatum IS NULL
+        THEN NULL
+        ELSE greatest(tng.einddatum, asg.zrt_begindatum)
+       END                              AS einddatum
      , bsd.brk_bsd_toestandsdatum        AS toestandsdatum
 FROM brk.stukdeel sdl
          LEFT JOIN brk.stuk stk
@@ -32,13 +40,19 @@ FROM brk.stukdeel sdl
          LEFT JOIN (
             SELECT
                 tip.stukdeel_identificatie,
+                min(tng.begindatum) AS begindatum,
+                CASE
+                    WHEN sum(CASE WHEN tng.einddatum IS NULL THEN 0 ELSE 1 END) < SUM(1)
+                    THEN NULL
+                    ELSE max(tng.einddatum)
+                END AS einddatum,
                 array_to_json(array_agg(json_build_object(
-                    'brk_tng_id', tng.identificatie,
-                    'nrn_tng_id', tng.id
+                    'brk_tng_id', tng.brk_tng_id,
+                    'nrn_tng_id', tng.nrn_tng_id
                 ))) AS tng_ids
             FROM brk.tenaamstelling_isgebaseerdop tip
-            LEFT JOIN brk.tenaamstelling tng
-            ON tng.id=tip.tenaamstelling_id
+            LEFT JOIN brk_prep.tenaamstelling tng
+            ON tng.nrn_tng_id=tip.tenaamstelling_id
             GROUP BY tip.stukdeel_identificatie
          ) tng ON (sdl.identificatie=tng.stukdeel_identificatie)
           LEFT JOIN (
@@ -56,12 +70,26 @@ FROM brk.stukdeel sdl
          LEFT JOIN (
             SELECT
                 stukdeel_identificatie,
+                min(zrt_begindatum) AS zrt_begindatum,
+                CASE
+                    -- NULL if one of the zrt_einddatums is NULL, otherwise max
+                        WHEN SUM(CASE WHEN zrt_einddatum IS NULL THEN 0 ELSE 1 END ) < SUM(1)
+                        THEN NULL
+                        ELSE max(zrt_einddatum)
+                    END AS zrt_einddatum,
                 array_to_json(array_agg(json_build_object(
                     'brk_zrt_id', identificatie
                 ))) AS zrt_ids
              FROM (
                 SELECT
                     arl.stukdeel_identificatie,
+                    min(zrt.zrt_begindatum) AS zrt_begindatum,
+                    CASE
+                        -- NULL if one of the zrt_einddatums is NULL, otherwise max
+                        WHEN SUM(CASE WHEN zrt.zrt_einddatum IS NULL THEN 0 ELSE 1 END ) < SUM(1)
+                        THEN NULL
+                        ELSE max(zrt.zrt_einddatum)
+                    END AS zrt_einddatum,
                     zrt.identificatie
                 FROM brk.appartementsrechtspl_stukdeel arl
                 LEFT JOIN brk.appartementsrechtsplitsing asg

@@ -1110,6 +1110,14 @@
             "type": "JSONB"
           },
           {
+            "name": "begindatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "einddatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
             "name": "toestandsdatum",
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           }
