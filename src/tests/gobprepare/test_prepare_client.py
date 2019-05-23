@@ -378,6 +378,14 @@ class TestPrepareClient(TestCase):
         with self.assertRaises(NotImplementedError):
             prepare_client.action_import_csv({})
 
+    def test_action_join_actions(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        action = {
+            "type": "join_actions"
+        }
+
+        result = prepare_client._run_prepare_action(action)
+
     def test__get_query_string_type(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         action = {
@@ -544,17 +552,74 @@ class TestPrepareClient(TestCase):
         contents = [{"dataset": dataset} for dataset in prepare_client.prepares_imports]
         self.assertEquals(contents, result['contents'])
 
+    def test_validate_actions_dependencies(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._validate_actions_ids = MagicMock()
+        prepare_client._actions = [{
+            "id": "action1",
+        }, {
+            "id": "action2",
+            "depends_on": ["action1"]
+        }]
+
+        prepare_client._validate_actions_dependencies()
+        prepare_client._validate_actions_ids.assert_called_once()
+
+    def test_validate_actions_dependencies_invalid_dependency(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._validate_actions_ids = MagicMock()
+        prepare_client._actions = [{
+            "id": "action1",
+        }, {
+            "id": "action2",
+            "depends_on": ["nonexistent"]
+        }]
+
+        with self.assertRaisesRegexp(GOBException, "Step action2 depends on action nonexistent"):
+            prepare_client._validate_actions_dependencies()
+
+    def test_validate_actions_ids(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        actions = [
+            {"id": "id1"},
+            {"id": "id2"},
+        ]
+        prepare_client._validate_actions_ids(actions)
+
+    def test_validate_actions_ids_nonunique(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        actions = [
+            {"id": "id1"},
+            {"id": "id1"},
+        ]
+
+        with self.assertRaisesRegexp(GOBException, "Duplicate action ID"):
+            prepare_client._validate_actions_ids(actions)
+
+    def test_validate_actions_ids_missing(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        actions = [
+            {"id": "id1"},
+            {"action": "actionwithoutid"},
+        ]
+
+        with self.assertRaisesRegexp(GOBException, "Missing action ID"):
+            prepare_client._validate_actions_ids(actions)
+
     def test_start_prepare_process(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.connect = MagicMock()
         prepare_client.prepare = MagicMock()
+        prepare_client._validate_actions_dependencies = MagicMock()
 
         prepare_client.start_prepare_process()
+        prepare_client._validate_actions_dependencies.assert_called_once()
         prepare_client.connect.assert_called_once()
         prepare_client.prepare.assert_called_once()
 
     def test_start_prepare_process_exception(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._validate_actions_dependencies = MagicMock()
         prepare_client.connect = MagicMock(side_effect=Exception)
 
         prepare_client.start_prepare_process()

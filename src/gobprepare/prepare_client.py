@@ -228,16 +228,54 @@ class PrepareClient:
 
         raise GOBException("Missing or invalid 'query_src'")
 
+    def _validate_actions_ids(self, actions: list):
+        """Checks that all actions have a unique ID
+
+        :param actions:
+        :return:
+        """
+        action_ids = []
+
+        for action in actions:
+            if "id" not in action:
+                raise GOBException("Missing action ID in prepare definition. Please provide a unique identifier")
+
+            if action["id"] in action_ids:
+                raise GOBException(f"Duplicate action ID {action['id']} in prepare definition. "
+                                   f"Please provide a unique identifier")
+
+            action_ids.append(action["id"])
+
+    def _validate_actions_dependencies(self):
+        """Checks if all dependencies in the sequence of actions are met
+
+        :return:
+        """
+        self._validate_actions_ids(self._actions)
+        actions_done = []
+
+        for action in self._actions:
+            if "depends_on" in action:
+                for depends_on in action["depends_on"]:
+                    if depends_on not in actions_done:
+                        raise GOBException(f"Step {action['id']} depends on action {depends_on}, but {depends_on} is "
+                                           f"not executed before {action['id']}")
+
+            actions_done.append(action["id"])
+
     def prepare(self):
         """Starts the appropriate prepare action based on the input configuration
 
         :return:
         """
         self.result['actions'] = []
-        for idx, action in enumerate(self._actions):
-            self.result['actions'].append(self._run_prepare_action(action))
+        for action in self._actions:
+            result = self._run_prepare_action(action)
 
-    def _run_prepare_action(self, action: dict):
+            if result is not None:
+                self.result['actions'].append(result)
+
+    def _run_prepare_action(self, action: dict):  # noqa: C901
         """Calls appropriate action.
 
         :param action:
@@ -256,6 +294,9 @@ class PrepareClient:
             result["executed"] = "OK"
         elif action["type"] == "import_csv":
             result["rows_imported"] = self.action_import_csv(action)
+        elif action["type"] == "join_actions":
+            # Action only joins dependencies. No further actions necessary
+            return None
         else:
             raise NotImplementedError
 
@@ -293,6 +334,7 @@ class PrepareClient:
         :return:
         """
         try:
+            self._validate_actions_dependencies()
             self.connect()
             self.prepare()
             logger.info(f"Prepare job {self._name} finished")
