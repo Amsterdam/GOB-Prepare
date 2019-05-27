@@ -30,7 +30,8 @@
       "schemas": [
         "brk",
         "brk_prep"
-      ]
+      ],
+      "id": "clear_schemas"
     },
     {
       "type": "select",
@@ -54,7 +55,11 @@
             "type": "VARCHAR(120)"
           }
         ]
-      }
+      },
+      "depends_on": [
+        "clear_schemas"
+      ],
+      "id": "create_bestand_table"
     },
     {
       "type": "clone",
@@ -220,29 +225,58 @@
           "kad_geslachtsnaam": "*****",
           "kad_geboortedatum": "****-**-**"
         }
-      }
+      },
+      "depends_on": [
+        "clear_schemas"
+      ],
+      "id": "clone_source"
     },
     {
       "type": "execute_sql",
       "description": "Create indexes",
       "query_src": "file",
-      "query": "data/sql/brk/indexes.sql"
+      "query": "data/sql/brk/indexes.sql",
+      "depends_on": [
+        "clone_source",
+        "create_bestand_table"
+      ],
+      "id": "create_indexes_source"
     },
     {
       "type": "execute_sql",
       "description": "Create materialized view Baghulptabel",
       "query_src": "file",
-      "query": "data/sql/brk/materialized_view_baghulptabel.sql"
+      "query": "data/sql/brk/materialized_view_baghulptabel.sql",
+      "id": "create_baghulptabel",
+      "depends_on": [
+        "clone_source"
+      ]
     },
     {
       "type": "import_csv",
       "source": "http://www.kadaster.nl/schemas/waardelijsten/BurgemKadgemSectie/BurgemKadgemSectie.csv",
-      "destination": "brk.import_burgerlijke_gemeentes"
+      "destination": "brk.import_burgerlijke_gemeentes",
+      "id": "import_burgerlijke_gemeentes"
+    },
+    {
+      "type": "join_actions",
+      "id": "import_ready",
+      "depends_on": [
+        "create_bestand_table",
+        "clone_source",
+        "create_indexes_source",
+        "create_baghulptabel",
+        "import_burgerlijke_gemeentes"
+      ]
     },
     {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
+      "id": "select_kot",
+      "depends_on": [
+        "import_ready"
+      ],
       "query": "data/sql/brk/kadastraal_object.sql",
       "query_src": "file",
       "destination_table": {
@@ -416,6 +450,10 @@
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
+      "id": "select_zrt",
+      "depends_on": [
+        "import_ready"
+      ],
       "query": "data/sql/brk/zakelijk_recht.sql",
       "query_src": "file",
       "destination_table": {
@@ -532,6 +570,10 @@
     {
       "type": "execute_sql",
       "description": "Populate ZRT table with KOT references",
+      "id": "populate_zrt",
+      "depends_on": [
+        "select_zrt"
+      ],
       "query_src": "file",
       "query": "data/sql/brk/zrt.add_kot.sql"
     },
@@ -539,6 +581,10 @@
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
+      "id": "select_tng",
+      "depends_on": [
+        "populate_zrt"
+      ],
       "query": "data/sql/brk/tenaamstelling.sql",
       "query_src": "file",
       "comment": "Assumes ZRT table is present and filled in brk_prep schema and populated with KOT references.",
@@ -633,6 +679,10 @@
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
+      "id": "select_sjt",
+      "depends_on": [
+        "import_ready"
+      ],
       "query": "data/sql/brk/kadastraal_subject.sql",
       "query_src": "file",
       "destination_table": {
@@ -886,6 +936,10 @@
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
+      "id": "select_art",
+      "depends_on": [
+        "select_tng"
+      ],
       "query": "data/sql/brk/aantekening_recht.sql",
       "query_src": "file",
       "comment": "Assumes TNG table is present and populated.",
@@ -948,6 +1002,10 @@
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
+      "id": "select_akt",
+      "depends_on": [
+        "import_ready"
+      ],
       "query": "data/sql/brk/aantekening_kadastraal_object.sql",
       "query_src": "file",
       "destination_table": {
@@ -1016,6 +1074,10 @@
     {
       "type": "execute_sql",
       "description": "Create indexes on ZRT prep table for SDL select",
+      "id": "create_indexes_zrt",
+      "depends_on": [
+        "populate_zrt"
+      ],
       "query_src": "file",
       "query": "data/sql/brk/zrt.sdl_indexes.sql"
     },
@@ -1023,6 +1085,10 @@
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
+      "id": "select_sdl",
+      "depends_on": [
+        "create_indexes_zrt"
+      ],
       "query": "data/sql/brk/stukdeel.sql",
       "query_src": "file",
       "destination_table": {
@@ -1127,12 +1193,21 @@
     {
       "type": "execute_sql",
       "description": "Create references between ZRT's on betrokken_bij and ontstaan_uit",
+      "id": "create_zrt_references",
+      "depends_on": [
+        "populate_zrt"
+      ],
       "query_src": "file",
       "query": "data/sql/brk/zrt.reference_ontstaan_uit_betrokken_bij.sql"
     },
     {
       "type": "execute_sql",
       "description": "Create references between A-percelen and G-percelen in KOT",
+      "id": "create_g_perceel_references",
+      "depends_on": [
+        "populate_zrt",
+        "select_kot"
+      ],
       "query_src": "file",
       "query": "data/sql/brk/kot.add_relatie_g_perceel.sql"
     }

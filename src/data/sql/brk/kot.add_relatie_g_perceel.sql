@@ -41,7 +41,7 @@ FROM (
          WHERE zrt.ontstaan_uit IS NOT NULL
          GROUP BY kot.nrn_kot_id, kot.nrn_kot_volgnr
      ) AS rel(nrn_kot_id, nrn_kot_volgnr, ontstaan_uit_kadastraalobject)
-WHERE kot.ontstaan_uit_kadastraalobject IS NULL
+WHERE kot.ontstaan_uit_kadastraalobject = 'null'
   AND kot.index_letter = 'A'
   AND rel.nrn_kot_id = kot.nrn_kot_id
   AND rel.nrn_kot_volgnr = kot.nrn_kot_volgnr;
@@ -112,6 +112,7 @@ BEGIN
                               WHERE kot2.index_letter = 'A'
                                 AND kot2.relatie_g_perceel <> 'null'
                                 AND kot.relatie_g_perceel = 'null'
+                                AND kot.ontstaan_uit_kadastraalobject <> 'null'
                               GROUP BY kot.brk_kot_id, kot.nrn_kot_volgnr
                               LIMIT 500
                           )
