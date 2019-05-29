@@ -1199,17 +1199,6 @@
       ],
       "query_src": "file",
       "query": "data/sql/brk/zrt.reference_ontstaan_uit_betrokken_bij.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Create references between A-percelen and G-percelen in KOT",
-      "id": "create_g_perceel_references",
-      "depends_on": [
-        "populate_zrt",
-        "select_kot"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/kot.add_relatie_g_perceel.sql"
     }
   ]
 }
