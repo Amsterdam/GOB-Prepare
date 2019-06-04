@@ -72,7 +72,7 @@ class TestPostgresCsvImporter(TestCase):
             ]
         }
         self.assertEqual(expected_result, result)
-        mock_read_csv.assert_called_with(self.importer._source)
+        mock_read_csv.assert_called_with(self.importer._source, keep_default_na=False)
 
     @patch("gobprepare.csv_importer.postgres.read_csv")
     def test_load_csv_parser_error(self, mock_read_csv):
