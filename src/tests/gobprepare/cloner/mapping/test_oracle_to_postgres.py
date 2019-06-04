@@ -17,8 +17,8 @@ class TestOracleToPostgresMapping(TestCase):
             ((9, None, None), 'INT'),
             ((10, None, None), 'BIGINT'),
             ((18, None, None), 'BIGINT'),
-            ((19, None, None), 'NUMERIC(19)'),
-            ((428, None, None), 'NUMERIC(428)'),
+            ((19, None, None), 'NUMERIC'),
+            ((428, None, None), 'NUMERIC'),
         ]
 
         for params, result in cases:

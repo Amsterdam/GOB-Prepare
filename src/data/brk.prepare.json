@@ -349,7 +349,7 @@
           },
           {
             "name": "kadgrootte",
-            "type": "NUMERIC(22)"
+            "type": "NUMERIC"
           },
           {
             "name": "koopsom",
