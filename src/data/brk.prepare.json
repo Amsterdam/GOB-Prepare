@@ -349,7 +349,7 @@
           },
           {
             "name": "kadgrootte",
-            "type": "NUMERIC(22)"
+            "type": "NUMERIC"
           },
           {
             "name": "koopsom",
@@ -1168,7 +1168,11 @@
             "type": "JSONB"
           },
           {
-            "name": "atg_ids",
+            "name": "art_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "akt_ids",
             "type": "JSONB"
           },
           {
@@ -1199,6 +1203,25 @@
       ],
       "query_src": "file",
       "query": "data/sql/brk/zrt.reference_ontstaan_uit_betrokken_bij.sql"
+    },
+    {
+      "type": "import_csv",
+      "source": "http://www.kadaster.nl/schemas/waardelijsten/AardZakelijkRecht/AardZakelijkRecht.csv",
+      "destination": "brk_prep.aardzakelijkrecht_waardelijst",
+      "id": "import_aardzakelijkrecht_waardelijst",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Populate AZT with AKR codes",
+      "id": "populate_aardzakelijkrecht_waardelijst",
+      "depends_on": [
+        "import_aardzakelijkrecht_waardelijst"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/azt.populate_akrcodes.sql"
     }
   ]
 }

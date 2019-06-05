@@ -30,7 +30,7 @@ class PostgresCsvImporter():
         tries = 0
         while True:
             try:
-                df = read_csv(self._source)
+                df = read_csv(self._source, keep_default_na=False)
                 break
             except ParserError:
                 raise GOBException(f"Can't parse CSV: {self._source}")
@@ -48,7 +48,7 @@ class PostgresCsvImporter():
             } for col in df.columns],
 
             # List of lists of values
-            "data": [list(map(lambda x: str(x), row.tolist())) for _, row in df.iterrows()]
+            "data": [list(map(lambda x: str(x) if x else None, row.tolist())) for _, row in df.iterrows()]
         }
 
     def _create_destination_table(self, columns: list):
