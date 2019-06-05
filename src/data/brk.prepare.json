@@ -1168,7 +1168,11 @@
             "type": "JSONB"
           },
           {
-            "name": "atg_ids",
+            "name": "art_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "akt_ids",
             "type": "JSONB"
           },
           {
