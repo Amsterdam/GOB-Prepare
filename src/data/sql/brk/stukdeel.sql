@@ -18,7 +18,8 @@ SELECT
      , srr.omschrijving                  AS stk_soortregister_oms
      , stk.deel                          AS stk_deel_soort
      , tng.tng_ids						 AS tng_ids
-     , atg.atg_ids						 AS atg_ids
+     , art.art_ids						 AS art_ids
+     , akt.akt_ids                       AS akt_ids
      , asg.zrt_ids 						 AS zrt_ids
      , least(tng.begindatum, asg.zrt_begindatum) AS begindatum
      , CASE
@@ -59,14 +60,30 @@ FROM brk.stukdeel sdl
             SELECT
                 aip.stukdeel_identificatie,
                 array_to_json(array_agg(json_build_object(
-                    'brk_atg_id', atg.identificatie,
-                    'nrn_atg_id', atg.id
-                ))) AS atg_ids
+                    'brk_art_id', atg.identificatie,
+                    'nrn_art_id', atg.id
+                ))) AS art_ids
             FROM brk.aantekeningisgebaseerdop aip
             LEFT JOIN brk.aantekening atg
             ON atg.id=aip.aantekening_id
+            JOIN brk.aantekeningrecht art -- Only include ART's
+            ON art.aantekening_id=atg.id
             GROUP BY aip.stukdeel_identificatie
-         ) atg ON (sdl.identificatie=atg.stukdeel_identificatie)
+         ) art ON (sdl.identificatie=art.stukdeel_identificatie)
+         LEFT JOIN (
+                SELECT
+                    aip.stukdeel_identificatie,
+                    array_to_json(array_agg(json_build_object(
+                            'brk_akt_id', atg.identificatie,
+                            'nrn_akt_id', atg.id
+                        ))) AS akt_ids
+                FROM brk.aantekeningisgebaseerdop aip
+                 LEFT JOIN brk.aantekening atg
+                           ON atg.id=aip.aantekening_id
+                 JOIN brk.aantekening_kadastraalobject akt -- Only include AKT's
+                      ON akt.aantekening_id=atg.id
+                GROUP BY aip.stukdeel_identificatie
+            ) akt ON (sdl.identificatie=akt.stukdeel_identificatie)
          LEFT JOIN (
             SELECT
                 stukdeel_identificatie,
