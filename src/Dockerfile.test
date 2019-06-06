@@ -12,6 +12,9 @@ RUN rm requirements.txt
 # Copy gobprepare module
 COPY gobprepare gobprepare
 
+# Copy data files
+COPY data data
+
 # Remove gobcore tests
 RUN rm -rf /app/src/gobcore/tests
 
