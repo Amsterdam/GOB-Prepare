@@ -815,12 +815,25 @@
       }
     },
     {
+      "type": "execute_sql",
+      "description": "Create materialized view subject_expiration_date",
+      "id": "create_view_subject_actueel",
+      "depends_on": [
+        "select_tng",
+        "select_zrt",
+        "select_akt",
+        "select_art"
+      ],
+      "query": "data/sql/brk/materialized_view.subject_expiration_date.sql",
+      "query_src": "file"
+    },
+    {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
       "id": "select_sjt",
       "depends_on": [
-        "import_ready"
+        "create_view_subject_actueel"
       ],
       "query": "data/sql/brk/select.kadastraal_subject.sql",
       "query_src": "file",

@@ -2,10 +2,12 @@ import json
 import os
 
 from unittest import TestCase
+from unittest.mock import patch
 
 from gobprepare.prepare_client import PrepareClient
 
 
+@patch('gobprepare.prepare_client.logger')
 class TestPrepareDefinitions(TestCase):
     files = [
         # Relative to 'src' directory
@@ -32,7 +34,7 @@ class TestPrepareDefinitions(TestCase):
                 with open(self._get_filepath(fileref)) as f:
                     pass
 
-    def test_prepare_definitions(self):
+    def test_prepare_definitions(self, mock_logger):
         # Test if config loads correctly and definition dependencies are in order
         for file in self.files:
             with open(self._get_filepath(file)) as f:
