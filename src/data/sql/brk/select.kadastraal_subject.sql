@@ -90,6 +90,7 @@ SELECT
          ,sps.buitenland_landnaam                                 AS Post_buitenland_naam
          ,sps.buitenland_land_code                                AS Post_buitenland_code
          ,gld4.omschrijving                                       AS Post_buitenland_oms
+         ,ede.expiration_date                                     AS expiration_date
          FROM   brk.subject                           sjt
          LEFT   JOIN brk.subject_woonadres            sws   ON (sjt.id = sws.subject_id)
          LEFT   JOIN brk.subject_postadres            sps   ON (sjt.id = sps.subject_id)
@@ -105,4 +106,5 @@ SELECT
          LEFT   JOIN brk.c_rechtsvorm                 rvm   ON (sjt.kad_rechtsvorm_code = rvm.code)          -- KAD_RECHTSVORM_OMSCHRIJVING
          LEFT   JOIN brk.c_gbaland                   gld3   ON (sws.buitenland_land_code = gld3.code)        -- BUITENLAND_LAND_OMSCHRIJVING
          LEFT   JOIN brk.c_gbaland                   gld4   ON (sps.buitenland_land_code = gld4.code)        -- BUITENLAND_LAND_OMSCHRIJVING
+         LEFT   JOIN brk_prep.subject_expiration_date ede   ON (sjt.identificatie=ede.subject_id)
          JOIN   brk.bestand bsd                          ON (1 = 1)

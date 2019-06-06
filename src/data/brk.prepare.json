@@ -235,7 +235,7 @@
       "type": "execute_sql",
       "description": "Create indexes",
       "query_src": "file",
-      "query": "data/sql/brk/indexes.sql",
+      "query": "data/sql/brk/brk.indexes.sql",
       "depends_on": [
         "clone_source",
         "create_bestand_table"
@@ -246,7 +246,7 @@
       "type": "execute_sql",
       "description": "Create materialized view Baghulptabel",
       "query_src": "file",
-      "query": "data/sql/brk/materialized_view_baghulptabel.sql",
+      "query": "data/sql/brk/materialized_view.baghulptabel.sql",
       "id": "create_baghulptabel",
       "depends_on": [
         "clone_source"
@@ -277,7 +277,7 @@
       "depends_on": [
         "import_ready"
       ],
-      "query": "data/sql/brk/kadastraal_object.sql",
+      "query": "data/sql/brk/select.kadastraal_object.sql",
       "query_src": "file",
       "destination_table": {
         "name": "brk_prep.kadastraal_object",
@@ -454,7 +454,7 @@
       "depends_on": [
         "import_ready"
       ],
-      "query": "data/sql/brk/zakelijk_recht.sql",
+      "query": "data/sql/brk/select.zakelijk_recht.sql",
       "query_src": "file",
       "destination_table": {
         "name": "brk_prep.zakelijk_recht",
@@ -585,7 +585,7 @@
       "depends_on": [
         "populate_zrt"
       ],
-      "query": "data/sql/brk/tenaamstelling.sql",
+      "query": "data/sql/brk/select.tenaamstelling.sql",
       "query_src": "file",
       "comment": "Assumes ZRT table is present and filled in brk_prep schema and populated with KOT references.",
       "destination_table": {
@@ -679,11 +679,163 @@
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
-      "id": "select_sjt",
+      "id": "select_art",
+      "depends_on": [
+        "select_tng"
+      ],
+      "query": "data/sql/brk/select.aantekening_recht.sql",
+      "query_src": "file",
+      "comment": "Assumes TNG table is present and populated.",
+      "destination_table": {
+        "name": "brk_prep.aantekening_recht",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_atg_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_atg_id",
+            "type": "INT"
+          },
+          {
+            "name": "atg_aardaantekening_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "atg_aardaantekening_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_omschrijving",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_einddatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "atg_type",
+            "type": "TEXT"
+          },
+          {
+            "name": "brk_sjt_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "nrn_tng_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "nrn_sdl_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "expiration_date",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "id": "select_akt",
       "depends_on": [
         "import_ready"
       ],
-      "query": "data/sql/brk/kadastraal_subject.sql",
+      "query": "data/sql/brk/select.aantekening_kadastraal_object.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.aantekening_kadastraal_object",
+        "create": true,
+        "columns": [
+          {
+            "name": "brk_atg_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_atg_id",
+            "type": "INT"
+          },
+          {
+            "name": "atg_aardaantekening_code",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "atg_aardaantekening_oms",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_omschrijving",
+            "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "atg_einddatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "brk_kot_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "nrn_kot_id",
+            "type": "INT"
+          },
+          {
+            "name": "nrn_kot_volgnr",
+            "type": "INT"
+          },
+          {
+            "name": "brk_sjt_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "nrn_sdl_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "expiration_date",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "begindatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          }
+        ]
+      }
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create materialized view subject_expiration_date",
+      "id": "create_view_subject_actueel",
+      "depends_on": [
+        "select_tng",
+        "select_zrt",
+        "select_akt",
+        "select_art"
+      ],
+      "query": "data/sql/brk/materialized_view.subject_expiration_date.sql",
+      "query_src": "file"
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "id": "select_sjt",
+      "depends_on": [
+        "create_view_subject_actueel"
+      ],
+      "query": "data/sql/brk/select.kadastraal_subject.sql",
       "query_src": "file",
       "destination_table": {
         "name": "brk_prep.kadastraal_subject",
@@ -933,145 +1085,6 @@
       }
     },
     {
-      "type": "select",
-      "source": "dst",
-      "ignore_missing": true,
-      "id": "select_art",
-      "depends_on": [
-        "select_tng"
-      ],
-      "query": "data/sql/brk/aantekening_recht.sql",
-      "query_src": "file",
-      "comment": "Assumes TNG table is present and populated.",
-      "destination_table": {
-        "name": "brk_prep.aantekening_recht",
-        "create": true,
-        "columns": [
-          {
-            "name": "brk_atg_id",
-            "type": "VARCHAR(240)"
-          },
-          {
-            "name": "nrn_atg_id",
-            "type": "INT"
-          },
-          {
-            "name": "atg_aardaantekening_code",
-            "type": "VARCHAR(200)"
-          },
-          {
-            "name": "atg_aardaantekening_oms",
-            "type": "VARCHAR(4000)"
-          },
-          {
-            "name": "atg_omschrijving",
-            "type": "VARCHAR(4000)"
-          },
-          {
-            "name": "atg_einddatum",
-            "type": "TIMESTAMP WITHOUT TIME ZONE"
-          },
-          {
-            "name": "atg_type",
-            "type": "TEXT"
-          },
-          {
-            "name": "brk_sjt_ids",
-            "type": "JSONB"
-          },
-          {
-            "name": "nrn_tng_ids",
-            "type": "JSONB"
-          },
-          {
-            "name": "nrn_sdl_ids",
-            "type": "JSONB"
-          },
-          {
-            "name": "toestandsdatum",
-            "type": "TIMESTAMP WITHOUT TIME ZONE"
-          },
-          {
-            "name": "expiration_date",
-            "type": "TIMESTAMP WITHOUT TIME ZONE"
-          }
-        ]
-      }
-    },
-    {
-      "type": "select",
-      "source": "dst",
-      "ignore_missing": true,
-      "id": "select_akt",
-      "depends_on": [
-        "import_ready"
-      ],
-      "query": "data/sql/brk/aantekening_kadastraal_object.sql",
-      "query_src": "file",
-      "destination_table": {
-        "name": "brk_prep.aantekening_kadastraal_object",
-        "create": true,
-        "columns": [
-          {
-            "name": "brk_atg_id",
-            "type": "VARCHAR(240)"
-          },
-          {
-            "name": "nrn_atg_id",
-            "type": "INT"
-          },
-          {
-            "name": "atg_aardaantekening_code",
-            "type": "VARCHAR(200)"
-          },
-          {
-            "name": "atg_aardaantekening_oms",
-            "type": "VARCHAR(4000)"
-          },
-          {
-            "name": "atg_omschrijving",
-            "type": "VARCHAR(4000)"
-          },
-          {
-            "name": "atg_einddatum",
-            "type": "TIMESTAMP WITHOUT TIME ZONE"
-          },
-          {
-            "name": "brk_kot_id",
-            "type": "VARCHAR(240)"
-          },
-          {
-            "name": "nrn_kot_id",
-            "type": "INT"
-          },
-          {
-            "name": "nrn_kot_volgnr",
-            "type": "INT"
-          },
-          {
-            "name": "brk_sjt_ids",
-            "type": "JSONB"
-          },
-          {
-            "name": "nrn_sdl_ids",
-            "type": "JSONB"
-          },
-          {
-            "name": "toestandsdatum",
-            "type": "TIMESTAMP WITHOUT TIME ZONE"
-          },
-          {
-            "name": "expiration_date",
-            "type": "TIMESTAMP WITHOUT TIME ZONE"
-          },
-          {
-            "name": "begindatum",
-            "type": "TIMESTAMP WITHOUT TIME ZONE"
-          }
-        ]
-      }
-    },
-    {
       "type": "execute_sql",
       "description": "Create indexes on ZRT prep table for SDL select",
       "id": "create_indexes_zrt",
@@ -1089,7 +1102,7 @@
       "depends_on": [
         "create_indexes_zrt"
       ],
-      "query": "data/sql/brk/stukdeel.sql",
+      "query": "data/sql/brk/select.stukdeel.sql",
       "query_src": "file",
       "destination_table": {
         "name": "brk_prep.stukdeel",
@@ -1222,6 +1235,17 @@
       ],
       "query_src": "file",
       "query": "data/sql/brk/azt.populate_akrcodes.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Populate KOT with relatie_g_perceel",
+      "id": "populate_relatie_g_perceel",
+      "depends_on": [
+        "populate_zrt",
+        "select_kot"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/kot.add_relatie_g_perceel.sql"
     }
   ]
 }
