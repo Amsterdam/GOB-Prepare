@@ -1080,6 +1080,10 @@
           {
             "name": "post_buitenland_oms",
             "type": "VARCHAR(4000)"
+          },
+          {
+            "name": "expiration_date",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
           }
         ]
       }
