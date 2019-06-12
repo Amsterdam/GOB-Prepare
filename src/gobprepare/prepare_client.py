@@ -154,14 +154,12 @@ class PrepareClient:
         """
         if self.destination['type'] == "postgres":
             for schema in action['schemas']:
+                logger.info(f"Clear schema {schema}")
                 create_schema(self._dst_connection, schema)
-                logger.info(f"Create schema {schema}")
-
                 tables = list_tables_for_schema(self._dst_connection, schema)
 
                 for table in tables:
                     full_tablename = f"{schema}.{table}"
-                    logger.info(f"Drop table {full_tablename}")
                     drop_table(self._dst_connection, full_tablename)
         else:
             raise NotImplementedError
