@@ -20,7 +20,7 @@ SELECT
            END                                                    AS Voorvoegsels                  --stelselpedia
         , CASE WHEN sjt.geslachtsnaam         IS NOT NULL THEN sjt.geslachtsnaam     ELSE sjt.kad_geslachtsnaam
            END                                                    AS Geslachtsnaam                 --stelselpedia
-        , CASE WHEN sjt.geslacht_code         IS NOT NULL THEN sjt.geslacht_code     ELSE sjt.kad_geslacht_code
+        , CASE WHEN sjt.geslacht_code         IS NOT NULL THEN sjt.geslacht_code     ELSE LEFT(agt.omschrijving, 1)
            END                                                    AS Code_geslacht                  --stelselpedia
         , CASE WHEN sjt.geslacht_code         IS NOT NULL THEN ggt.omschrijving      ELSE agt.omschrijving
            END                                                    AS Omschrijving_geslacht          --stelselpedia
