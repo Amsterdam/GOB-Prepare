@@ -19,7 +19,8 @@
         "tenaamstellingen",
         "aantekeningenrechten",
         "aantekeningenkadastraleobjecten",
-        "stukdelen"
+        "stukdelen",
+        "aardzakelijkerechten"
       ],
       "application": "GOBPrepare"
     }
