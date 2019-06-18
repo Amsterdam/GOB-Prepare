@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch, call, mock_open, ANY
 from gobcore.exceptions import GOBException
 from gobprepare.prepare_client import PrepareClient
 from tests import fixtures
+from gobcore.message_broker.config import TASK_QUEUE, PREPARE_QUEUE
 
 
 @patch('gobprepare.prepare_client.logger')
@@ -54,7 +55,6 @@ class TestPrepareClient(TestCase):
 
         # Assert the logger is configured and called
         mock_logger.configure.assert_called_with({'header': ANY}, "PREPARE")
-        mock_logger.info.assert_called()
 
     def test_build_prepare_imports(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
@@ -105,11 +105,6 @@ class TestPrepareClient(TestCase):
         for case in invalid_cases:
             res = prepare_client._build_prepare_imports(case)
             self.assertEqual(0, len(res))
-
-    def test_no_imports_defined_warning(self, mock_logger):
-        del self.mock_dataset['prepares_imports']
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        mock_logger.warning.assert_called_once()
 
     def test_connect(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
@@ -381,10 +376,20 @@ class TestPrepareClient(TestCase):
     def test_action_join_actions(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         action = {
-            "type": "join_actions"
+            "type": "join_actions",
+            "id": "id",
         }
 
         result = prepare_client._run_prepare_action(action)
+
+    def test_run_prepare_action_invalid_action_type(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        action = {
+            "type": "nonexistent",
+            "id": "id",
+        }
+        with self.assertRaises(NotImplementedError):
+            result = prepare_client._run_prepare_action(action)
 
     def test__get_query_string_type(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
@@ -424,23 +429,12 @@ class TestPrepareClient(TestCase):
         with self.assertRaises(GOBException):
             prepare_client._get_query(action)
 
-    def test_prepare(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client._run_prepare_action = MagicMock(return_value="result")
-        prepare_client._actions = ['action_a', 'action_b']
-        prepare_client.prepare()
-
-        self.assertEqual(['result', 'result'], prepare_client.result['actions'])
-        prepare_client._run_prepare_action.assert_has_calls([
-            call('action_a'),
-            call('action_b')
-        ])
-
     def test_run_prepare_action_clone(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.action_clone = MagicMock(return_value=3223)
         action = {
-            "type": "clone"
+            "type": "clone",
+            "id": "id",
         }
 
         result = prepare_client._run_prepare_action(action)
@@ -448,13 +442,15 @@ class TestPrepareClient(TestCase):
         self.assertEqual({
             "action": "clone",
             "rows_copied": 3223,
+            "id": "id",
         }, result)
 
     def test_run_prepare_action_clear(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.action_clear = MagicMock()
         action = {
-            "type": "clear"
+            "type": "clear",
+            "id": "id",
         }
 
         result = prepare_client._run_prepare_action(action)
@@ -462,13 +458,15 @@ class TestPrepareClient(TestCase):
         self.assertEqual({
             "action": "clear",
             "clear": "OK",
+            "id": "id",
         }, result)
 
     def test_run_prepare_action_select(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.action_select = MagicMock(return_value=3223)
         action = {
-            "type": "select"
+            "type": "select",
+            "id": "id",
         }
 
         result = prepare_client._run_prepare_action(action)
@@ -476,13 +474,15 @@ class TestPrepareClient(TestCase):
         self.assertEqual({
             "action": "select",
             "rows_copied": 3223,
+            "id": "id",
         }, result)
 
     def test_run_prepare_action_execute_sql(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.action_execute_sql = MagicMock()
         action = {
-            "type": "execute_sql"
+            "type": "execute_sql",
+            "id": "id",
         }
 
         result = prepare_client._run_prepare_action(action)
@@ -490,13 +490,15 @@ class TestPrepareClient(TestCase):
         self.assertEqual({
             "action": "execute_sql",
             "executed": "OK",
+            "id": "id",
         }, result)
 
     def test_run_prepare_action_import_csv(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.action_import_csv = MagicMock(return_value=425)
         action = {
-            "type": "import_csv"
+            "type": "import_csv",
+            "id": "id",
         }
 
         result = prepare_client._run_prepare_action(action)
@@ -504,14 +506,8 @@ class TestPrepareClient(TestCase):
         self.assertEqual({
             "action": "import_csv",
             "rows_imported": 425,
+            "id": "id",
         }, result)
-
-    def test_prepare_invalid_action_type(self, mock_logger):
-        self.mock_dataset['actions'][0]['type'] = 'nonexistent'
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-
-        with self.assertRaises(NotImplementedError):
-            prepare_client.prepare()
 
     def test_get_result(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
@@ -523,7 +519,7 @@ class TestPrepareClient(TestCase):
                 }
             ]
         }
-        result = prepare_client.get_result()
+        result = prepare_client._get_result()
 
         header_keys = [
             "someheader",
@@ -549,78 +545,169 @@ class TestPrepareClient(TestCase):
         self.assertTrue(keys_in_dict(header_keys, result['header']))
         self.assertTrue(keys_in_dict(summary_keys, result['summary']['actions'][0]))
 
+    def test_start_prepare_process(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        mock_logger.reset_calls()
+        prepare_client._create_tasks = MagicMock()
+        prepare_client._publish_tasks = MagicMock()
+
+        prepare_client.start_prepare_process()
+        mock_logger.info.assert_called_once()
+        mock_logger.warning.assert_not_called()
+        prepare_client._publish_tasks.assert_called_with(prepare_client._create_tasks.return_value)
+
+    def test_no_imports_defined_warning(self, mock_logger):
+        del self.mock_dataset['prepares_imports']
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        mock_logger.reset_calls()
+        prepare_client._create_tasks = MagicMock()
+        prepare_client._publish_tasks = MagicMock()
+
+        prepare_client.start_prepare_process()
+        mock_logger.warning.assert_called_once()
+
+    def test_create_tasks(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._actions = [{
+            'id': 'action1',
+            'depends_on': ['dep1', 'dep2'],
+            'type': 'some type',
+        }, {
+            'id': 'action2',
+            'type': 'some other type',
+        }]
+
+        self.assertEqual([{
+            'id': 'action1',
+            'dependencies': ['dep1', 'dep2']
+        }, {
+            'id': 'action2',
+            'dependencies': []
+        }], prepare_client._create_tasks())
+
+    def test_create_tasks_clone(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._split_clone_action = MagicMock(return_value=['task_a', 'task_b'])
+        prepare_client._actions = [{
+            'id': 'action',
+            'type': 'clone'
+        }]
+        result = prepare_client._create_tasks()
+        self.assertEqual(prepare_client._split_clone_action.return_value, result)
+
+    @patch("gobprepare.prepare_client.publish")
+    def test_publish_tasks(self, mock_publish, mock_logger):
+        tasks = [{'id': 'task1', 'dependencies': []}, {'id': 'task2', 'dependencies': ['task1']}]
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.header = {'hea': 'der'}
+        prepare_client.msg = {'prepare_config': 'config.json'}
+        prepare_client._publish_tasks(tasks)
+
+        mock_publish.assert_called_with(TASK_QUEUE, 'task.start', {
+            'header': {
+                'hea': 'der'
+            },
+            'contents': {
+                'tasks': tasks,
+                'dst_queue': PREPARE_QUEUE,
+                'key_prefix': 'prepare',
+                'extra_msg': {
+                    'prepare_config': prepare_client.msg['prepare_config'],
+                }
+            }
+        })
+
+    def test_run_prepare_task(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.connect = MagicMock()
+        prepare_client._run_prepare_action = MagicMock()
+        prepare_client.disconnect = MagicMock()
+        prepare_client._get_result = MagicMock()
+
+        prepare_client._actions = [{'id': 'some_id'}, {'id': 'other_id'}]
+        prepare_client.msg = {'id': 'other_id'}
+
+        result = prepare_client.run_prepare_task()
+        prepare_client._run_prepare_action.assert_called_with(prepare_client._actions[1])
+
+        self.assertEqual(result, prepare_client._get_result.return_value)
+
+    def test_run_prepare_task_no_action(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._actions = [{'id': 'some_id'}, {'id': 'other_id'}]
+        prepare_client.msg = {'id': 'nonexistent'}
+
+        with self.assertRaises(GOBException):
+            prepare_client.run_prepare_task()
+
+    def test_run_prepare_task_original_action_and_override(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.connect = MagicMock()
+        prepare_client._run_prepare_action = MagicMock()
+        prepare_client.disconnect = MagicMock()
+        prepare_client._get_result = MagicMock()
+        prepare_client._actions = [{'id': 'some_id'}, {'id': 'other_id', 'type': 'sometype'}]
+        prepare_client.msg = {'id': 'some_other_id', 'original_action': 'other_id', 'override': {'type': 'newtype'}}
+
+        prepare_client.run_prepare_task()
+
+        # Take original action based on original_action and override 'type'
+        prepare_client._run_prepare_action.assert_called_with({
+            'id': 'other_id',
+            'type': 'newtype'
+        })
+
+    def test_complete_prepare_process(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.msg['summary'] = {'key': 'value'}
+
+        result = prepare_client.complete_prepare_process()
         contents = [{"dataset": dataset} for dataset in prepare_client.prepares_imports]
         self.assertEquals(contents, result['contents'])
 
-    def test_validate_actions_dependencies(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client._validate_actions_ids = MagicMock()
-        prepare_client._actions = [{
-            "id": "action1",
-        }, {
-            "id": "action2",
-            "depends_on": ["action1"]
-        }]
-
-        prepare_client._validate_actions_dependencies()
-        prepare_client._validate_actions_ids.assert_called_once()
-
-    def test_validate_actions_dependencies_invalid_dependency(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client._validate_actions_ids = MagicMock()
-        prepare_client._actions = [{
-            "id": "action1",
-        }, {
-            "id": "action2",
-            "depends_on": ["nonexistent"]
-        }]
-
-        with self.assertRaisesRegexp(GOBException, "Step action2 depends on action nonexistent"):
-            prepare_client._validate_actions_dependencies()
-
-    def test_validate_actions_ids(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        actions = [
-            {"id": "id1"},
-            {"id": "id2"},
-        ]
-        prepare_client._validate_actions_ids(actions)
-
-    def test_validate_actions_ids_nonunique(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        actions = [
-            {"id": "id1"},
-            {"id": "id1"},
-        ]
-
-        with self.assertRaisesRegexp(GOBException, "Duplicate action ID"):
-            prepare_client._validate_actions_ids(actions)
-
-    def test_validate_actions_ids_missing(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        actions = [
-            {"id": "id1"},
-            {"action": "actionwithoutid"},
-        ]
-
-        with self.assertRaisesRegexp(GOBException, "Missing action ID"):
-            prepare_client._validate_actions_ids(actions)
-
-    def test_start_prepare_process(self, mock_logger):
+    def test_split_clone_action(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.connect = MagicMock()
-        prepare_client.prepare = MagicMock()
-        prepare_client._validate_actions_dependencies = MagicMock()
+        prepare_client.disconnect = MagicMock()
+        prepare_client._get_cloner = MagicMock()
 
-        prepare_client.start_prepare_process()
-        prepare_client._validate_actions_dependencies.assert_called_once()
-        prepare_client.connect.assert_called_once()
-        prepare_client.prepare.assert_called_once()
+        prepare_client._get_cloner.return_value.read_source_table_names.return_value = ['table_a', 'table_b']
 
-    def test_start_prepare_process_exception(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client._validate_actions_dependencies = MagicMock()
-        prepare_client.connect = MagicMock(side_effect=Exception)
+        action = {
+            'type': 'clone',
+            'id': 'some_clone_action',
+            'depends_on': ['some_dep']
+        }
 
-        prepare_client.start_prepare_process()
-        mock_logger.error.assert_called_once()
+        result = prepare_client._split_clone_action(action)
+
+        expected_result = [{
+            'id': 'some_clone_action__table_a',
+            'dependencies': action['depends_on'],
+            'extra_msg': {
+                'override': {
+                    'include': ['table_a'],
+                    'ignore': []
+                },
+                'original_action': 'some_clone_action',
+            }
+        }, {
+            'id': 'some_clone_action__table_b',
+            'dependencies': action['depends_on'],
+            'extra_msg': {
+                'override': {
+                    'include': ['table_b'],
+                    'ignore': []
+                },
+                'original_action': 'some_clone_action',
+            }
+        }, {
+            'id': action['id'],
+            'dependencies': ['some_clone_action__table_a', 'some_clone_action__table_b'],
+            'extra_msg': {
+                'override': {
+                    'type': 'join_actions'
+                }
+            }
+        }]
+        self.assertEqual(expected_result, result)
