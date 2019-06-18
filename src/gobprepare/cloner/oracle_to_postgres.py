@@ -48,7 +48,7 @@ class OracleToPostgresCloner():
             self._include_tables = config.get('include', [])
             self._id_columns = config.get('id_columns', {})
 
-    def _read_source_table_names(self) -> list:
+    def read_source_table_names(self) -> list:
         """Returns a list of table names present in given schema
 
         :return:
@@ -139,7 +139,7 @@ class OracleToPostgresCloner():
         """
 
         if not self.schema_definition:
-            table_names = self._read_source_table_names()
+            table_names = self.read_source_table_names()
             self.schema_definition = [
                 (table_name, self._get_source_table_definition(table_name))
                 for table_name in table_names

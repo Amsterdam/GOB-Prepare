@@ -7,7 +7,6 @@ database.
 """
 
 import datetime
-import traceback
 
 from gobcore.database.connector.oracle import connect_to_oracle
 from gobcore.database.connector.postgresql import connect_to_postgresql
@@ -15,6 +14,8 @@ from gobcore.database.reader.postgresql import list_tables_for_schema
 from gobcore.database.writer.postgresql import drop_table, create_schema, execute_postgresql_query
 from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
+from gobcore.message_broker import publish
+from gobcore.message_broker.config import TASK_QUEUE, PREPARE_QUEUE
 from gobprepare.config import get_database_config
 from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
 from gobprepare.csv_importer.postgres import PostgresCsvImporter
@@ -52,8 +53,7 @@ class PrepareClient:
         self.destination_app = self._prepare_config['destination']['application']
 
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
-        self.process_id = f"{start_timestamp}.{self.source_app}{self._name}"
-
+        self.process_id = self.header.get('process_id', f"{start_timestamp}.{self.source_app}{self._name}")
         self.prepares_imports = self._build_prepare_imports(self._prepare_config.get('prepares_imports', []))
         catalogues = set([item['catalogue'] for item in self.prepares_imports])
 
@@ -66,10 +66,6 @@ class PrepareClient:
         msg["header"] = self.header
 
         logger.configure(msg, "PREPARE")
-        logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
-
-        if len(self.prepares_imports) == 0:
-            logger.warning(f"No prepared imports defined")
 
     def _build_prepare_imports(self, imports: list):
         result = []
@@ -132,18 +128,22 @@ class PrepareClient:
         self._src_user = None
         self._dst_user = None
 
-    def action_clone(self, action: dict) -> int:
-        """Clones the source data using an external Cloner class.
-
-        :return:
-        """
+    def _get_cloner(self, action):
         if self.source['type'] == "oracle" and self.destination['type'] == "postgres":
             cloner = OracleToPostgresCloner(self._src_connection, action['source_schema'],
                                             self._dst_connection, action['destination_schema'],
                                             action)
         else:
             raise NotImplementedError
+        return cloner
 
+    def action_clone(self, action: dict) -> int:
+        """Clones the source data using an external Cloner class.
+
+        :return:
+        """
+
+        cloner = self._get_cloner(action)
         return cloner.clone()
 
     def action_clear(self, action: dict):
@@ -226,60 +226,16 @@ class PrepareClient:
 
         raise GOBException("Missing or invalid 'query_src'")
 
-    def _validate_actions_ids(self, actions: list):
-        """Checks that all actions have a unique ID
-
-        :param actions:
-        :return:
-        """
-        action_ids = []
-
-        for action in actions:
-            if "id" not in action:
-                raise GOBException("Missing action ID in prepare definition. Please provide a unique identifier")
-
-            if action["id"] in action_ids:
-                raise GOBException(f"Duplicate action ID {action['id']} in prepare definition. "
-                                   f"Please provide a unique identifier")
-
-            action_ids.append(action["id"])
-
-    def _validate_actions_dependencies(self):
-        """Checks if all dependencies in the sequence of actions are met
-
-        :return:
-        """
-        self._validate_actions_ids(self._actions)
-        actions_done = []
-
-        for action in self._actions:
-            if "depends_on" in action:
-                for depends_on in action["depends_on"]:
-                    if depends_on not in actions_done:
-                        raise GOBException(f"Step {action['id']} depends on action {depends_on}, but {depends_on} is "
-                                           f"not executed before {action['id']}")
-
-            actions_done.append(action["id"])
-
-    def prepare(self):
-        """Starts the appropriate prepare action based on the input configuration
-
-        :return:
-        """
-        self.result['actions'] = []
-        for action in self._actions:
-            result = self._run_prepare_action(action)
-
-            if result is not None:
-                self.result['actions'].append(result)
-
     def _run_prepare_action(self, action: dict):  # noqa: C901
         """Calls appropriate action.
 
         :param action:
         :return:
         """
-        result = {}
+        result = {
+            'id': action['id'],
+            'action': action['type'],
+        }
         if action["type"] == "clone":
             result["rows_copied"] = self.action_clone(action)
         elif action["type"] == "clear":
@@ -298,14 +254,10 @@ class PrepareClient:
         else:
             raise NotImplementedError
 
-        result['action'] = action['type']
+        self.result['action'] = result
         return result
 
-    def get_result(self):
-        """Returns the result of the prepare job
-
-        :return:
-        """
+    def _get_result(self):
         metadata = {
             **self.header,
             **self.msg,  # Return original message in header
@@ -322,25 +274,153 @@ class PrepareClient:
                 "warnings": logger.get_warnings(),
                 "errors": logger.get_errors(),
             },
-            "contents": [{"dataset": dataset} for dataset in self.prepares_imports],
         }
         return result
 
-    def start_prepare_process(self):
-        """Entry method. Handles the prepare process.
+    def _split_clone_action(self, action):
+        """Splits a clone action into smaller tasks. Creates a task per table.
+
+        :param action:
+        :return:
+        """
+        self.connect()
+        cloner = self._get_cloner(action)
+        table_names = cloner.read_source_table_names()
+        self.disconnect()
+
+        tasks = []
+        for table_name in table_names:
+            tasks.append({
+                'id': action['id'] + '__' + table_name.lower(),
+                'dependencies': action.get('depends_on', []),
+                'extra_msg': {
+                    'override': {
+                        # Include only this table. Unset the ignore list
+                        'include': [table_name],
+                        'ignore': [],
+                    },
+                    'original_action': action['id'],
+                }
+            })
+
+        ids = [task['id'] for task in tasks]
+
+        # Create join action with dependencies on new steps
+        tasks.append({
+            'id': action['id'],
+            'dependencies': ids,
+            'extra_msg': {
+                'override': {
+                    'type': 'join_actions'
+                }
+            }
+        })
+
+        return tasks
+
+    def _create_tasks(self):
+        """Creates tasks to be put on the message bus from the actions defined in the config
 
         :return:
         """
-        try:
-            self._validate_actions_dependencies()
-            self.connect()
-            self.prepare()
-            logger.info(f"Prepare job {self._name} finished")
-        except Exception as e:
-            # Print error message, the message that caused the error and a short stacktrace
-            stacktrace = traceback.format_exc(limit=-5)
-            print("Prepare failed: {e}", stacktrace)
-            # Log the error and a short error description
-            logger.error(f'Prepare failed: {e}')
-        finally:
-            self.disconnect()
+        tasks = []
+        for action in self._actions:
+            if action['type'] == 'clone':
+                # Split a clone action into smaller tasks
+                tasks.extend(self._split_clone_action(action))
+            else:
+                tasks.append({
+                    'id': action['id'],
+                    'dependencies': action.get('depends_on', []),
+                })
+        return tasks
+
+    def _publish_tasks(self, tasks):
+        """Publishes tasks for further processing.
+
+        :param tasks:
+        :return:
+        """
+        msg = {
+            "header": {
+                **self.header,
+            },
+            "contents": {
+                "tasks": tasks,
+                "dst_queue": PREPARE_QUEUE,
+                "key_prefix": "prepare",
+                "extra_msg": {
+                    "prepare_config": self.msg["prepare_config"],
+                }
+            }
+        }
+        publish(TASK_QUEUE, 'task.start', msg)
+
+    def start_prepare_process(self):
+        """Entry method. Starts the prepare process.
+
+        :return:
+        """
+        logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
+
+        if len(self.prepares_imports) == 0:
+            logger.warning(f"No prepared imports defined")
+
+        tasks = self._create_tasks()
+        self._publish_tasks(tasks)
+
+    def run_prepare_task(self):
+        """Runs incoming task.
+
+        Checks if id is known in configuration. If not, we may have generated this task. In that case original_action
+        will be set, possibly with override set.
+        In that case, we copy the original action and use the override dict to update the action.
+
+        :return:
+        """
+        taskid = self.msg['id']
+        action = [action for action in self._actions if action['id'] == taskid]
+
+        if not action and 'original_action' in self.msg:
+            action = [action for action in self._actions if action['id'] == self.msg['original_action']]
+
+        if not action:
+            raise GOBException(f"Unknown action with id {taskid}")
+
+        action = action[0]
+
+        if 'override' in self.msg:
+            action.update(self.msg['override'])
+
+        self.connect()
+        self._run_prepare_action(action)
+        self.disconnect()
+
+        return self._get_result()
+
+    def complete_prepare_process(self):
+        """Function is called when all tasks are completed.
+
+        Message contains summary of all actions, errors and warnings of all tasks.
+
+        :return:
+        """
+        metadata = {
+            **self.header,
+            **self.msg,  # Return original message in header
+            "source_application": self.source_app,
+            "destination_application": self.destination_app,
+            "version": self._prepare_config['version'],
+            "timestamp": datetime.datetime.utcnow().isoformat()
+        }
+
+        result = {
+            "header": metadata,
+            "summary": {
+                # Pass summary of import message.
+                **self.msg['summary'],
+            },
+            "contents": [{"dataset": dataset} for dataset in self.prepares_imports],
+        }
+
+        return result
