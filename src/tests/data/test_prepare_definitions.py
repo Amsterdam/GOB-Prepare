@@ -18,10 +18,11 @@ class TestPrepareDefinitions(TestCase):
         return os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '..', filename)
 
     def _test_prepare_definition(self, definition: dict):
-        prepare_client = PrepareClient(definition, {})
-        prepare_client._validate_actions_dependencies()
+        actions = definition.get('actions', [])
+        self.assertTrue(len(actions) > 0, "No actions defined")
 
-        self.assertTrue(len(definition.get('actions', [])) > 0, "No actions defined")
+        self._validate_unique_ids(actions)
+        self._validate_actions_dependencies(actions)
         self._validate_file_references_exist(definition)
 
     def _validate_file_references_exist(self, definition: dict):
@@ -33,6 +34,20 @@ class TestPrepareDefinitions(TestCase):
 
                 with open(self._get_filepath(fileref)) as f:
                     pass
+
+    def _validate_unique_ids(self, actions):
+        ids = [action['id'] for action in actions]
+        self.assertTrue(len(set(ids)) == len(actions))
+
+    def _validate_actions_dependencies(self, actions):
+        actions_done = []
+
+        for action in actions:
+            if "depends_on" in action:
+                for depends_on in action["depends_on"]:
+                    self.assertTrue(depends_on in actions_done)
+
+            actions_done.append(action["id"])
 
     def test_prepare_definitions(self, mock_logger):
         # Test if config loads correctly and definition dependencies are in order

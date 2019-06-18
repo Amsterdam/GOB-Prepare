@@ -76,7 +76,7 @@ class TestOracleToPostgresCloner(TestCase):
     def test_read_source_table_names(self, mock_read_from_oracle):
         mock_read_from_oracle.return_value = [{'table_name': 'tableA'}, {'table_name': 'tableB'}]
 
-        self.assertEqual(['tableA', 'tableB'], self.cloner._read_source_table_names())
+        self.assertEqual(['tableA', 'tableB'], self.cloner.read_source_table_names())
 
         mock_read_from_oracle.assert_called_with(
             self.oracle_connection_mock,
@@ -87,7 +87,7 @@ class TestOracleToPostgresCloner(TestCase):
     def test_read_source_table_names_ignore_tables(self, mock_read_from_oracle):
         self.cloner._ignore_tables = ['table_1', 'table_2']
         mock_read_from_oracle.return_value = [{'table_name': 'tableA'}, {'table_name': 'tableB'}]
-        self.assertEqual(['tableA', 'tableB'], self.cloner._read_source_table_names())
+        self.assertEqual(['tableA', 'tableB'], self.cloner.read_source_table_names())
 
         mock_read_from_oracle.assert_called_with(
             self.oracle_connection_mock,
@@ -99,7 +99,7 @@ class TestOracleToPostgresCloner(TestCase):
     def test_read_source_table_names_include_tables(self, mock_read_from_oracle):
         self.cloner._include_tables = ['table_1', 'table_2']
         mock_read_from_oracle.return_value = [{'table_name': 'tableA'}, {'table_name': 'tableB'}]
-        self.assertEqual(['tableA', 'tableB'], self.cloner._read_source_table_names())
+        self.assertEqual(['tableA', 'tableB'], self.cloner.read_source_table_names())
 
         mock_read_from_oracle.assert_called_with(
             self.oracle_connection_mock,
@@ -170,7 +170,7 @@ class TestOracleToPostgresCloner(TestCase):
         )
 
     def test_get_destination_schema_definition(self):
-        self.cloner._read_source_table_names = MagicMock(return_value=["table_a", "table_b"])
+        self.cloner.read_source_table_names = MagicMock(return_value=["table_a", "table_b"])
         self.cloner._get_source_table_definition = MagicMock(return_value="some table definition")
 
         expected_result = [("table_a", "some table definition"), ("table_b", "some table definition")]
@@ -179,7 +179,7 @@ class TestOracleToPostgresCloner(TestCase):
         self.assertEqual(expected_result, self.cloner._get_destination_schema_definition())
         self.assertEqual(expected_result, self.cloner._get_destination_schema_definition())
         self.cloner._get_source_table_definition.assert_has_calls([call("table_a"), call("table_b")])
-        self.cloner._read_source_table_names.assert_called_once()
+        self.cloner.read_source_table_names.assert_called_once()
 
     def test_copy_data(self):
         self.cloner._get_destination_schema_definition = MagicMock(return_value=[
