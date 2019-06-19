@@ -133,7 +133,6 @@ class TestPrepareClient(TestCase):
         result = prepare_client._connect_application(application_config)
         self.assertEqual(("connection", "user"), result)
         mock_connect_oracle.assert_called_once()
-        self.assertEqual(1, mock_logger.info.call_count)
         mock_database_config.assert_called_with("SOME_APPLICATION")
         mock_connect_oracle.assert_called_with(mock_database_config.return_value)
 
@@ -150,7 +149,6 @@ class TestPrepareClient(TestCase):
         result = prepare_client._connect_application(application_config)
         self.assertEqual(("connection", "user"), result)
         mock_connect_postgres.assert_called_once()
-        self.assertEqual(1, mock_logger.info.call_count)
         mock_database_config.assert_called_with("SOME_APPLICATION")
         mock_connect_postgres.assert_called_with(mock_database_config.return_value)
 
