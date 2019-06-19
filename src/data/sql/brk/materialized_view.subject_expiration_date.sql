@@ -1,10 +1,3 @@
-CREATE INDEX ON brk_prep.tenaamstelling(einddatum);
-CREATE INDEX ON brk_prep.zakelijk_recht(ontstaan_uit_ref);
-CREATE INDEX ON brk_prep.zakelijk_recht(betrokken_bij_ref);
-CREATE INDEX ON brk_prep.zakelijk_recht(zrt_einddatum);
-CREATE INDEX ON brk_prep.aantekening_kadastraal_object(expiration_date);
-CREATE INDEX ON brk_prep.aantekening_recht(expiration_date);
-
 CREATE MATERIALIZED VIEW brk_prep.subject_expiration_date AS (
     SELECT
     	q.subject_id,
