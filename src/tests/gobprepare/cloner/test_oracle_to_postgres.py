@@ -144,8 +144,7 @@ class TestOracleToPostgresCloner(TestCase):
              f"owner='{self.src_schema}' AND table_name='{table_name}' ORDER BY column_id"],
         )
 
-    @patch("gobprepare.cloner.oracle_to_postgres.logger")
-    def test_prepare_destination_database(self, mock_logger):
+    def test_prepare_destination_database(self):
         self.cloner._get_destination_schema_definition = MagicMock(
             return_value=["tabledef_a", "tabledef_b", "tabledef_c"]
         )
@@ -155,7 +154,6 @@ class TestOracleToPostgresCloner(TestCase):
         self.cloner._create_destination_table.assert_has_calls([
             call("tabledef_a"), call("tabledef_b"), call("tabledef_c")
         ])
-        mock_logger.info.assert_called_once()
 
     @patch("gobprepare.cloner.oracle_to_postgres.drop_table")
     @patch("gobprepare.cloner.oracle_to_postgres.execute_postgresql_query")
