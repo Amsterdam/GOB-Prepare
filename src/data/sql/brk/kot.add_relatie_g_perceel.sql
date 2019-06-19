@@ -3,12 +3,6 @@
 -- 'ontstaan_uit_kadastraalobject' contains the direct parent(s) of an A-perceel.
 -- 'relatie_g_perceel' contains the G-perceel predecessors of an A-perceel.
 
-CREATE INDEX ON brk_prep.kadastraal_object(nrn_kot_id, nrn_kot_volgnr);
-CREATE INDEX ON brk_prep.kadastraal_object(index_letter);
-CREATE INDEX ON brk_prep.zakelijk_recht(betrokken_bij_asg_id);
-CREATE INDEX ON brk_prep.zakelijk_recht(ontstaan_uit_asg_id);
-CREATE INDEX ON brk_prep.zakelijk_recht(rust_op_kadastraalobject_id, rust_op_kadastraalobj_volgnr);
-
 -- Add first order relation. Set ontstaan_uit_kadastraalobject for all A-percelen
 -- Relation is derived through the ontstaan_uit_asg_id and betrokken_bij_asg_id values from 'zakelijk_recht'.
 -- ASG stands for 'appartementsrechtsplitsing'. When A has the same value for 'betrokken_bij' as B for 'onstaan_uit',
