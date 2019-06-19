@@ -451,6 +451,16 @@
       }
     },
     {
+      "type": "execute_sql",
+      "description": "Create indexes on brk_prep KOT",
+      "query_src": "file",
+      "query": "data/sql/brk/brk_prep.kot.indexes.sql",
+      "depends_on": [
+        "select_kot"
+      ],
+      "id": "create_indexes_kot"
+    },
+    {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
@@ -573,10 +583,20 @@
     },
     {
       "type": "execute_sql",
+      "description": "Create indexes on brk_prep ZRT",
+      "query_src": "file",
+      "query": "data/sql/brk/brk_prep.zrt.indexes.sql",
+      "depends_on": [
+        "select_zrt"
+      ],
+      "id": "create_indexes_zrt"
+    },
+    {
+      "type": "execute_sql",
       "description": "Populate ZRT table with KOT references",
       "id": "populate_zrt",
       "depends_on": [
-        "select_zrt"
+        "create_indexes_zrt"
       ],
       "query_src": "file",
       "query": "data/sql/brk/zrt.add_kot.sql"
@@ -680,12 +700,22 @@
       }
     },
     {
+      "type": "execute_sql",
+      "description": "Create indexes on brk_prep TNG",
+      "query_src": "file",
+      "query": "data/sql/brk/brk_prep.tng.indexes.sql",
+      "depends_on": [
+        "select_tng"
+      ],
+      "id": "create_indexes_tng"
+    },
+    {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
       "id": "select_art",
       "depends_on": [
-        "select_tng"
+        "create_indexes_tng"
       ],
       "query": "data/sql/brk/select.aantekening_recht.sql",
       "query_src": "file",
@@ -744,6 +774,16 @@
           }
         ]
       }
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create indexes on brk_prep ART",
+      "query_src": "file",
+      "query": "data/sql/brk/brk_prep.art.indexes.sql",
+      "depends_on": [
+        "select_art"
+      ],
+      "id": "create_indexes_art"
     },
     {
       "type": "select",
@@ -820,13 +860,23 @@
     },
     {
       "type": "execute_sql",
+      "description": "Create indexes on brk_prep AKT",
+      "query_src": "file",
+      "query": "data/sql/brk/brk_prep.akt.indexes.sql",
+      "depends_on": [
+        "select_akt"
+      ],
+      "id": "create_indexes_akt"
+    },
+    {
+      "type": "execute_sql",
       "description": "Create materialized view subject_expiration_date",
       "id": "create_view_subject_actueel",
       "depends_on": [
-        "select_tng",
-        "select_zrt",
-        "select_akt",
-        "select_art"
+        "create_indexes_tng",
+        "create_indexes_zrt",
+        "create_indexes_akt",
+        "create_indexes_art"
       ],
       "query": "data/sql/brk/materialized_view.subject_expiration_date.sql",
       "query_src": "file"
@@ -1093,22 +1143,12 @@
       }
     },
     {
-      "type": "execute_sql",
-      "description": "Create indexes on ZRT prep table for SDL select",
-      "id": "create_indexes_zrt",
-      "depends_on": [
-        "populate_zrt"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/zrt.sdl_indexes.sql"
-    },
-    {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
       "id": "select_sdl",
       "depends_on": [
-        "create_indexes_zrt"
+        "populate_zrt"
       ],
       "query": "data/sql/brk/select.stukdeel.sql",
       "query_src": "file",
@@ -1251,7 +1291,7 @@
       "id": "populate_relatie_g_perceel",
       "depends_on": [
         "populate_zrt",
-        "select_kot"
+        "create_indexes_kot"
       ],
       "query_src": "file",
       "query": "data/sql/brk/kot.add_relatie_g_perceel.sql"

@@ -1,7 +1,3 @@
--- Create some indexes first
-CREATE INDEX ON brk_prep.zakelijk_recht(ontstaan_uit_asg_id);
-CREATE INDEX ON brk_prep.zakelijk_recht(betrokken_bij_asg_id);
-
 -- Reference betrokken_bij
 UPDATE brk_prep.zakelijk_recht zrt
 SET betrokken_bij= (
