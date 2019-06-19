@@ -107,8 +107,6 @@ class OracleToPostgresCloner():
         for table_definition in schema_definition:
             self._create_destination_table(table_definition)
 
-        logger.info(f"Destination database schema {self._dst_schema} with tables created")
-
     def _create_destination_table(self, table_definition: Tuple[str, List]) -> None:
         """
         Creates table in destination database based on table_definition. See _get_table_definition

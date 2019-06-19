@@ -103,8 +103,6 @@ class PrepareClient:
         else:
             raise NotImplementedError
 
-        logger.info(f"Connection to {application_config['application']} {user} has been made.")
-
         return connection, user
 
     def _close_connection(self, connection):
