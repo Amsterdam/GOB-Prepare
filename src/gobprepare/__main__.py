@@ -1,4 +1,5 @@
-from gobcore.message_broker.config import WORKFLOW_EXCHANGE, PREPARE_QUEUE
+from gobcore.message_broker.config import WORKFLOW_EXCHANGE, PREPARE_QUEUE, PREPARE_RESULT_KEY, \
+    PREPARE_TASK_RESULT_KEY, PREPARE_TASK_QUEUE, PREPARE_COMPLETE_QUEUE, TASK_REQUEST_KEY
 from gobcore.message_broker.messagedriven_service import messagedriven_service
 
 from gobprepare.prepare_client import PrepareClient
@@ -13,7 +14,7 @@ def _prepare_client_for_msg(msg):
 
 def handle_prepare_msg(msg):
     prepare_client = _prepare_client_for_msg(msg)
-    prepare_client.start_prepare_process()
+    return prepare_client.start_prepare_process()
 
 
 def handle_prepare_step_msg(msg):
@@ -28,31 +29,29 @@ def handle_prepare_complete_msg(msg):
 
 SERVICE_DEFINITION = {
     'prepare_request': {
-        'exchange': WORKFLOW_EXCHANGE,
         'queue': PREPARE_QUEUE,
-        'key': 'prepare.start',
         'handler': handle_prepare_msg,
+        'report': {
+            'key': TASK_REQUEST_KEY,
+            'exchange': WORKFLOW_EXCHANGE,
+        }
     },
     'prepare_task': {
-        'exchange': WORKFLOW_EXCHANGE,
-        'queue': PREPARE_QUEUE,
-        'key': 'prepare.task',
+        'queue': PREPARE_TASK_QUEUE,
+        'handler': handle_prepare_step_msg,
         'report': {
-            'key': 'task.complete',
+            'key': PREPARE_TASK_RESULT_KEY,
             'exchange': WORKFLOW_EXCHANGE,
         },
-        'handler': handle_prepare_step_msg,
     },
     'prepare_complete': {
-        'exchange': WORKFLOW_EXCHANGE,
-        'queue': PREPARE_QUEUE,
-        'key': 'prepare.complete',
+        'queue': PREPARE_COMPLETE_QUEUE,
+        'handler': handle_prepare_complete_msg,
         'report': {
-            'key': 'import.result',
+            'key': PREPARE_RESULT_KEY,
             'exchange': WORKFLOW_EXCHANGE,
         },
-        'handler': handle_prepare_complete_msg,
-    }
+    },
 }
 
 

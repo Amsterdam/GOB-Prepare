@@ -31,9 +31,10 @@ class TestMain(TestCase):
     def test_handle_prepare_msg(self, mock_prepare_client_for_msg):
         mock_prepare_client_for_msg.return_value = MagicMock()
         msg = {'some': 'msg'}
-        handle_prepare_msg(msg)
+        result = handle_prepare_msg(msg)
         mock_prepare_client_for_msg.assert_called_with(msg)
         mock_prepare_client_for_msg.return_value.start_prepare_process.assert_called_once()
+        self.assertEqual(mock_prepare_client_for_msg.return_value.start_prepare_process.return_value, result)
 
     @patch("gobprepare.__main__._prepare_client_for_msg")
     def test_handle_prepare_step_msg(self, mock_prepare_client_for_msg):
