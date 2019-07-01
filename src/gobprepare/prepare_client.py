@@ -14,8 +14,7 @@ from gobcore.database.reader.postgresql import list_tables_for_schema
 from gobcore.database.writer.postgresql import drop_table, create_schema, execute_postgresql_query
 from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
-from gobcore.message_broker import publish
-from gobcore.message_broker.config import TASK_QUEUE, PREPARE_QUEUE
+from gobcore.message_broker.config import PREPARE
 from gobprepare.config import get_database_config
 from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
 from gobprepare.csv_importer.postgres import PostgresCsvImporter
@@ -333,7 +332,7 @@ class PrepareClient:
                 })
         return tasks
 
-    def _publish_tasks(self, tasks):
+    def _get_task_message(self, tasks):
         """Publishes tasks for further processing.
 
         :param tasks:
@@ -345,14 +344,13 @@ class PrepareClient:
             },
             "contents": {
                 "tasks": tasks,
-                "dst_queue": PREPARE_QUEUE,
-                "key_prefix": "prepare",
+                "key_prefix": PREPARE,
                 "extra_msg": {
                     "prepare_config": self.msg["prepare_config"],
                 }
             }
         }
-        publish(TASK_QUEUE, 'task.start', msg)
+        return msg
 
     def start_prepare_process(self):
         """Entry method. Starts the prepare process.
@@ -365,7 +363,7 @@ class PrepareClient:
             logger.warning(f"No prepared imports defined")
 
         tasks = self._create_tasks()
-        self._publish_tasks(tasks)
+        return self._get_task_message(tasks)
 
     def run_prepare_task(self):
         """Runs incoming task.

@@ -547,22 +547,24 @@ class TestPrepareClient(TestCase):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         mock_logger.reset_calls()
         prepare_client._create_tasks = MagicMock()
-        prepare_client._publish_tasks = MagicMock()
+        prepare_client._get_task_message = MagicMock()
 
-        prepare_client.start_prepare_process()
+        res = prepare_client.start_prepare_process()
         mock_logger.info.assert_called_once()
         mock_logger.warning.assert_not_called()
-        prepare_client._publish_tasks.assert_called_with(prepare_client._create_tasks.return_value)
+        prepare_client._get_task_message.assert_called_with(prepare_client._create_tasks.return_value)
+        self.assertEqual(prepare_client._get_task_message.return_value, res)
 
     def test_no_imports_defined_warning(self, mock_logger):
         del self.mock_dataset['prepares_imports']
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         mock_logger.reset_calls()
         prepare_client._create_tasks = MagicMock()
-        prepare_client._publish_tasks = MagicMock()
+        prepare_client._get_task_message = MagicMock()
 
-        prepare_client.start_prepare_process()
+        res = prepare_client.start_prepare_process()
         mock_logger.warning.assert_called_once()
+        self.assertEqual(prepare_client._get_task_message.return_value, res)
 
     def test_create_tasks(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
@@ -593,27 +595,25 @@ class TestPrepareClient(TestCase):
         result = prepare_client._create_tasks()
         self.assertEqual(prepare_client._split_clone_action.return_value, result)
 
-    @patch("gobprepare.prepare_client.publish")
-    def test_publish_tasks(self, mock_publish, mock_logger):
+    def test_get_task_message(self, mock_logger):
         tasks = [{'id': 'task1', 'dependencies': []}, {'id': 'task2', 'dependencies': ['task1']}]
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.header = {'hea': 'der'}
         prepare_client.msg = {'prepare_config': 'config.json'}
-        prepare_client._publish_tasks(tasks)
+        res = prepare_client._get_task_message(tasks)
 
-        mock_publish.assert_called_with(TASK_QUEUE, 'task.start', {
+        self.assertEqual({
             'header': {
                 'hea': 'der'
             },
             'contents': {
                 'tasks': tasks,
-                'dst_queue': PREPARE_QUEUE,
                 'key_prefix': 'prepare',
                 'extra_msg': {
                     'prepare_config': prepare_client.msg['prepare_config'],
                 }
             }
-        })
+        }, res)
 
     def test_run_prepare_task(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
