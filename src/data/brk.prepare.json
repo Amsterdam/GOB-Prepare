@@ -1148,7 +1148,9 @@
       "ignore_missing": true,
       "id": "select_sdl",
       "depends_on": [
-        "populate_zrt"
+        "populate_zrt",
+        "create_indexes_akt",
+        "create_indexes_art"
       ],
       "query": "data/sql/brk/select.stukdeel.sql",
       "query_src": "file",
