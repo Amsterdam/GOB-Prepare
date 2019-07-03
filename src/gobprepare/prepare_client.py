@@ -341,13 +341,13 @@ class PrepareClient:
         msg = {
             "header": {
                 **self.header,
+                "extra": {
+                    "catalogue": self.header['catalogue'],
+                }
             },
             "contents": {
                 "tasks": tasks,
                 "key_prefix": PREPARE,
-                "extra_msg": {
-                    "prepare_config": self.msg["prepare_config"],
-                }
             }
         }
         return msg
@@ -416,7 +416,7 @@ class PrepareClient:
                 # Pass summary of import message.
                 **self.msg['summary'],
             },
-            "contents": [{"dataset": dataset} for dataset in self.prepares_imports],
+            "contents": self.prepares_imports,
         }
 
         return result
