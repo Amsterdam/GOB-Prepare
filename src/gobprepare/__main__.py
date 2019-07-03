@@ -3,12 +3,14 @@ from gobcore.message_broker.config import WORKFLOW_EXCHANGE, PREPARE_QUEUE, PREP
 from gobcore.message_broker.messagedriven_service import messagedriven_service
 
 from gobprepare.prepare_client import PrepareClient
-from gobprepare.mapping import get_mapping
+from gobprepare.mapping import get_mapping, get_prepare_definition_file_location
 
 
 def _prepare_client_for_msg(msg):
-    assert('prepare_config' in msg)
-    prepare_config = get_mapping(msg['prepare_config'])
+    assert 'catalogue' in msg.get('header', {})
+    mapping_file = get_prepare_definition_file_location(msg['header']['catalogue'])
+    prepare_config = get_mapping(mapping_file)
+
     return PrepareClient(prepare_config=prepare_config, msg=msg)
 
 

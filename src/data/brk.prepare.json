@@ -1,6 +1,7 @@
 {
   "version": "0.1",
   "name": "BRK",
+  "catalogue": "brk",
   "source": {
     "application": "Neuron",
     "type": "oracle"
