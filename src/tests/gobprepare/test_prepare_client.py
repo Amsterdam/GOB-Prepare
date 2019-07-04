@@ -43,6 +43,7 @@ class TestPrepareClient(TestCase):
         self.mock_msg = {
             'header': {
                 "someheader": "value",
+                "catalogue": "somecatalogue",
             },
         }
 
@@ -530,6 +531,7 @@ class TestPrepareClient(TestCase):
             "version",
             "timestamp",
             "entity",
+            "catalogue",
         ]
         summary_keys = [
             "rows_copied",
@@ -598,20 +600,21 @@ class TestPrepareClient(TestCase):
     def test_get_task_message(self, mock_logger):
         tasks = [{'id': 'task1', 'dependencies': []}, {'id': 'task2', 'dependencies': ['task1']}]
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client.header = {'hea': 'der'}
+        prepare_client.header = {'hea': 'der', 'catalogue': 'somecatalogue'}
         prepare_client.msg = {'prepare_config': 'config.json'}
         res = prepare_client._get_task_message(tasks)
 
         self.assertEqual({
             'header': {
-                'hea': 'der'
+                'hea': 'der',
+                'catalogue': 'somecatalogue',
+                'extra': {
+                    'catalogue': 'somecatalogue'
+                },
             },
             'contents': {
                 'tasks': tasks,
-                'key_prefix': 'prepare',
-                'extra_msg': {
-                    'prepare_config': prepare_client.msg['prepare_config'],
-                }
+                'key_prefix': 'prepare'
             }
         }, res)
 
@@ -660,8 +663,7 @@ class TestPrepareClient(TestCase):
         prepare_client.msg['summary'] = {'key': 'value'}
 
         result = prepare_client.complete_prepare_process()
-        contents = [{"dataset": dataset} for dataset in prepare_client.prepares_imports]
-        self.assertEquals(contents, result['contents'])
+        self.assertEquals(prepare_client.prepares_imports, result['contents'])
 
     def test_split_clone_action(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)

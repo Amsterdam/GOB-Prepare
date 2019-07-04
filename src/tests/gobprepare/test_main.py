@@ -9,20 +9,25 @@ class TestMain(TestCase):
 
     def setUp(self):
         self.mock_msg = {
-            'prepare_config': 'data/somefile.json',
+            'header': {
+                'catalogue': 'somecat'
+            },
         }
 
     @patch("gobprepare.__main__.PrepareClient")
     @patch("gobprepare.__main__.get_mapping")
-    def test_prepare_client_for_msg(self, mock_get_mapping, mock_prepare_client):
+    @patch("gobprepare.__main__.get_prepare_definition_file_location")
+    def test_prepare_client_for_msg(self, mock_file_location, mock_get_mapping, mock_prepare_client):
         mock_get_mapping.return_value = "mapped_file"
         result = _prepare_client_for_msg(self.mock_msg)
+        mock_file_location.assert_called_with('somecat')
+        mock_get_mapping.assert_called_with(mock_file_location.return_value)
 
         mock_prepare_client.assert_called_with(prepare_config="mapped_file", msg=self.mock_msg)
         self.assertEqual(mock_prepare_client.return_value, result)
 
     def test_prepare_client_for_msg_without_dataset(self):
-        del self.mock_msg['prepare_config']
+        del self.mock_msg['header']['catalogue']
 
         with self.assertRaises(AssertionError):
             _prepare_client_for_msg(self.mock_msg)
