@@ -27,6 +27,13 @@ SELECT kot.identificatie                    AS brk_kot_id
     ,kot.toestandsdatum       AS toestandsdatum
       ,kot.creation         AS creation
       ,kot.modification       AS modification
+     ,      CASE
+                WHEN kot.modification IS NOT NULL
+                    THEN kot.modification
+                ELSE
+                    (CASE kot.status_code
+                         WHEN 'H' THEN kot.creation
+                         ELSE NULL END)  END AS expiration_date
       ,      CASE
              WHEN kot.modification IS NOT NULL
                  THEN kot.modification
