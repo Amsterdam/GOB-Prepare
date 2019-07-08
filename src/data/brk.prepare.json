@@ -1256,6 +1256,10 @@
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           },
           {
+            "name": "expiration_date",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
             "name": "toestandsdatum",
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           }
