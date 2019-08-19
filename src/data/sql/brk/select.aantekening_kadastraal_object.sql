@@ -31,14 +31,14 @@ JOIN   brk.kadastraal_object kot                        ON     (akt.kadastraalob
 LEFT JOIN (
 	SELECT
 		abn.aantekening_id,
-		array_to_json(array_agg(json_build_object('brk_sjt_id', subject_identificatie))) AS brk_sjt_ids
+		array_to_json(array_agg(json_build_object('brk_sjt_id', subject_identificatie) ORDER BY subject_identificatie)) AS brk_sjt_ids
 	FROM brk.aantekeningbetrokkenpersoon abn
 	GROUP BY abn.aantekening_id
 ) abn ON (abn.aantekening_id=atg.id)
 LEFT JOIN (
 	SELECT
 		geb.aantekening_id,
-		array_to_json(array_agg(json_build_object('nrn_sdl_id', sdl.id))) AS nrn_sdl_ids
+		array_to_json(array_agg(json_build_object('nrn_sdl_id', sdl.id) ORDER BY sdl.id)) AS nrn_sdl_ids
 	FROM brk.aantekeningisgebaseerdop geb
 	JOIN brk.stukdeel sdl
 	ON sdl.identificatie=geb.stukdeel_identificatie
