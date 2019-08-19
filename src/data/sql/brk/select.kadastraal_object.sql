@@ -80,7 +80,7 @@ LEFT   JOIN (SELECT kas.kot_id AS nrn_kot_id
                     ,array_to_json(array_agg(json_build_object( -- POSTGRES Changed to JSON
                         'code', kas.cult_beb_code,
                         'omschrijving', kas.cult_beb
-                    ))) as cultuurbebouwd
+                    ) ORDER BY kas.cult_beb_code, kas.cult_beb)) as cultuurbebouwd
              FROM   (SELECT kasi.kadastraalobject_id         AS kot_id
                            ,kasi.kadastraalobject_volgnummer AS kot_volgnr
                            ,cbd.omschrijving                 AS cult_beb

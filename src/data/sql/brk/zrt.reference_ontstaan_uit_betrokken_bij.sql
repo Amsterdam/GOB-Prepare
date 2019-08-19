@@ -1,7 +1,7 @@
 -- Reference betrokken_bij
 UPDATE brk_prep.zakelijk_recht zrt
 SET betrokken_bij= (
-	SELECT array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie)))
+	SELECT array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie) ORDER BY identificatie))
 	FROM (
 		SELECT identificatie
 		FROM brk_prep.zakelijk_recht zrt2
@@ -15,7 +15,7 @@ SET betrokken_bij= (
 UPDATE brk_prep.zakelijk_recht zrt
 SET ontstaan_uit= (
 	SELECT
-		array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie)))
+		array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie) ORDER BY identificatie))
 	FROM (
 		SELECT identificatie
 		FROM brk_prep.zakelijk_recht zrt2

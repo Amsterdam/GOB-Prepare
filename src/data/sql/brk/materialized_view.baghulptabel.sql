@@ -8,7 +8,16 @@ create materialized view brk.baghulptabel as select
 	    'huisletter', huisletter,
 	    'huisnummertoevoeging', huisnummertoevoeging,
 	    'postcode', postcode,
-	    'woonplaatsnaam', woonplaatsnaam))) as adressen
+	    'woonplaatsnaam', woonplaatsnaam)
+	    ORDER BY
+	        bag_id,
+	        openbareruimtenaam,
+	        huisnummer,
+	        huisletter,
+	        huisnummertoevoeging,
+	        postcode,
+	        woonplaatsnaam)
+	    ) as adressen
 from (
 SELECT kas.id
       ,kas.kadastraalobject_id

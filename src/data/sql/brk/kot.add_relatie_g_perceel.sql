@@ -21,7 +21,10 @@ FROM (
                     'brk_kot_id', ontst_uit_kot.brk_kot_id,
                     'nrn_kot_id', ontst_uit_kot.nrn_kot_id,
                     'kot_volgnummer', ontst_uit_kot.nrn_kot_volgnr
-                )
+                ) ORDER BY
+                    ontst_uit_kot.brk_kot_id,
+                    ontst_uit_kot.nrn_kot_id,
+                    ontst_uit_kot.nrn_kot_volgnr
             )
         ) AS ontstaan_uit_kadastraalobject
     FROM brk_prep.kadastraal_object kot
@@ -56,7 +59,10 @@ FROM (
                     'brk_kot_id', ontst_uit_kot.brk_kot_id,
                     'nrn_kot_id', ontst_uit_kot.nrn_kot_id,
                     'kot_volgnummer', ontst_uit_kot.nrn_kot_volgnr
-                )
+                ) ORDER BY
+                    ontst_uit_kot.brk_kot_id,
+                    ontst_uit_kot.nrn_kot_id,
+                    ontst_uit_kot.nrn_kot_volgnr
             )
         ) AS relatie_g_perceel
     FROM brk_prep.kadastraal_object kot
@@ -97,7 +103,10 @@ BEGIN
                             'brk_kot_id', gperceel.brk_kot_id,
                             'nrn_kot_id', gperceel.nrn_kot_id,
                             'kot_volgnummer', gperceel.nrn_kot_volgnr
-                        )
+                        ) ORDER BY
+                            gperceel.brk_kot_id,
+                            gperceel.nrn_kot_id,
+                            gperceel.nrn_kot_volgnr
                     )
                 ) AS relatie_g_perceel
             FROM brk_prep.kadastraal_object kot
