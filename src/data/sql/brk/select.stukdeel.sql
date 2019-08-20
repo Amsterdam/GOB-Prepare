@@ -51,7 +51,7 @@ LEFT JOIN (
         array_to_json(array_agg(json_build_object(
             'brk_tng_id', tng.brk_tng_id,
             'nrn_tng_id', tng.nrn_tng_id
-        ))) AS tng_ids
+        ) ORDER BY tng.brk_tng_id, tng.nrn_tng_id)) AS tng_ids
     FROM brk.tenaamstelling_isgebaseerdop tip
     LEFT JOIN brk_prep.tenaamstelling tng
     ON tng.nrn_tng_id=tip.tenaamstelling_id
@@ -63,7 +63,7 @@ LEFT JOIN (
         array_to_json(array_agg(json_build_object(
                     'brk_art_id', identificatie,
                     'nrn_art_id', id
-                ))) AS art_ids,
+                ) ORDER BY identificatie, id)) AS art_ids,
         CASE
                 WHEN sum(CASE WHEN expiration_date IS NULL THEN 0 ELSE 1 END) < SUM(1)
                     THEN NULL
@@ -94,7 +94,7 @@ LEFT JOIN (
         array_to_json(array_agg(json_build_object(
                     'brk_akt_id', identificatie,
                     'nrn_akt_id', id
-                ))) AS akt_ids,
+                ) ORDER BY identificatie, id)) AS akt_ids,
         CASE
                 WHEN sum(CASE WHEN expiration_date IS NULL THEN 0 ELSE 1 END) < SUM(1)
                     THEN NULL
@@ -131,7 +131,7 @@ LEFT JOIN (
             END AS zrt_einddatum,
         array_to_json(array_agg(json_build_object(
             'brk_zrt_id', identificatie
-        ))) AS zrt_ids
+        ) ORDER BY identificatie)) AS zrt_ids
      FROM (
         SELECT
             arl.stukdeel_identificatie,

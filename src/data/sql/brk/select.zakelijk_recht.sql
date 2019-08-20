@@ -87,7 +87,7 @@ FROM   brk.zakelijkrecht zrt
 LEFT JOIN (
     SELECT
         zrt_id,
-        array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie))) as is_belast_met
+        array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie) ORDER BY identificatie)) as is_belast_met
     FROM (
         SELECT
             zit.zakelijkrecht_id AS zrt_id,
@@ -101,7 +101,7 @@ LEFT JOIN (
 LEFT JOIN (
     SELECT
         zrt_id,
-        array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie))) as belast
+        array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie) ORDER BY identificatie)) as belast
     FROM (
         SELECT
             zit.is_belast_met AS zrt_id,
