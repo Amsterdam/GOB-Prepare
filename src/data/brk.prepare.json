@@ -264,7 +264,10 @@
       ]
     },
     {
-      "type": "join_actions",
+      "type": "execute_sql",
+      "description": "Analyze database and finish import",
+      "query_src": "file",
+      "query": "data/sql/brk/analyze.sql",
       "id": "import_ready",
       "depends_on": [
         "create_bestand_table",
