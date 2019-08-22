@@ -57,14 +57,14 @@ SELECT zrt.id
            asg2.app_rechtsplitstype_code || ',' ||
            asg1.app_rechtsplitstype_code
           ELSE
-           asg2.app_rechtsplitstype_code || asg1.app_rechtsplitstype_code
+           COALESCE(asg2.app_rechtsplitstype_code, asg1.app_rechtsplitstype_code)
        END AS asg_app_rechtsplitstype_code -- NDG, 10-12-2015: workaround t.b.v. ophalen ASG-informatie VVEs
       ,CASE
           WHEN asg2.vve IS NOT NULL
                AND asg1.vve IS NOT NULL THEN
            ase2.omschrijving || ',' || ase1.omschrijving
           ELSE
-           ase2.omschrijving || ase1.omschrijving
+           COALESCE(ase2.omschrijving, ase1.omschrijving)
        END AS asg_app_rechtsplitstype_oms -- NDG, 10-12-2015: workaround t.b.v. ophalen ASG-informatie VVEs
        ,CASE WHEN asg2.id IS NOT NULL THEN 'nog niet beschikbaar' END-- BRK_EXTRACTIE_PCK.geef_einddatum_asg_fnc(tng.id)
                     AS asg_einddatum -- t.b.v. mview met actuele Zakelijk-rechtgegevens
