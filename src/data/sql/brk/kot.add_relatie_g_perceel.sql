@@ -74,6 +74,7 @@ FROM (
     WHERE ontst_uit_kot.index_letter='G'
         AND kot.index_letter='A'
         AND kot.relatie_g_perceel = 'null'
+        AND kot.ontstaan_uit_kadastraalobject <> 'null'
     GROUP BY kot.nrn_kot_id, kot.nrn_kot_volgnr
 ) q(nrn_kot_id, nrn_kot_volgnr, relatie_g_perceel)
 WHERE kot.nrn_kot_id=q.nrn_kot_id
@@ -123,6 +124,7 @@ BEGIN
             WHERE ontst_uit_kot.relatie_g_perceel <> 'null'
                 AND kot.index_letter = 'A'
                 AND kot.relatie_g_perceel = 'null'
+                AND kot.ontstaan_uit_kadastraalobject <> 'null'
             GROUP BY kot.nrn_kot_id, kot.nrn_kot_volgnr
         ) q(nrn_kot_id, nrn_kot_volgnr, relatie_g_perceel)
         WHERE kot.nrn_kot_id=q.nrn_kot_id
