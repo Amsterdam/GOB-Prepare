@@ -9,6 +9,10 @@
 -- they were involved in the same ASG. In this case A is a parent for B (there can be multiple parents).
 --
 -- In this query we set all direct parent <-> child relation
+
+-- Analyze database first.
+ANALYZE;
+
 UPDATE brk_prep.kadastraal_object kot
 SET ontstaan_uit_kadastraalobject=q.ontstaan_uit_kadastraalobject
 FROM (
