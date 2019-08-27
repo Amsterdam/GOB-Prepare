@@ -19,12 +19,6 @@ is required to run this component.
 ```bash
 docker-compose build
 docker-compose up &
-
-# NB This is the only prepare job currently available. Takes a long time!
-docker exec gobworkflow python -m gobworkflow.start prepare data/brk.prepare.json
-
-# Optionally, you can define a dataset to import after the prepare command:
-docker exec gobworkflow python -m gobworkflow.start prepare data/brk.prepare.json --dataset data/some_dataset.json
 ```
 
 ## Tests
@@ -58,23 +52,18 @@ source venv/bin/activate
 
 # Run
 
-Start the service:
+Optional: Set environment if GOB-Import should connect to secure data sources:
 
 ```bash
 export $(cat .env | xargs)  # Copy from .env.example if missing
+```
+
+Start the service:
+
+```bash
 cd src
 python -m gobprepare
 ```
-
-Start a single import in another window:
-
-```bash
-cd ../GOB/GOB-Workflow/src
-# Start a single import (requires VPN connection)
-# NB This is the only prepare job currently available. Takes a long time!
-python -m gobworkflow.start prepare data/brk.prepare.json
-```
-
 
 ## Tests
 
@@ -84,3 +73,9 @@ Run the tests:
 cd src
 sh test.sh
 ```
+
+# Remarks
+
+## Trigger prepare
+
+Prepares are triggered by the GOB-Workflow module. See the GOB-Workflow README for more details
