@@ -21,7 +21,8 @@
         "aantekeningenrechten",
         "aantekeningenkadastraleobjecten",
         "stukdelen",
-        "aardzakelijkerechten"
+        "aardzakelijkerechten",
+        "meta"
       ],
       "application": "GOBPrepare"
     }
@@ -276,6 +277,35 @@
         "create_baghulptabel",
         "import_burgerlijke_gemeentes"
       ]
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "id": "select_meta",
+      "depends_on": [
+        "import_ready"
+      ],
+      "query": "data/sql/brk/select.meta.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.meta",
+        "create": true,
+        "columns": [
+          {
+            "name": "id",
+            "type": "INT"
+          },
+          {
+            "name": "toestandsdatum",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "omschrijving",
+            "type": "VARCHAR(120)"
+          }
+        ]
+      }
     },
     {
       "type": "select",
