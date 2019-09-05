@@ -2,10 +2,19 @@ SELECT kot.identificatie                    AS brk_kot_id
       ,kot.id                               AS nrn_kot_id
       ,kot.id                        AS source_id
       ,kot.volgnummer                       AS nrn_kot_volgnr
-      ,kot.kadastralegemeente_code          AS kad_gemeentecode
-      ,kge.omschrijving                     AS kad_gemeente_oms
-    ,kot.akrkadastralegemeentecode_code   AS akrkadgemcode_code
-      ,ake.omschrijving                     AS kadastralegemeente_code
+     ,json_build_object(
+         'code', kot.kadastralegemeente_code,
+         'omschrijving', kge.omschrijving
+    ) AS kad_gemeente
+     ,json_build_object(
+         'code', LPAD(brg.cbscode::text, 4, '0'),
+         'omschrijving', brg.bgmnaam
+    ) AS brg_gemeente
+    , json_build_object(
+        'code', kot.akrkadastralegemeentecode_code,
+        'omschrijving', ake.omschrijving
+    ) AS kad_gemeentecode
+      ,ake.omschrijving || kot.sectie || LPAD(kot.perceelnummer::text, 5, '0') || kot.index_letter || LPAD(kot.index_nummer::text, 4, '0') AS kadastrale_aanduiding
       ,kot.sectie                           AS sectie
       ,kot.perceelnummer                    AS perceelnummer
       ,kot.index_letter                     AS index_letter
@@ -59,7 +68,6 @@ SELECT kot.identificatie                    AS brk_kot_id
       ,prc.geometrie        AS perceelnummer_geometrie
       ,bij.geometrie         AS bijpijling_geometrie
       ,adr.adressen as adressen
-      ,brg.cbscode as brg_gemeente_id
       ,brg.bgmnaam as brg_gemeente_oms
 --
 FROM   brk.kadastraal_object kot

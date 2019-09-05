@@ -338,28 +338,24 @@
             "type": "INT"
           },
           {
-            "name": "brg_gemeente_id",
-            "type": "INT"
-          },
-          {
             "name": "brg_gemeente_oms",
             "type": "VARCHAR(200)"
           },
           {
+            "name": "kad_gemeente",
+            "type": "JSONB"
+          },
+          {
+            "name": "brg_gemeente",
+            "type": "JSONB"
+          },
+          {
             "name": "kad_gemeentecode",
-            "type": "VARCHAR(200)"
+            "type": "JSONB"
           },
           {
-            "name": "kad_gemeente_oms",
-            "type": "VARCHAR(200)"
-          },
-          {
-            "name": "akrkadgemcode_code",
-            "type": "VARCHAR(200)"
-          },
-          {
-            "name": "kadastralegemeente_code",
-            "type": "VARCHAR(200)"
+            "name": "kadastrale_aanduiding",
+            "type": "VARCHAR(40)"
           },
           {
             "name": "sectie",
