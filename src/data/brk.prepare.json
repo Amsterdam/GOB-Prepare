@@ -500,7 +500,7 @@
       "ignore_missing": true,
       "id": "select_zrt",
       "depends_on": [
-        "import_ready"
+        "select_kot"
       ],
       "query": "data/sql/brk/select.zakelijk_recht.sql",
       "query_src": "file",
@@ -610,6 +610,10 @@
           },
           {
             "name": "toestandsdatum",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "expiration_date",
             "type": "TIMESTAMP"
           }
         ]
