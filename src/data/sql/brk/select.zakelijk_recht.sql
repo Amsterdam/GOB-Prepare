@@ -72,17 +72,12 @@ SELECT zrt.id
                       AS asg_actueel -- t.b.v. mview met actuele Zakelijk-rechtgegevens
       ,zrt.rust_op_kadastraalobject_id
       ,zrt.rust_op_kadastraalobj_volgnr
-      ,kot.identificatie AS Kadastraal_object_id
-      ,      CASE
-             WHEN kot.modification IS NOT NULL
-                 THEN kot.modification
-             ELSE
-                 (CASE kot.status_code
-                  WHEN 'H' THEN kot.creation
-                     ELSE NULL END)  END AS zrt_einddatum
+      ,kot.brk_kot_id AS Kadastraal_object_id
+      ,kot.einddatum AS zrt_einddatum
       ,kot.creation AS zrt_begindatum
       ,kot.status_code AS kot_status_code
-      ,bsd.brk_bsd_toestandsdatum       AS toestandsdatum
+      ,kot.toestandsdatum       AS toestandsdatum
+      ,kot.expiration_date AS expiration_date
 FROM   brk.zakelijkrecht zrt
 LEFT JOIN (
     SELECT
@@ -113,11 +108,10 @@ LEFT JOIN (
     GROUP BY zrt_id
 ) bel ON bel.zrt_id=zrt.id
 LEFT JOIN BRK.C_AARDZAKELIJKRECHT a             ON zrt.aardzakelijkrecht_code=a.code
-LEFT JOIN BRK.KADASTRAAL_OBJECT kot             ON (zrt.rust_op_kadastraalobject_id=kot.id
-                                                    AND zrt.rust_op_kadastraalobj_volgnr=kot.volgnummer)
+LEFT JOIN brk_prep.kadastraal_object kot             ON (zrt.rust_op_kadastraalobject_id=kot.nrn_kot_id
+                                                    AND zrt.rust_op_kadastraalobj_volgnr=kot.nrn_kot_volgnr)
 LEFT JOIN brk.appartementsrechtsplitsing asg1   ON (asg1.id = zrt.betrokken_bij)
 LEFT JOIN brk.appartementsrechtsplitsing asg2   ON (asg2.id = zrt.ontstaan_uit)
            -- ndg, 10-12-2015: workaround t.b.v. ophalen asg-informatie vves
 LEFT JOIN brk.c_appartementsrechtsplitstype ase1 ON (ase1.code = asg1.app_rechtsplitstype_code)
 LEFT JOIN brk.c_appartementsrechtsplitstype ase2 ON   (ase2.code = asg2.app_rechtsplitstype_code)
-JOIN   brk.bestand bsd                          ON (1 = 1);
