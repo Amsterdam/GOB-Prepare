@@ -15,7 +15,7 @@ services:
       - gob-volume:/app/shared
 
   prepare_database:
-    image: amsterdam/postgres
+    image: amsterdam/postgres11
     ports:
       - "5408:5432"
     container_name: prepare_database
