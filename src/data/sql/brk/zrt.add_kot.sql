@@ -19,35 +19,29 @@ BEGIN
 	    kadastraal_object_id=kot_identificatie,
 	    kot_status_code=v.kot_status_code,
 	    zrt_begindatum=begindatum,
-	    zrt_einddatum=einddatum
+	    zrt_einddatum=einddatum,
+	    expiration_date=expiration_date
 	FROM (
 		SELECT
 		    zrtbelastmet.id,
 		    zrtkot.rust_op_kadastraalobject_id,
 		    zrtkot.rust_op_kadastraalobj_volgnr,
-		    kot.identificatie as kot_identificatie,
+		    kot.brk_kot_id as kot_identificatie,
 		    kot.status_code as kot_status_code,
 		    kot.creation AS zrt_begindatum,
-		    CASE
-                WHEN kot.modification IS NOT NULL THEN kot.modification
-                ELSE (
-                    CASE kot.status_code
-                        WHEN 'H' THEN kot.creation
-                        ELSE NULL
-                    END
-                )
-		    END AS zrt_einddatum
+		    kot.einddatum as zrt_einddatum,
+		    kot.expiration_date as expiration_date
 		FROM brk.zakelijkrecht_isbelastmet bel
 		LEFT JOIN brk_prep.zakelijk_recht zrtkot
 		    ON zrtkot.id = zakelijkrecht_id
 		LEFT JOIN brk_prep.zakelijk_recht zrtbelastmet
 		    ON zrtbelastmet.id = bel.is_belast_met
-		LEFT JOIN brk.kadastraal_object kot
-		    ON kot.id = zrtkot.rust_op_kadastraalobject_id
-	        AND kot.volgnummer = zrtkot.rust_op_kadastraalobj_volgnr
+		LEFT JOIN brk_prep.kadastraal_object kot
+		    ON kot.nrn_kot_id = zrtkot.rust_op_kadastraalobject_id
+	        AND kot.nrn_kot_volgnr = zrtkot.rust_op_kadastraalobj_volgnr
 		WHERE zrtkot.rust_op_kadastraalobject_id IS NOT NULL
 		    AND zrtbelastmet.rust_op_kadastraalobject_id IS NULL
-	) AS v(id, kot_id, kot_volgnr, kot_identificatie, kot_status_code, begindatum, einddatum)
+	) AS v(id, kot_id, kot_volgnr, kot_identificatie, kot_status_code, begindatum, einddatum, expiration_date)
 	WHERE v.id = zrt.id;
 
     GET DIAGNOSTICS lastres = ROW_COUNT;
