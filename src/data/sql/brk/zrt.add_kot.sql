@@ -20,7 +20,7 @@ BEGIN
 	    kot_status_code=v.kot_status_code,
 	    zrt_begindatum=begindatum,
 	    zrt_einddatum=einddatum,
-	    expiration_date=expiration_date
+	    expiration_date=v.expiration_date
 	FROM (
 		SELECT
 		    zrtbelastmet.id,
