@@ -30,7 +30,14 @@ LEFT JOIN BRK.C_BURGERLIJKESTAAT b              ON t.burgerlijkestaat_code=b.cod
 LEFT JOIN BRK.SUBJECT sjt                       ON t.van_persoon_identificatie=sjt.identificatie
 LEFT JOIN brk_prep.zakelijk_recht zrt                 ON t.van_id=zrt.id
 LEFT JOIN BRK.TENAAMSTELLING_ONDERZOEK o        ON t.id=o.tenaamstelling_id
-LEFT JOIN brk.aantekeningrecht art              ON art.tenaamstelling_identificatie = t.identificatie
--- aardaantekening_code 21 is Einddatum recht
-LEFT JOIN brk.aantekening atg                   ON atg.id = art.aantekening_id AND atg.aardaantekening_code = '21'
+LEFT JOIN (
+    SELECT
+        art.tenaamstelling_identificatie,
+        min(atg.einddatum) AS einddatum
+    FROM brk.aantekeningrecht art
+    LEFT JOIN brk.aantekening atg ON atg.id = art.aantekening_id
+    -- aardaantekening_code 21 is Einddatum recht
+    WHERE atg.aardaantekening_code = '21'
+    GROUP BY art.tenaamstelling_identificatie
+) atg ON atg.tenaamstelling_identificatie = t.identificatie
 JOIN   brk.bestand bsd                          ON (1 = 1);
