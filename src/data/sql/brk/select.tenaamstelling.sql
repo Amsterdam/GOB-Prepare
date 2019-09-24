@@ -33,11 +33,15 @@ LEFT JOIN BRK.TENAAMSTELLING_ONDERZOEK o        ON t.id=o.tenaamstelling_id
 LEFT JOIN (
     SELECT
         art.tenaamstelling_identificatie,
-        min(atg.einddatum) AS einddatum
+        atg.einddatum
     FROM brk.aantekeningrecht art
     LEFT JOIN brk.aantekening atg ON atg.id = art.aantekening_id
     -- aardaantekening_code 21 is Einddatum recht
-    WHERE atg.aardaantekening_code = '21'
-    GROUP BY art.tenaamstelling_identificatie
+    WHERE art.id IN (
+        SELECT max(art.id)
+        FROM brk.aantekening atg
+        LEFT JOIN brk.aantekeningrecht art ON art.aantekening_id = atg.id
+        where atg.aardaantekening_code = '21' group by art.tenaamstelling_identificatie
+    )
 ) atg ON atg.tenaamstelling_identificatie = t.identificatie
 JOIN   brk.bestand bsd                          ON (1 = 1);
