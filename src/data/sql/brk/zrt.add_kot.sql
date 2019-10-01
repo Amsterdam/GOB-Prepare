@@ -20,7 +20,8 @@ BEGIN
 	    kot_status_code=v.kot_status_code,
 	    zrt_begindatum=begindatum,
 	    zrt_einddatum=einddatum,
-	    expiration_date=v.expiration_date
+	    expiration_date=v.expiration_date,
+	    toestandsdatum=v.toestandsdatum
 	FROM (
 		SELECT
 		    zrtbelastmet.id,
@@ -30,7 +31,8 @@ BEGIN
 		    kot.status_code as kot_status_code,
 		    kot.creation AS zrt_begindatum,
 		    kot.einddatum as zrt_einddatum,
-		    kot.expiration_date as expiration_date
+		    kot.expiration_date as expiration_date,
+		    kot.toestandsdatum as toestandsdatum
 		FROM brk.zakelijkrecht_isbelastmet bel
 		LEFT JOIN brk_prep.zakelijk_recht zrtkot
 		    ON zrtkot.id = zakelijkrecht_id
@@ -41,7 +43,7 @@ BEGIN
 	        AND kot.nrn_kot_volgnr = zrtkot.rust_op_kadastraalobj_volgnr
 		WHERE zrtkot.rust_op_kadastraalobject_id IS NOT NULL
 		    AND zrtbelastmet.rust_op_kadastraalobject_id IS NULL
-	) AS v(id, kot_id, kot_volgnr, kot_identificatie, kot_status_code, begindatum, einddatum, expiration_date)
+	) AS v(id, kot_id, kot_volgnr, kot_identificatie, kot_status_code, begindatum, einddatum, expiration_date, toestandsdatum)
 	WHERE v.id = zrt.id;
 
     GET DIAGNOSTICS lastres = ROW_COUNT;
