@@ -19,7 +19,7 @@ SELECT t.identificatie              	AS brk_tng_id
 ,      zrt.identificatie                AS van_zakelijkrecht_id
 ,      t.van_id               			AS van_nrn_zakelijkrecht_id
 ,      g.stukdeel_identificatie         AS gebaseerdop_stukdeel_id
-,      bsd.brk_bsd_toestandsdatum       AS toestandsdatum
+,      zrt.toestandsdatum               AS toestandsdatum
 ,      zrt.rust_op_kadastraalobj_volgnr AS volgnummer
 ,      zrt.zrt_begindatum               AS begindatum
 ,      least(zrt.zrt_einddatum, atg.einddatum) AS einddatum
