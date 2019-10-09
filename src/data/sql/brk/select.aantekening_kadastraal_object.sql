@@ -4,30 +4,20 @@ SELECT atg.identificatie                       AS brk_atg_id
    ,aag.omschrijving                           AS atg_aardaantekening_oms
    ,atg.omschrijving                           AS atg_omschrijving
    ,atg.einddatum                              AS atg_einddatum
-   ,kot.identificatie                          AS brk_kot_id -- BETREKKING OP KOT
-   ,kot.id                                     AS nrn_kot_id -- BETREKKING OP KOT
-   ,kot.volgnummer                             AS nrn_kot_volgnr -- BETREKKING OP KOT
+   ,kot.brk_kot_id                          AS brk_kot_id -- BETREKKING OP KOT
+   ,kot.nrn_kot_id                                     AS nrn_kot_id -- BETREKKING OP KOT
+   ,kot.nrn_kot_volgnr                             AS nrn_kot_volgnr -- BETREKKING OP KOT
    ,abn.brk_sjt_ids        		               AS brk_sjt_ids
    ,geb.nrn_sdl_ids                            AS nrn_sdl_ids
-   ,bsd.brk_bsd_toestandsdatum                 AS toestandsdatum
+   ,kot.toestandsdatum                 AS toestandsdatum
    ,kot.creation                               AS begindatum
-   ,LEAST(
-    CASE
-        WHEN kot.modification IS NOT NULL THEN kot.modification
-        ELSE (
-            CASE kot.status_code
-                WHEN 'H' THEN kot.creation
-                ELSE NULL
-            END
-        )
-    END,
-    atg.einddatum
-) 											AS expiration_date
+   ,kot.einddatum                              AS einddatum
+   ,LEAST(kot.einddatum, atg.einddatum)        AS expiration_date
 --
 FROM   brk.aantekening atg
 JOIN   brk.aantekening_kadastraalobject akt             ON     (atg.id = akt.aantekening_id)
-JOIN   brk.kadastraal_object kot                        ON     (akt.kadastraalobject_id = kot.id AND
-                                                             akt.kadastraalobject_volgnummer = kot.volgnummer)
+JOIN   brk_prep.kadastraal_object kot                        ON     (akt.kadastraalobject_id = kot.nrn_kot_id AND
+                                                             akt.kadastraalobject_volgnummer = kot.nrn_kot_volgnr)
 LEFT JOIN (
 	SELECT
 		abn.aantekening_id,

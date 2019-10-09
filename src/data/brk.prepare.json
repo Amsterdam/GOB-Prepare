@@ -14,15 +14,6 @@
     {
       "catalogue": "brk",
       "collections": [
-        "kadastraleobjecten",
-        "zakelijkerechten",
-        "kadastralesubjecten",
-        "tenaamstellingen",
-        "aantekeningenrechten",
-        "aantekeningenkadastraleobjecten",
-        "stukdelen",
-        "aardzakelijkerechten",
-        "meta"
       ],
       "application": "GOBPrepare"
     }
@@ -500,7 +491,7 @@
       "ignore_missing": true,
       "id": "select_zrt",
       "depends_on": [
-        "select_kot"
+        "create_indexes_kot"
       ],
       "query": "data/sql/brk/select.zakelijk_recht.sql",
       "query_src": "file",
@@ -829,7 +820,7 @@
       "ignore_missing": true,
       "id": "select_akt",
       "depends_on": [
-        "import_ready"
+        "create_indexes_kot"
       ],
       "query": "data/sql/brk/select.aantekening_kadastraal_object.sql",
       "query_src": "file",
