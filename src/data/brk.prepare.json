@@ -10,14 +10,6 @@
     "application": "GOBPrepare",
     "type": "postgres"
   },
-  "prepares_imports": [
-    {
-      "catalogue": "brk",
-      "collections": [
-      ],
-      "application": "GOBPrepare"
-    }
-  ],
   "actions": [
     {
       "type": "clear",

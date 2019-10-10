@@ -53,33 +53,15 @@ class PrepareClient:
 
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
         self.process_id = self.header.get('process_id', f"{start_timestamp}.{self.source_app}{self._name}")
-        self.prepares_imports = self._build_prepare_imports(self._prepare_config.get('prepares_imports', []))
-        catalogues = set([item['catalogue'] for item in self.prepares_imports])
 
         self.header.update({
             'process_id': self.process_id,
             'source': self.source_app,
             'application': self.source.get('application'),
-            'entity': ",".join(catalogues),
         })
         msg["header"] = self.header
 
         logger.configure(msg, "PREPARE")
-
-    def _build_prepare_imports(self, imports: list):
-        result = []
-
-        for prepared_import in imports:
-            if not all([key in prepared_import for key in ['catalogue', 'application', 'collections']]):
-                continue
-
-            result.extend([{
-                "catalogue": prepared_import['catalogue'],
-                "application": prepared_import['application'],
-                "collection": collection
-            } for collection in prepared_import['collections']])
-
-        return result
 
     def connect(self):
         """Connects to data source and destination database
@@ -359,9 +341,6 @@ class PrepareClient:
         """
         logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
 
-        if len(self.prepares_imports) == 0:
-            logger.warning(f"No prepared imports defined")
-
         tasks = self._create_tasks()
         return self._get_task_message(tasks)
 
@@ -416,7 +395,7 @@ class PrepareClient:
                 # Pass summary of import message.
                 **self.msg['summary'],
             },
-            "contents": self.prepares_imports,
+            "contents": [],
         }
 
         return result
