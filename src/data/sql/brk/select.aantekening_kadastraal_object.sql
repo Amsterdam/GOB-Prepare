@@ -34,5 +34,4 @@ LEFT JOIN (
 	ON sdl.identificatie=geb.stukdeel_identificatie
 	GROUP BY geb.aantekening_id
 ) geb ON (geb.aantekening_id=atg.id)
-JOIN   brk.c_aardaantekening aag                        ON     (atg.aardaantekening_code = aag.code)
-JOIN   brk.bestand bsd                                  ON     (1 = 1);
+JOIN   brk.c_aardaantekening aag                        ON     (atg.aardaantekening_code = aag.code);
