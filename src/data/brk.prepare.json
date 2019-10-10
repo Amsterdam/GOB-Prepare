@@ -1283,6 +1283,39 @@
       }
     },
     {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "id": "select_kse",
+      "depends_on": [
+        "create_indexes_kot"
+      ],
+      "query": "data/sql/brk/select.kadastrale_sectie.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.kadastrale_sectie",
+        "create": true,
+        "columns": [
+          {
+            "name": "identificatie",
+            "type": "VARCHAR(10)"
+          },
+          {
+            "name": "code",
+            "type": "VARCHAR(3)"
+          },
+          {
+            "name": "geometrie",
+            "type": "GEOMETRY"
+          },
+          {
+            "name": "is_onderdeel_van_gemeente",
+            "type": "VARCHAR(10)"
+          }
+        ]
+      }
+    },
+    {
       "type": "execute_sql",
       "description": "Create references between ZRT's on betrokken_bij and ontstaan_uit",
       "id": "create_zrt_references",
