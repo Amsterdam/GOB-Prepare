@@ -1,0 +1,7 @@
+SELECT
+          kad_gemeente->>'omschrijving'                           AS identificatie
+         ,ST_UNION(geometrie)                                     AS geometrie
+         ,brg_gemeente->>'omschrijving'                           AS ligt_in_gemeente
+         FROM   brk_prep.kadastraal_object
+         WHERE index_letter = 'G'
+         GROUP BY kad_gemeente->>'omschrijving', brg_gemeente->>'omschrijving'

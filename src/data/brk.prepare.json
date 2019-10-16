@@ -1309,8 +1309,66 @@
             "type": "GEOMETRY"
           },
           {
-            "name": "is_onderdeel_van_gemeente",
+            "name": "is_onderdeel_van_kadastralegemeentecode",
             "type": "VARCHAR(10)"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "id": "select_kce",
+      "depends_on": [
+        "create_indexes_kot"
+      ],
+      "query": "data/sql/brk/select.kadastrale_gemeentecode.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.kadastrale_gemeentecode",
+        "create": true,
+        "columns": [
+          {
+            "name": "identificatie",
+            "type": "VARCHAR(10)"
+          },
+          {
+            "name": "geometrie",
+            "type": "GEOMETRY"
+          },
+          {
+            "name": "is_onderdeel_van_kadastralegemeente",
+            "type": "VARCHAR(200)"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "ignore_missing": true,
+      "id": "select_kge",
+      "depends_on": [
+        "create_indexes_kot"
+      ],
+      "query": "data/sql/brk/select.kadastrale_gemeente.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brk_prep.kadastrale_gemeente",
+        "create": true,
+        "columns": [
+          {
+            "name": "identificatie",
+            "type": "VARCHAR(10)"
+          },
+          {
+            "name": "geometrie",
+            "type": "GEOMETRY"
+          },
+          {
+            "name": "ligt_in_gemeente",
+            "type": "VARCHAR(200)"
           }
         ]
       }
