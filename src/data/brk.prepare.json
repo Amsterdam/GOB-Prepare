@@ -1360,7 +1360,7 @@
         "columns": [
           {
             "name": "identificatie",
-            "type": "VARCHAR(10)"
+            "type": "VARCHAR(200)"
           },
           {
             "name": "geometrie",
