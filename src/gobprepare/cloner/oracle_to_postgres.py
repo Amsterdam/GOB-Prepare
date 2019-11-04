@@ -3,6 +3,8 @@ Contains the OracleToPostgresCloner class, which contains the logic to clone an 
 database.
 """
 import time
+import re
+
 from math import ceil
 from typing import Dict, List, Tuple
 
@@ -48,25 +50,35 @@ class OracleToPostgresCloner():
             self._include_tables = config.get('include', [])
             self._id_columns = config.get('id_columns', {})
 
+    def _filter_tables(self, tables: list):
+        def matches_any(table_name: str, patterns: list):
+            """Returns True if table_name matches any pattern in list
+
+            :param table_name:
+            :return:
+            """
+            return any([pattern.match(table_name) for pattern in patterns])
+
+        if self._ignore_tables:
+            patterns = [re.compile(pattern) for pattern in self._ignore_tables]
+
+            return [table for table in tables if not matches_any(table['table_name'], patterns)]
+        elif self._include_tables:
+            patterns = [re.compile(pattern) for pattern in self._include_tables]
+
+            return [table for table in tables if matches_any(table['table_name'], patterns)]
+        else:
+            return tables
+
     def read_source_table_names(self) -> list:
         """Returns a list of table names present in given schema
 
         :return:
         """
-
-        def quote_string(string):
-            return f"'{string}'"
-
-        if self._ignore_tables:
-            table_select = f" AND table_name NOT IN " \
-                f"({','.join([quote_string(table) for table in self._ignore_tables])})"
-        elif self._include_tables:
-            table_select = f" AND table_name IN ({','.join([quote_string(table) for table in self._include_tables])})"
-        else:
-            table_select = ""
-
-        query = f"SELECT table_name FROM all_tables WHERE owner='{self._src_schema}'{table_select} ORDER BY table_name"
+        query = f"SELECT table_name FROM all_tables WHERE owner='{self._src_schema}' ORDER BY table_name"
         table_names = read_from_oracle(self._src_connection, [query])
+        table_names = self._filter_tables(table_names)
+
         return [row['table_name'] for row in table_names]
 
     def _get_source_table_definition(self, table: str) -> List[Tuple[str, str]]:

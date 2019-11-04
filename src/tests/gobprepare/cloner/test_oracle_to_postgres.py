@@ -72,8 +72,59 @@ class TestOracleToPostgresCloner(TestCase):
                                         self.dst_schema, config)
         self.assertEquals(config["include"], cloner._include_tables)
 
+    def test_filter_tables_no_filter(self):
+        self.cloner._ignore_tables = []
+        self.cloner._include_tables = []
+
+        input = [random_string() for _ in range(10)]
+
+        self.assertEqual(input, self.cloner._filter_tables(input))
+
+    def test_filter_tables_ignore(self):
+        self.cloner._include_tables = []
+        self.cloner._ignore_tables = ['^PREFIX_.*', 'TABLE_NAME', '^OTHERTABLE$']
+
+        input = [
+            {'table_name': 'PREFIX_SOMETHING'},
+            {'table_name': 'SPREFIX_OTHER'},
+            {'table_name': 'TABLE_NAME'},
+            {'table_name': 'OTHER_TABLE_NAME_NOT_IGNORED'},
+            {'table_name': 'OTHERTABLE'},
+            {'table_name': 'OTHERTABLE_NOT_IGNORED'},
+        ]
+
+        expected_result = [
+            {'table_name': 'SPREFIX_OTHER'},
+            {'table_name': 'OTHER_TABLE_NAME_NOT_IGNORED'},
+            {'table_name': 'OTHERTABLE_NOT_IGNORED'},
+        ]
+
+        self.assertEqual(expected_result, self.cloner._filter_tables(input))
+
+    def test_filter_tables_include(self):
+        self.cloner._ignore_tables = []
+        self.cloner._include_tables = ['^PREFIX_.*', 'TABLE_NAME', '^OTHERTABLE$']
+
+        input = [
+            {'table_name': 'PREFIX_SOMETHING'},
+            {'table_name': 'SPREFIX_OTHER'},
+            {'table_name': 'TABLE_NAME'},
+            {'table_name': 'OTHER_TABLE_NAME_NOT_IGNORED'},
+            {'table_name': 'OTHERTABLE'},
+            {'table_name': 'OTHERTABLE_NOT_IGNORED'},
+        ]
+
+        expected_result = [
+            {'table_name': 'PREFIX_SOMETHING'},
+            {'table_name': 'TABLE_NAME'},
+            {'table_name': 'OTHERTABLE'},
+        ]
+
+        self.assertEqual(expected_result, self.cloner._filter_tables(input))
+
     @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
     def test_read_source_table_names(self, mock_read_from_oracle):
+        self.cloner._filter_tables = MagicMock(side_effect=lambda x: x)
         mock_read_from_oracle.return_value = [{'table_name': 'tableA'}, {'table_name': 'tableB'}]
 
         self.assertEqual(['tableA', 'tableB'], self.cloner.read_source_table_names())
@@ -82,30 +133,7 @@ class TestOracleToPostgresCloner(TestCase):
             self.oracle_connection_mock,
             [f"SELECT table_name FROM all_tables WHERE owner='{self.src_schema}' ORDER BY table_name"]
         )
-
-    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
-    def test_read_source_table_names_ignore_tables(self, mock_read_from_oracle):
-        self.cloner._ignore_tables = ['table_1', 'table_2']
-        mock_read_from_oracle.return_value = [{'table_name': 'tableA'}, {'table_name': 'tableB'}]
-        self.assertEqual(['tableA', 'tableB'], self.cloner.read_source_table_names())
-
-        mock_read_from_oracle.assert_called_with(
-            self.oracle_connection_mock,
-            [f"SELECT table_name FROM all_tables WHERE owner='{self.src_schema}' AND "
-             f"table_name NOT IN ('table_1','table_2') ORDER BY table_name"]
-        )
-
-    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
-    def test_read_source_table_names_include_tables(self, mock_read_from_oracle):
-        self.cloner._include_tables = ['table_1', 'table_2']
-        mock_read_from_oracle.return_value = [{'table_name': 'tableA'}, {'table_name': 'tableB'}]
-        self.assertEqual(['tableA', 'tableB'], self.cloner.read_source_table_names())
-
-        mock_read_from_oracle.assert_called_with(
-            self.oracle_connection_mock,
-            [f"SELECT table_name FROM all_tables WHERE owner='{self.src_schema}' AND "
-             f"table_name IN ('table_1','table_2') ORDER BY table_name"]
-        )
+        self.cloner._filter_tables.assert_called_with(mock_read_from_oracle.return_value)
 
     @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
     @patch("gobprepare.cloner.oracle_to_postgres.get_postgres_column_definition")
