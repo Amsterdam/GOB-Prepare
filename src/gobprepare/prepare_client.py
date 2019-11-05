@@ -17,7 +17,7 @@ from gobcore.logging.logger import logger
 from gobcore.message_broker.config import PREPARE
 from gobprepare.config import get_database_config
 from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
-from gobprepare.csv_importer.postgres import PostgresCsvImporter
+from gobprepare.importers.csv_importer import PostgresCsvImporter
 from gobprepare.selector.oracle_to_postgres import OracleToPostgresSelector
 from gobprepare.selector.postgres_to_postgres import PostgresToPostgresSelector
 
