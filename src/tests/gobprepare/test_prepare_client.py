@@ -617,7 +617,7 @@ class TestPrepareClient(TestCase):
             'dependencies': action['depends_on'],
             'extra_msg': {
                 'override': {
-                    'include': ['table_a'],
+                    'include': ['^table_a$'],
                     'ignore': []
                 },
                 'original_action': 'some_clone_action',
@@ -627,7 +627,7 @@ class TestPrepareClient(TestCase):
             'dependencies': action['depends_on'],
             'extra_msg': {
                 'override': {
-                    'include': ['table_b'],
+                    'include': ['^table_b$'],
                     'ignore': []
                 },
                 'original_action': 'some_clone_action',
