@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from pandas.errors import ParserError
 from urllib.error import HTTPError
 from gobcore.exceptions import GOBException
-from gobprepare.csv_importer.postgres import PostgresCsvImporter
+from gobprepare.importers.csv_importer import PostgresCsvImporter
 
 
 class TestPostgresCsvImporter(TestCase):
@@ -52,7 +52,7 @@ class TestPostgresCsvImporter(TestCase):
         self.assertEqual(self.config['source'], self.importer._source)
         self.assertEqual(self.config['destination'], self.importer._destination)
 
-    @patch("gobprepare.csv_importer.postgres.read_csv")
+    @patch("gobprepare.importers.csv_importer.read_csv")
     def test_load_csv(self, mock_read_csv):
         mock_pandas = self.MockPandasDataFrame()
         mock_read_csv.return_value = mock_pandas
@@ -74,14 +74,14 @@ class TestPostgresCsvImporter(TestCase):
         self.assertEqual(expected_result, result)
         mock_read_csv.assert_called_with(self.importer._source, keep_default_na=False)
 
-    @patch("gobprepare.csv_importer.postgres.read_csv")
+    @patch("gobprepare.importers.csv_importer.read_csv")
     def test_load_csv_parser_error(self, mock_read_csv):
         mock_read_csv.side_effect = ParserError()
 
         with self.assertRaisesRegex(GOBException, self.config['source']):
             self.importer._load_csv()
 
-    @patch("gobprepare.csv_importer.postgres.read_csv")
+    @patch("gobprepare.importers.csv_importer.read_csv")
     def test_load_csv_http_error(self, mock_read_csv):
         mock_read_csv.side_effect = HTTPError("", "", "", "", "")
 
@@ -90,7 +90,7 @@ class TestPostgresCsvImporter(TestCase):
         with self.assertRaisesRegex(GOBException, self.config['source']):
             self.importer._load_csv()
 
-    @patch("gobprepare.csv_importer.postgres.execute_postgresql_query")
+    @patch("gobprepare.importers.csv_importer.execute_postgresql_query")
     def test_create_destination_table(self, mock_execute):
         columns = [
             {"max_length": 20, "name": "col_a"},
@@ -102,7 +102,7 @@ class TestPostgresCsvImporter(TestCase):
         self.importer._create_destination_table(columns)
         mock_execute.assert_called_with(self.importer._dst_connection, expected_query)
 
-    @patch("gobprepare.csv_importer.postgres.write_rows_to_postgresql")
+    @patch("gobprepare.importers.csv_importer.write_rows_to_postgresql")
     def test_import_data(self, mock_write):
         data = [[1, 2, 3], [4, 4, 2], [2, 4, 5]]
         self.importer._import_data(data)
