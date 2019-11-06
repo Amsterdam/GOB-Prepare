@@ -275,7 +275,7 @@ class PrepareClient:
                 'extra_msg': {
                     'override': {
                         # Include only this table. Unset the ignore list
-                        'include': [table_name],
+                        'include': [f'^{table_name}$'],
                         'ignore': [],
                     },
                     'original_action': action['id'],
