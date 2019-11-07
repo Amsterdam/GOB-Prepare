@@ -1,0 +1,10 @@
+{
+  bagVerblijfsobjecten {
+    edges {
+      node {
+        identificatie
+        geometrie
+      }
+    }
+  }
+}

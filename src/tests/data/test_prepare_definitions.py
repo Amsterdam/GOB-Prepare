@@ -55,6 +55,3 @@ class TestPrepareDefinitions(TestCase):
             with open(self._get_filepath(file)) as f:
                 definition = json.load(f)
                 self._test_prepare_definition(definition)
-
-
-
