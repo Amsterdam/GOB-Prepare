@@ -12,20 +12,11 @@ CREATE MATERIALIZED VIEW brk_prep.subject_expiration_date AS (
              UNION
              --
              SELECT
-             	zrt.ontstaan_uit_ref,
-             	CASE WHEN sum(CASE WHEN zrt.zrt_einddatum IS NULL THEN 1 ELSE 0 END) > 0 THEN NULL ELSE max(zrt.zrt_einddatum) END AS expiration_date
-             FROM brk_prep.zakelijk_recht zrt
-             WHERE zrt.ontstaan_uit_ref IS NOT NULL
-             GROUP BY zrt.ontstaan_uit_ref
-             --
-             UNION
-             --
-             SELECT
-             	zrt.betrokken_bij_ref,
-             	CASE WHEN sum(CASE WHEN zrt.zrt_einddatum IS NULL THEN 1 ELSE 0 END) > 0 THEN NULL ELSE max(zrt.zrt_einddatum) END AS expiration_date
+                zrt.betrokken_bij_ref,
+                NULL AS expiration_date
              FROM brk_prep.zakelijk_recht zrt
              WHERE zrt.betrokken_bij_ref IS NOT NULL
-			 GROUP BY zrt.betrokken_bij_ref
+             GROUP BY zrt.betrokken_bij_ref
 			 --
              UNION
   			 --
