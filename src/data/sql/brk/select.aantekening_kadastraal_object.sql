@@ -12,7 +12,7 @@ SELECT atg.identificatie                       AS brk_atg_id
    ,kot.toestandsdatum                 AS toestandsdatum
    ,kot.creation                               AS begindatum
    ,kot.einddatum                              AS einddatum
-   ,LEAST(kot.einddatum, atg.einddatum)        AS expiration_date
+   ,LEAST(kot.expiration_date, atg.einddatum)        AS expiration_date
 --
 FROM   brk.aantekening atg
 JOIN   brk.aantekening_kadastraalobject akt             ON     (atg.id = akt.aantekening_id)
