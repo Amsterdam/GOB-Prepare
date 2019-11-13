@@ -10,7 +10,7 @@ SELECT
 ,art.nrn_tng_ids				  AS nrn_tng_ids
 ,geb.nrn_sdl_ids 				  AS nrn_sdl_ids
 ,art.toestandsdatum       AS toestandsdatum
-,atg.einddatum                    AS expiration_date
+,least(atg.einddatum, art.einddatum)                    AS expiration_date
 FROM BRK.AANTEKENING atg
 LEFT JOIN (
 	SELECT
@@ -31,6 +31,7 @@ LEFT JOIN (
 JOIN (
 	SELECT
 		art.aantekening_id,
+	    max(tng.einddatum) AS einddatum,
 	    max(tng.toestandsdatum) AS toestandsdatum,
 		array_to_json(array_agg(json_build_object('nrn_tng_id', tng.nrn_tng_id) ORDER BY tng.nrn_tng_id)) AS nrn_tng_ids
 	FROM brk.aantekeningrecht art
