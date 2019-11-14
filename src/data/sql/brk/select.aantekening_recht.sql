@@ -31,7 +31,7 @@ LEFT JOIN (
 JOIN (
 	SELECT
 		art.aantekening_id,
-	    max(tng.einddatum) AS einddatum,
+	    case when sum (case when tng.einddatum is null then 1 else 0 end) > 0 then null else max(tng.einddatum) end AS einddatum,
 	    max(tng.toestandsdatum) AS toestandsdatum,
 		array_to_json(array_agg(json_build_object('nrn_tng_id', tng.nrn_tng_id) ORDER BY tng.nrn_tng_id)) AS nrn_tng_ids
 	FROM brk.aantekeningrecht art
