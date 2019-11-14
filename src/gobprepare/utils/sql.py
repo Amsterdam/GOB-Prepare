@@ -40,7 +40,7 @@ def _create_field(name, type, description):
     }
 
 
-def get_create_table_sql(schema, table_name, description, meta_fields, field_names, primary_key=None):
+def get_create_table_sql(schema, table_name, description, meta_fields, field_names):
     """
     Returns a SQL statement to create a table in a schema
     The table fields are constructed from GraphQL meta fields
@@ -61,7 +61,6 @@ def get_create_table_sql(schema, table_name, description, meta_fields, field_nam
         f"COMMENT ON COLUMN {table_name}.{field['name']} "
         f"IS {SQL_QUOTATION_MARK}{field['description']}{SQL_QUOTATION_MARK}" for field in fields
     ])
-    primary_key_sql = f"  ,PRIMARY KEY ({primary_key})" if primary_key else ""
 
     return f"""
 DROP TABLE IF EXISTS {table_name} CASCADE;
@@ -69,7 +68,6 @@ DROP TABLE IF EXISTS {table_name} CASCADE;
 CREATE TABLE IF NOT EXISTS {table_name}
 (
   {table_fields}
-{primary_key_sql}
 );
 COMMIT;
 
