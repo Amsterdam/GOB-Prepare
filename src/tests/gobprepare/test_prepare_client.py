@@ -315,6 +315,33 @@ class TestPrepareClient(TestCase):
         with self.assertRaises(NotImplementedError):
             prepare_client.action_import_csv({})
 
+    @patch("gobprepare.prepare_client.PostgresAPIImporter", autospec=True)
+    def test_action_import_api(self, mock_importer, mock_logger):
+        action = {
+            "action": "import_api",
+            "destination": "some_table",
+            "somemore": "configuration",
+        }
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._dst_connection = "connection"
+        prepare_client._get_query = MagicMock(return_value="the_query")
+        prepare_client.destination["type"] = "postgres"
+        mock_importer_instance = mock_importer.return_value
+        mock_importer_instance.import_api.return_value = 77
+
+        result = prepare_client.action_import_api(action)
+        self.assertEqual(77, result)
+
+        mock_importer.assert_called_with(prepare_client._dst_connection, action, "the_query")
+        mock_importer_instance.import_api.assert_called_once()
+
+    def test_action_import_api_invalid_destination(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.destination["type"] = "somedb"
+
+        with self.assertRaises(NotImplementedError):
+            prepare_client.action_import_api({})
+
     def test_action_join_actions(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         action = {
@@ -448,6 +475,22 @@ class TestPrepareClient(TestCase):
         self.assertEqual({
             "action": "import_csv",
             "rows_imported": 425,
+            "id": "id",
+        }, result)
+
+    def test_run_prepare_action_import_api(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.action_import_api = MagicMock(return_value=88)
+        action = {
+            "type": "import_api",
+            "id": "id",
+        }
+
+        result = prepare_client._run_prepare_action(action)
+        prepare_client.action_import_api.assert_called_with(action)
+        self.assertEqual({
+            "action": "import_api",
+            "rows_imported": 88,
             "id": "id",
         }, result)
 

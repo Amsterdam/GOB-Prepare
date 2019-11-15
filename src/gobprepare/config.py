@@ -8,6 +8,11 @@ ORACLE_DRIVER = 'oracle+cx_oracle'
 POSTGRES_DRIVER = 'postgresql'
 DEBUG = os.getenv('GOB_DEBUG', False)
 
+STREAMING_GRAPHQL_ENDPOINT = '/gob/graphql/streaming/'
+GRAPHQL_ENDPOINT = '/gob/graphql/'
+WRITE_BATCH_SIZE = 10000
+GOB_API_HOST = os.getenv('API_HOST', 'http://localhost:8141')
+
 DATABASE_CONFIGS = {
     'Neuron': {
         'drivername': ORACLE_DRIVER,

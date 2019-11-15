@@ -7,6 +7,11 @@ Prepare source data before the import is done by the GOB-Import service.
 A running [GOB infrastructure](https://github.com/Amsterdam/GOB-Infra)
 is required to run this component.
 
+# Prerequisites
+
+Prepare should run after Import BAG is completed.
+This is because BAG verblijfsobjecten are required for import_verblijfsobjecten_geometrie action.
+
 # Docker
 
 ## Requirements

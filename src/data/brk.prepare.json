@@ -1366,6 +1366,19 @@
       ],
       "query_src": "file",
       "query": "data/sql/brk/kot.add_relatie_g_perceel.sql"
+    },
+    {
+      "type": "import_api",
+      "description": "Import BAG geometrie van verblijfsobjecten",
+      "id": "import_verblijfsobjecten_geometrie",
+      "depends_on": [
+        "populate_relatie_g_perceel"
+      ],
+      "query_src": "file",
+      "query": "data/api/bag/verblijfsobjecten_geometrie_import.graphql",
+      "meta_type": "bag_verblijfsobjectenRootObjectType",
+      "schema": "bag",
+      "destination": "verblijfsobjecten_geometrie"
     }
   ]
 }

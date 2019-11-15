@@ -17,6 +17,7 @@ from gobcore.logging.logger import logger
 from gobcore.message_broker.config import PREPARE
 from gobprepare.config import get_database_config
 from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
+from gobprepare.importers.api_importer import PostgresAPIImporter
 from gobprepare.importers.csv_importer import PostgresCsvImporter
 from gobprepare.selector.oracle_to_postgres import OracleToPostgresSelector
 from gobprepare.selector.postgres_to_postgres import PostgresToPostgresSelector
@@ -183,7 +184,23 @@ class PrepareClient:
             raise NotImplementedError
 
         rows_imported = importer.import_csv()
-        logger.info(f"Imported {rows_imported} rows from CSV in table {action['destination']}")
+        logger.info(f"Imported {rows_imported} rows from CSV to table {action['destination']}")
+        return rows_imported
+
+    def action_import_api(self, action: dict):
+        """Import API action. Import API into destination database action.
+
+        :param action:
+        :return:
+        """
+        if self.destination['type'] == "postgres":
+            query = self._get_query(action)
+            importer = PostgresAPIImporter(self._dst_connection, action, query)
+        else:
+            raise NotImplementedError
+
+        rows_imported = importer.import_api()
+        logger.info(f"Imported {rows_imported} rows from API to table {action['destination']}")
         return rows_imported
 
     def _get_query(self, action: dict):
@@ -227,6 +244,8 @@ class PrepareClient:
             result["executed"] = "OK"
         elif action["type"] == "import_csv":
             result["rows_imported"] = self.action_import_csv(action)
+        elif action["type"] == "import_api":
+            result["rows_imported"] = self.action_import_api(action)
         elif action["type"] == "join_actions":
             # Action only joins dependencies. No further actions necessary
             return None
