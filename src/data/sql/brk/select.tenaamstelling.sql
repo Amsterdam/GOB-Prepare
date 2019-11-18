@@ -22,7 +22,7 @@ SELECT t.identificatie              	AS brk_tng_id
 ,      zrt.toestandsdatum               AS toestandsdatum
 ,      zrt.rust_op_kadastraalobj_volgnr AS volgnummer
 ,      zrt.zrt_begindatum               AS begindatum
-,      least(zrt.zrt_einddatum, atg.einddatum) AS einddatum
+,      least(zrt.expiration_date, atg.einddatum) AS einddatum
 FROM BRK.TENAAMSTELLING t
 LEFT JOIN BRK.TENAAMSTELLING_ISGEBASEERDOP g    ON t.id=g.tenaamstelling_id
 LEFT JOIN BRK.C_SAMENWERKINGSVERBAND s          ON t.verkregen_namens_code=s.code
