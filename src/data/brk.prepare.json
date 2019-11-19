@@ -1379,6 +1379,16 @@
       "meta_type": "bag_verblijfsobjectenRootObjectType",
       "schema": "bag",
       "destination": "verblijfsobjecten_geometrie"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Generate geometrie voor actuele appartementsrechten",
+      "id": "update_geometrie_appartementsrechten",
+      "depends_on": [
+        "import_verblijfsobjecten_geometrie"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/kot.update_a_geometrie.sql"
     }
   ]
 }
