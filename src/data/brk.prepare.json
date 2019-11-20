@@ -166,7 +166,6 @@
       ],
       "mask": {
         "SUBJECT": {
-          "bsn": "*****",
           "voornamen": "*****",
           "voorvoegselsgeslsnaam": "*****",
           "geslachtsnaam": "*****",
@@ -226,7 +225,8 @@
         "clone_source",
         "create_indexes_source",
         "create_baghulptabel",
-        "import_burgerlijke_gemeentes"
+        "import_burgerlijke_gemeentes",
+        "import_bsn_overleden"
       ]
     },
     {
