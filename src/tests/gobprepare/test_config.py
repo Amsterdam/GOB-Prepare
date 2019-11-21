@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from gobcore.exceptions import GOBException
 
-from gobprepare.config import get_url, ORACLE_DRIVER, get_database_config
+from gobprepare.config import get_url, ORACLE_DRIVER, get_database_config, get_objectstore_config
 
 
 class TestConfig(TestCase):
@@ -40,3 +40,16 @@ class TestConfig(TestCase):
     def test_get_nonexistent_database_config(self):
         with self.assertRaises(GOBException):
             get_database_config("nonexistent")
+
+    def test_get_objectstore_config(self):
+        available = [
+            'Basisinformatie'
+        ]
+
+        for config in available:
+            result = get_objectstore_config(config)
+            self.assertEqual(result['name'], config)
+
+    def test_get_nonexistent_objectstore_config(self):
+        with self.assertRaises(GOBException):
+            get_objectstore_config("nonexistent")

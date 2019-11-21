@@ -13,7 +13,7 @@ SELECT
           END                                                     AS Type_subject                  --stelselpedia
         ,sjt.beschikkingsbevoegdheid_code                         AS Code_Beschikkingsbevoegdheid  --stelselpedia
         ,bbd.omschrijving                                         AS Oms_Beschikkingsbevoegdheid   --stelselpedia
-        ,sjt.bsn                                                  AS Heeft_BSN_voor                --stelselpedia
+        ,'*****'                                                  AS Heeft_BSN_voor                --stelselpedia
         , CASE WHEN sjt.voornamen             IS NOT NULL THEN sjt.voornamen         ELSE sjt.kad_voornamen
            END                                                    AS Voornamen                     --stelselpedia
         , CASE WHEN sjt.voorvoegselsgeslsnaam IS NOT NULL THEN sjt.voorvoegselsgeslsnaam ELSE sjt.kad_voorvoegselsgeslsnaam
@@ -34,7 +34,10 @@ SELECT
           END                                                     AS Code_geboorteland              --stelselpedia
         , CASE WHEN gld1.omschrijving         IS NOT NULL THEN gld1.omschrijving     ELSE lad.omschrijving
           END                                                     AS Omschrijving_geboorteland      --stelselpedia
-        , CASE WHEN sjt.datumoverlijden       IS NOT NULL THEN sjt.datumoverlijden   ELSE sjt.kad_datumoverlijden
+        , CASE
+            WHEN bon.overlijdensdatum IS NOT NULL THEN bon.overlijdensdatum
+            WHEN sjt.datumoverlijden  IS NOT NULL THEN sjt.datumoverlijden
+            ELSE sjt.kad_datumoverlijden
            END                                                    AS Datum_overlijden               --stelselpedia
         ,sjt.kad_indicatieoverleden                               AS Indicatieoverleden             --stelselpedia
         ,sjt.partner_voornamen                                    AS Voornamen_partner              --stelselpedia
@@ -107,4 +110,5 @@ SELECT
          LEFT   JOIN brk.c_gbaland                   gld3   ON (sws.buitenland_land_code = gld3.code)        -- BUITENLAND_LAND_OMSCHRIJVING
          LEFT   JOIN brk.c_gbaland                   gld4   ON (sps.buitenland_land_code = gld4.code)        -- BUITENLAND_LAND_OMSCHRIJVING
          LEFT   JOIN brk_prep.subject_expiration_date ede   ON (sjt.identificatie=ede.subject_id)
+         LEFT   JOIN brk_prep.bsn_overleden           bon   ON (sjt.bsn=bon.bsn)
          JOIN   brk.bestand bsd                          ON (1 = 1)

@@ -48,6 +48,21 @@
       "id": "create_bestand_table"
     },
     {
+      "type": "import_csv",
+      "source": "brk/Totaal_overleden.csv",
+      "objectstore": "Basisinformatie",
+      "column_names": {
+        "01 - BSN": "bsn",
+        "01 - Overlijdensdatum": "overlijdensdatum"
+      },
+      "separator": ";",
+      "destination": "brk_prep.bsn_overleden",
+      "id": "import_bsn_overleden",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
       "type": "clone",
       "source_schema": "BRK",
       "destination_schema": "brk",
@@ -151,7 +166,6 @@
       ],
       "mask": {
         "SUBJECT": {
-          "bsn": "*****",
           "voornamen": "*****",
           "voorvoegselsgeslsnaam": "*****",
           "geslachtsnaam": "*****",
@@ -211,7 +225,8 @@
         "clone_source",
         "create_indexes_source",
         "create_baghulptabel",
-        "import_burgerlijke_gemeentes"
+        "import_burgerlijke_gemeentes",
+        "import_bsn_overleden"
       ]
     },
     {

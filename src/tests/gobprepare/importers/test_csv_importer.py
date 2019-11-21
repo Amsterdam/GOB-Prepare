@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from pandas.errors import ParserError
 from urllib.error import HTTPError
 from gobcore.exceptions import GOBException
-from gobprepare.importers.csv_importer import PostgresCsvImporter
+from gobprepare.importers.csv_importer import PostgresCsvImporter, CONTAINER_BASE
 
 
 class TestPostgresCsvImporter(TestCase):
@@ -19,7 +19,11 @@ class TestPostgresCsvImporter(TestCase):
         rows = [
             ['row1col1', 'row1 col 2', 'row1col 3'],
             ['ro w2c o l1', 'row2 col 2', 'r o w 2 c o l 3'],
+            ['', '', ''],
             ['row3 col1', 'r o w3 col 2', 'ro w 3 c ol 3'],
+            ['', '', ''],
+            ['', '', ''],
+            ['', '', ''],
         ]
         cols = {
             "col_a": [row[0] for row in rows],
@@ -36,6 +40,10 @@ class TestPostgresCsvImporter(TestCase):
                 (1, self.MockRow(self.rows[0])),
                 (2, self.MockRow(self.rows[1])),
                 (3, self.MockRow(self.rows[2])),
+                (3, self.MockRow(self.rows[3])),
+                (3, self.MockRow(self.rows[4])),
+                (3, self.MockRow(self.rows[5])),
+                (3, self.MockRow(self.rows[6])),
             ]
 
     def setUp(self) -> None:
@@ -51,28 +59,72 @@ class TestPostgresCsvImporter(TestCase):
         self.assertEqual(self.dst_connection, self.importer._dst_connection)
         self.assertEqual(self.config['source'], self.importer._source)
         self.assertEqual(self.config['destination'], self.importer._destination)
+        self.assertEqual(',', self.importer._separator)
+        self.assertEqual({}, self.importer._column_names)
+
+    def test_init_non_defaults(self):
+        self.config['column_names'] = {'csv_column': 'db_column'}
+        self.config['separator'] = ';'
+
+        importer = PostgresCsvImporter(self.dst_connection, self.config)
+        self.assertEqual(';', importer._separator)
+        self.assertEqual({'csv_column': 'db_column'}, importer._column_names)
+
+    @patch("gobprepare.importers.csv_importer.PostgresCsvImporter._load_from_objectstore")
+    def test_init_objectstore(self, mock_load_from_objectstore):
+        self.config['objectstore'] = 'SomeObjectstoreReference'
+        self.config['source'] = 'file/on/objectstore.ext'
+
+        importer = PostgresCsvImporter(self.dst_connection, self.config)
+        mock_load_from_objectstore.assert_called_with('SomeObjectstoreReference', 'file/on/objectstore.ext')
+        self.assertEqual(mock_load_from_objectstore.return_value, importer._source)
+
+    def test_empty_row(self):
+        class MockPandasList:
+            def __init__(self, lst: list):
+                self.lst = lst
+
+            def tolist(self):
+                return self.lst
+
+        testcases = (
+            (MockPandasList([]), True),
+            (MockPandasList([1, 2]), False),
+            (MockPandasList(['', '']), True),
+            (MockPandasList(['', '2']), False),
+            (MockPandasList(['', 0]), False),
+        )
+
+        for input, output in testcases:
+            self.assertEqual(output, self.importer._is_empty_row(input))
 
     @patch("gobprepare.importers.csv_importer.read_csv")
     def test_load_csv(self, mock_read_csv):
         mock_pandas = self.MockPandasDataFrame()
         mock_read_csv.return_value = mock_pandas
 
+        # col_a will be replaced by db_col_a
+        self.importer._column_names = {
+            'col_a': 'db_col_a'
+        }
+
         result = self.importer._load_csv()
 
         expected_result = {
             "columns": [
-                {"name": "col_a", "max_length": max([len(i) for i in mock_pandas.cols['col_a']])},
+                {"name": "db_col_a", "max_length": max([len(i) for i in mock_pandas.cols['col_a']])},
                 {"name": "col_b", "max_length": max([len(i) for i in mock_pandas.cols['col_b']])},
                 {"name": "col_c", "max_length": max([len(i) for i in mock_pandas.cols['col_c']])},
             ],
             "data": [
+                # Empty rows should not be returned
                 [str(i) for i in mock_pandas.rows[0]],
                 [str(i) for i in mock_pandas.rows[1]],
-                [str(i) for i in mock_pandas.rows[2]],
+                [str(i) for i in mock_pandas.rows[3]],
             ]
         }
         self.assertEqual(expected_result, result)
-        mock_read_csv.assert_called_with(self.importer._source, keep_default_na=False)
+        mock_read_csv.assert_called_with(self.importer._source, keep_default_na=False, sep=self.importer._separator)
 
     @patch("gobprepare.importers.csv_importer.read_csv")
     def test_load_csv_parser_error(self, mock_read_csv):
@@ -89,6 +141,33 @@ class TestPostgresCsvImporter(TestCase):
 
         with self.assertRaisesRegex(GOBException, self.config['source']):
             self.importer._load_csv()
+
+    @patch("gobprepare.importers.csv_importer.tempfile.gettempdir", lambda: '/the_tmp_dir')
+    @patch("gobprepare.importers.csv_importer.os.makedirs")
+    def test_tmp_filename(self, mock_makedirs):
+        objectstore_filename = 'the/file/on_objectstore/dir/file.ext'
+        expected_tmp_filename = '/the_tmp_dir/the/file/on_objectstore/dir/file.ext'
+        self.assertEqual(expected_tmp_filename, self.importer._tmp_filename(objectstore_filename))
+
+        mock_makedirs.assert_called_with('/the_tmp_dir/the/file/on_objectstore/dir', exist_ok=True)
+
+    @patch("gobprepare.importers.csv_importer.connect_to_objectstore")
+    @patch("gobprepare.importers.csv_importer.get_objectstore_config")
+    @patch("builtins.open")
+    def test_load_from_objectstore(self, mock_open, mock_get_config, mock_connect):
+        self.importer._tmp_filename = MagicMock()
+        mock_connection = MagicMock()
+        mock_connect.return_value = mock_connection, None
+        mock_connection.get_object.return_value = [{}, 'the object data']
+
+        result = self.importer._load_from_objectstore('ObjectStoreId', 'file/location/on/objectstore.ext')
+
+        mock_connection.get_object.assert_called_with(CONTAINER_BASE, 'file/location/on/objectstore.ext')
+        mock_get_config.assert_called_with('ObjectStoreId')
+        mock_connect.assert_called_with(mock_get_config.return_value)
+
+        mock_open.return_value.__enter__.return_value.write.assert_called_with('the object data')
+        self.assertEqual(self.importer._tmp_filename.return_value, result)
 
     @patch("gobprepare.importers.csv_importer.execute_postgresql_query")
     def test_create_destination_table(self, mock_execute):
