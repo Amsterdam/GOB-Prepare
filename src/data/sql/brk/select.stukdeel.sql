@@ -140,7 +140,7 @@ WITH stukdelen AS (SELECT sdl.identificatie                         AS brk_sdl_i
                                          LEFT JOIN brk.appartementsrechtsplitsing asg
                                                    ON (arl.appartementsrechtsplitsing_id = asg.id)
                                          LEFT JOIN brk_prep.zakelijk_recht zrt
-                                                   ON (zrt.ontstaan_uit_asg_id = asg.id)
+                                                   ON (zrt.ontstaan_uit_asg_id = asg.id or zrt.betrokken_bij_asg_id = asg.id)
                                 GROUP BY arl.stukdeel_identificatie, zrt.identificatie
                             ) q
                        GROUP BY stukdeel_identificatie
