@@ -10,6 +10,9 @@
     "application": "GOBPrepare",
     "type": "postgres"
   },
+  "publish_schemas": {
+    "brk_prep": "brk_prepared"
+  },
   "actions": [
     {
       "type": "clear",
