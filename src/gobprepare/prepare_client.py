@@ -51,6 +51,9 @@ class PrepareClient:
         self.source_app = self._prepare_config['source']['application']
         self.destination = self._prepare_config['destination']
         self.destination_app = self._prepare_config['destination']['application']
+        self.publish_schemas = self._prepare_config.get('publish_schemas', {})
+
+        assert isinstance(self.publish_schemas, dict)
 
         start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
         self.process_id = self.header.get('process_id', f"{start_timestamp}.{self.source_app}{self._name}")
@@ -392,6 +395,22 @@ class PrepareClient:
 
         return self._get_result()
 
+    def _publish_result_schemas(self):
+        for src_schema, dst_schema in self.publish_schemas.items():
+            self._publish_schema(src_schema, dst_schema)
+
+    def _publish_schema(self, src_schema: str, dst_schema: str):
+        if src_schema == dst_schema:
+            raise GOBException(f"Publish schema: src and dst schema are the same. Don't understand what you want."
+                               f"Really bad idea too though.")
+
+        logger.info(f"Publish schema {dst_schema}")
+        if self.destination['type'] == "postgres":
+            execute_postgresql_query(self._dst_connection, f'DROP SCHEMA IF EXISTS "{dst_schema}" CASCADE')
+            execute_postgresql_query(self._dst_connection, f'ALTER SCHEMA "{src_schema}" RENAME TO "{dst_schema}"')
+        else:
+            raise NotImplementedError
+
     def complete_prepare_process(self):
         """Function is called when all tasks are completed.
 
@@ -399,6 +418,10 @@ class PrepareClient:
 
         :return:
         """
+        self.connect()
+        self._publish_result_schemas()
+        self.disconnect()
+
         metadata = {
             **self.header,
             **self.msg,  # Return original message in header
