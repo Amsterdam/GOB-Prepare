@@ -31,7 +31,10 @@ class TestPrepareClient(TestCase):
                         "somecolumn": "mask"
                     }
                 }
-            }]
+            }],
+            'publish_schemas': {
+                'src schema': 'dst schema',
+            }
         }
 
         self.mock_msg = {
@@ -46,6 +49,7 @@ class TestPrepareClient(TestCase):
         # Expect a process_id is created
         self.assertTrue(prepare_client.process_id)
         self.assertEqual(self.mock_msg['header'], prepare_client.header)
+        self.assertEqual({'src schema': 'dst schema'}, prepare_client.publish_schemas)
 
         # Assert the logger is configured and called
         mock_logger.configure.assert_called_with({'header': ANY}, "PREPARE")
@@ -632,12 +636,50 @@ class TestPrepareClient(TestCase):
             'type': 'newtype'
         })
 
+    def test_publish_result_schemas(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._publish_schema = MagicMock()
+        prepare_client.publish_schemas = {
+            'src a': 'dst a',
+            'src b': 'dst b',
+        }
+        prepare_client._publish_result_schemas()
+        prepare_client._publish_schema.assert_has_calls([
+            call('src a', 'dst a'),
+            call('src b', 'dst b'),
+        ])
+
+    @patch("gobprepare.prepare_client.execute_postgresql_query")
+    def test_publish_schema(self, mock_execute, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.destination = {'type': 'postgres'}
+        prepare_client._dst_connection = MagicMock()
+
+        prepare_client._publish_schema('src schema', 'dst schema')
+
+        mock_execute.assert_has_calls([
+            call(prepare_client._dst_connection, 'DROP SCHEMA IF EXISTS "dst schema" CASCADE'),
+            call(prepare_client._dst_connection, 'ALTER SCHEMA "src schema" RENAME TO "dst schema"'),
+        ])
+
+        prepare_client.destination = {'type': 'not implemented'}
+
+        with self.assertRaises(NotImplementedError):
+            prepare_client._publish_schema('src schema', 'dst schema')
+
+        with self.assertRaises(GOBException):
+            prepare_client._publish_schema('same src and dst', 'same src and dst')
+
     def test_complete_prepare_process(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.connect = MagicMock()
+        prepare_client.disconnect = MagicMock()
+        prepare_client._publish_result_schemas = MagicMock()
         prepare_client.msg['summary'] = {'key': 'value'}
 
         result = prepare_client.complete_prepare_process()
         self.assertEquals([], result['contents'])
+        prepare_client._publish_result_schemas.assert_called_once()
 
     def test_split_clone_action(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
