@@ -23,7 +23,6 @@ SELECT nrn_kot_id, nrn_kot_volgnr, g_poly
             AND g_perceel->>'nrn_kot_id' IS NOT NULL
         JOIN brk_prep.kadastraal_object kot2
             ON kot2.nrn_kot_id =  (g_perceel->>'nrn_kot_id')::integer
-            AND kot2.nrn_kot_volgnr =  (g_perceel->>'kot_volgnummer')::integer
             AND kot2.expiration_date IS NULL
         WHERE kot1.index_letter = 'A'
             AND kot1.expiration_date IS NULL
@@ -71,7 +70,6 @@ WITH point_g_poly AS (
         AND g_perceel->>'nrn_kot_id' IS NOT NULL
     JOIN brk_prep.kadastraal_object kot2
         ON kot2.nrn_kot_id = (g_perceel->>'nrn_kot_id')::integer
-        AND kot2.nrn_kot_volgnr = (g_perceel->>'kot_volgnummer')::integer
         AND kot2.expiration_date IS NULL
     WHERE kot1.index_letter = 'A'
         AND kot1.expiration_date IS NULL
