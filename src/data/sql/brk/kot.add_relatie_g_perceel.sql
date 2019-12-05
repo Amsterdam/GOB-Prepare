@@ -124,7 +124,7 @@ BEGIN
                 ON TRUE
             LEFT JOIN brk_prep.kadastraal_object gperceel
                 ON gperceel.nrn_kot_id=(json_gperc_elms.obj->>'nrn_kot_id')::integer
-                AND gperceel.nrn_kot_volgnr=(json_elms.obj->>'kot_volgnummer')::integer
+                AND gperceel.nrn_kot_volgnr=(json_gperc_elms.obj->>'kot_volgnummer')::integer
             WHERE ontst_uit_kot.relatie_g_perceel <> 'null'
                 AND kot.index_letter = 'A'
                 AND kot.relatie_g_perceel = 'null'
