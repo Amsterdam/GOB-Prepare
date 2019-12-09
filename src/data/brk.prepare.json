@@ -167,21 +167,6 @@
         "^MDRT_.*",
         "^MDXT_.*"
       ],
-      "mask": {
-        "SUBJECT": {
-          "voornamen": "*****",
-          "voorvoegselsgeslsnaam": "*****",
-          "geslachtsnaam": "*****",
-          "geboortedatum": "****-**-**",
-          "partner_geslachtsnaam": "*****",
-          "partner_voornamen": "*****",
-          "partner_voorvoegselsgeslsnaam": "*****",
-          "kad_voornamen": "*****",
-          "kad_voorvoegselsgeslsnaam": "*****",
-          "kad_geslachtsnaam": "*****",
-          "kad_geboortedatum": "****-**-**"
-        }
-      },
       "depends_on": [
         "clear_schemas"
       ],
