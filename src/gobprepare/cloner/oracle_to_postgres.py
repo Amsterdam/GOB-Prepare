@@ -23,7 +23,6 @@ class OracleToPostgresCloner():
     WRITE_BATCH_SIZE = 100000
 
     schema_definition = None
-    _mask_columns = {}
     _ignore_tables = []
     _include_tables = []
     _id_columns = {}
@@ -45,7 +44,6 @@ class OracleToPostgresCloner():
             if config.get('ignore') and config.get('include'):
                 raise GOBException("Don't know what to do with both ignore and include in the config. "
                                    "Use either, not both.")
-            self._mask_columns = config.get('mask', {})
             self._ignore_tables = config.get('ignore', [])
             self._include_tables = config.get('include', [])
             self._id_columns = config.get('id_columns', {})
@@ -299,22 +297,6 @@ class OracleToPostgresCloner():
         logger.info(f"Written {row_cnt} rows to destination table {full_table_name}")
         return row_cnt
 
-    def _mask_rows(self, table_name: str, row_data: List[Dict]) -> List[Dict]:
-        """
-        Masks the provided rows if a mask is defined in the config.
-
-        :param table_name:
-        :param row_data:
-        :return:
-        """
-        if table_name not in self._mask_columns:
-            return row_data
-
-        for row in row_data:
-            row.update({colname: maskvalue for colname, maskvalue in self._mask_columns[table_name].items()
-                        if row[colname] is not None})
-        return row_data
-
     def _insert_rows(self, table_definition: Tuple[str, List], row_data: List[Dict]) -> None:
         """
         Inserts row_data into table. Input is a list of dicts with column: value pairs.
@@ -326,9 +308,6 @@ class OracleToPostgresCloner():
         :return:
         """
         table_name, table_columns = table_definition
-
-        if table_name in self._mask_columns:
-            row_data = self._mask_rows(table_name, row_data)
 
         full_table_name = f"{self._dst_schema}.{table_name}"
         # Divide rows in chunks of size WRITE_BATCH_SIZE
