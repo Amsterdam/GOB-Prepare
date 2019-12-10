@@ -101,7 +101,11 @@ WITH near_a_poly AS (
         AND kot2.geometrie IS NOT NULL
     WHERE kot1.geometrie IS NULL
         AND kot1.index_letter = 'A'
-        AND kot1.expiration_date IS NULL)
+        AND kot1.expiration_date IS NULL
+    ORDER BY
+        kot1.nrn_kot_id,
+        kot1.nrn_kot_volgnr,
+        kot2.kadastrale_aanduiding)
 UPDATE brk_prep.kadastraal_object
 SET geometrie = near_a_poly.geometrie
 FROM near_a_poly
