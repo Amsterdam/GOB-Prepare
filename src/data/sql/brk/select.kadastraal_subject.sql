@@ -13,7 +13,7 @@ SELECT
           END                                                     AS Type_subject                  --stelselpedia
         ,sjt.beschikkingsbevoegdheid_code                         AS Code_Beschikkingsbevoegdheid  --stelselpedia
         ,bbd.omschrijving                                         AS Oms_Beschikkingsbevoegdheid   --stelselpedia
-        ,'*****'                                                  AS Heeft_BSN_voor                --stelselpedia
+        ,sjt.bsn                                                  AS Heeft_BSN_voor                --stelselpedia
         , CASE WHEN sjt.voornamen             IS NOT NULL THEN sjt.voornamen         ELSE sjt.kad_voornamen
            END                                                    AS Voornamen                     --stelselpedia
         , CASE WHEN sjt.voorvoegselsgeslsnaam IS NOT NULL THEN sjt.voorvoegselsgeslsnaam ELSE sjt.kad_voorvoegselsgeslsnaam

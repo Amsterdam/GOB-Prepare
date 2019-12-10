@@ -22,28 +22,20 @@ class TestOracleToPostgresCloner(TestCase):
             {}
         )
 
-    def test_init_no_mask_columns_or_ignore_tables(self):
+    def test_init_no_ignore_tables(self):
         # Test empty dict
         cloner = OracleToPostgresCloner(self.oracle_connection_mock, self.src_schema, self.postgres_connection_mock,
                                         self.dst_schema, {})
 
-        self.assertEquals({}, cloner._mask_columns)
         self.assertEquals([], cloner._ignore_tables)
 
         # Test None
         cloner = OracleToPostgresCloner(self.oracle_connection_mock, self.src_schema, self.postgres_connection_mock,
                                         self.dst_schema, None)
-        self.assertEquals({}, cloner._mask_columns)
         self.assertEquals([], cloner._ignore_tables)
 
-    def test_init_with_mask_columns_and_ignore_tables(self):
+    def test_init_with_ignore_tables(self):
         config = {
-            "mask": {
-                "table_name": {
-                    "column_a": "mask_a",
-                    "column_b": "mask_b",
-                },
-            },
             "ignore": [
                 "table_a",
                 "table_b",
@@ -52,7 +44,6 @@ class TestOracleToPostgresCloner(TestCase):
         cloner = OracleToPostgresCloner(self.oracle_connection_mock, self.src_schema, self.postgres_connection_mock,
                                         self.dst_schema, config)
 
-        self.assertEquals(config["mask"], cloner._mask_columns)
         self.assertEquals(config["ignore"], cloner._ignore_tables)
 
     def test_init_with_ignore_and_include(self):
@@ -277,7 +268,6 @@ class TestOracleToPostgresCloner(TestCase):
 
         self.cloner._get_select_list_for_table_definition = MagicMock(return_value="colA, colB, colC")
         self.cloner._insert_rows = MagicMock()
-        self.cloner._mask_columns = MagicMock()
         self.cloner._get_order_by_clause = MagicMock(return_value="ORDERBYCLAUSE")
         self.cloner._get_ids_for_table = MagicMock(return_value='list of ids')
         self.cloner._get_id_columns_for_table = MagicMock()
@@ -294,7 +284,6 @@ class TestOracleToPostgresCloner(TestCase):
         ])
 
         mock_logger.info.assert_called_once()
-        self.cloner._mask_columns.assert_not_called()
         self.cloner._get_ids_for_table(f"{self.cloner._src_schema}.tableName")
         self.cloner._get_id_columns_for_table.assert_called_with(f"{self.cloner._src_schema}.tableName")
         self.cloner._list_to_chunks.assert_called_with('list of ids', self.cloner.READ_BATCH_SIZE)
@@ -304,7 +293,6 @@ class TestOracleToPostgresCloner(TestCase):
     def test_copy_table_data_chunk_minmax(self, mock_read_oracle, mock_logger):
         self.cloner._get_select_list_for_table_definition = MagicMock(return_value='cols')
         self.cloner._insert_rows = MagicMock()
-        self.cloner._mask_columns = MagicMock()
         self.cloner._get_order_by_clause = MagicMock()
         self.cloner._get_ids_for_table = MagicMock()
         self.cloner._get_id_columns_for_table = MagicMock(return_value=["order_column", "other_order_column"])
@@ -336,45 +324,12 @@ class TestOracleToPostgresCloner(TestCase):
 
         self.cloner._get_select_list_for_table_definition = MagicMock(return_value="colA, colB, colC")
         self.cloner._insert_rows = MagicMock()
-        self.cloner._mask_columns = MagicMock()
         self.cloner._get_ids_for_table = MagicMock()
         self.cloner._get_id_columns_for_table = MagicMock()
         self.cloner._list_to_chunks = MagicMock(return_value=[{"min": None, "max": None}])
         self.cloner._copy_table_data(("tableName", [('colA', 'int'), ('colB', 'varchar'), ('colC', 'varchar')]))
 
         self.assertEqual(2, mock_logger.info.call_count)
-        self.cloner._mask_columns.assert_not_called()
-
-    def test_mask_rows(self):
-        self.cloner._mask_columns = {
-            "table_name": {
-                "name": "***"
-            }
-        }
-        row_data = [
-            {"id": 4, "name": "Sheldon"},
-            {"id": 5, "name": "Leonard"},
-            {"id": 6, "name": None},
-        ]
-        expected_result = [
-            {"id": 4, "name": "***"},
-            {"id": 5, "name": "***"},
-            {"id": 6, "name": None},
-        ]
-        self.assertEqual(expected_result, self.cloner._mask_rows("table_name", row_data))
-
-    def test_mask_rows_nothing_to_mask(self):
-        self.cloner._mask_columns = {
-            "table_name": {
-                "name": "***"
-            }
-        }
-        row_data = [
-            {"id": 4, "name": "Sheldon"},
-            {"id": 5, "name": "Leonard"},
-            {"id": 6, "name": None},
-        ]
-        self.assertEqual(row_data, self.cloner._mask_rows("table_name_not_in_mask_columns", row_data))
 
     @patch("gobprepare.cloner.oracle_to_postgres.logger")
     @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
@@ -416,29 +371,6 @@ class TestOracleToPostgresCloner(TestCase):
             call(self.postgres_connection_mock, full_table_name, [[7, "Amy"], [1, "Rajesh"]]),
             call(self.postgres_connection_mock, full_table_name, [[9, "Howard"], [5, "Penny"]]),
             call(self.postgres_connection_mock, full_table_name, [[2, "Kripke"]]),
-        ])
-
-    @patch("gobprepare.cloner.oracle_to_postgres.write_rows_to_postgresql")
-    def test_insert_rows_with_mask(self, mock_write):
-        self.cloner.WRITE_BATCH_SIZE = 2
-        table_definition = ("table_name", [("id", "INT"), ("name", "VARCHAR")])
-        row_data = [
-            {"name": "Sheldon", "id": 3},
-            {"name": "Leonard", "id": 4},
-            {"name": "Amy", "id": 7},
-            {"name": "Rajesh", "id": 1},
-            {"name": "Howard", "id": 9},
-            {"name": "Penny", "id": 5},
-            {"name": "Kripke", "id": 2},
-        ]
-        full_table_name = f"{self.dst_schema}.table_name"
-        self.cloner._mask_columns = {"table_name": {"id": "**"}}
-        self.cloner._insert_rows(table_definition, row_data)
-        mock_write.assert_has_calls([
-            call(self.postgres_connection_mock, full_table_name, [["**", "Sheldon"], ["**", "Leonard"]]),
-            call(self.postgres_connection_mock, full_table_name, [["**", "Amy"], ["**", "Rajesh"]]),
-            call(self.postgres_connection_mock, full_table_name, [["**", "Howard"], ["**", "Penny"]]),
-            call(self.postgres_connection_mock, full_table_name, [["**", "Kripke"]]),
         ])
 
     def test_get_select_list_for_table_definition(self):
