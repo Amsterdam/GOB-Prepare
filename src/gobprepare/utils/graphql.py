@@ -1,5 +1,6 @@
 import json
 
+from gobcore.exceptions import GOBException
 from gobprepare.utils.requests import post_stream
 
 
@@ -28,5 +29,13 @@ class GraphQL:
         {"node": {"a": "2", "b": "yy"}}
         """
         items = post_stream(f'{self.host}{self.endpoint}', {'query': self.query})
+
+        last_item = None
         for item in items:
-            yield from self.item_to_list(json.loads(item))
+            last_item = item
+
+            if item != b'':
+                yield from self.item_to_list(json.loads(item))
+
+        if last_item != b'':
+            raise GOBException('Received incomplete response from GOB API')
