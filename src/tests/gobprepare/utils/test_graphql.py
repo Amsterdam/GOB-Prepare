@@ -1,7 +1,7 @@
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-from gobprepare.utils.graphql import GraphQL
+from gobprepare.utils.graphql import GraphQL ,GOBException
 from typing import Generator
 
 
@@ -12,9 +12,9 @@ class TestGraphQL(TestCase):
     def test_iter(self, mock_post_stream):
         graphql = GraphQL('the_host', 'the_url', 'query')
 
-        mock_post_stream.return_value = ['a', 'b', 'c', 'd', 'e', 'f']
+        mock_post_stream.return_value = ['a', 'b', 'c', 'd', 'e', 'f', b'']
 
-        expected_result = ['jl_' + item for item in mock_post_stream.return_value]
+        expected_result = ['jl_' + item for item in mock_post_stream.return_value[:-1]]
         self.assertIsInstance(graphql.__iter__(), Generator)
 
         result = [item for item in graphql]
@@ -22,9 +22,20 @@ class TestGraphQL(TestCase):
 
     @patch("gobprepare.utils.graphql.post_stream")
     @patch("gobprepare.utils.graphql.json.loads", lambda x: 'jl_' + x)
+    def test_iter_incomplete_response(self, mock_post_stream):
+        graphql = GraphQL('the_host', 'the_url', 'query')
+
+        # Missing empty line in result, should raise Exception
+        mock_post_stream.return_value = ['a', 'b', 'c', 'd', 'e', 'f']
+
+        with self.assertRaises(GOBException):
+            list(graphql)
+
+    @patch("gobprepare.utils.graphql.post_stream")
+    @patch("gobprepare.utils.graphql.json.loads", lambda x: 'jl_' + x)
     def test_query(self, mock_post_stream):
         graphql = GraphQL('the_host', 'the_url', 'query')
-        mock_post_stream.return_value = ['a', 'b']
+        mock_post_stream.return_value = ['a', 'b', b'']
         result = [i for i in graphql]
 
         url = 'the_host' + 'the_url'
