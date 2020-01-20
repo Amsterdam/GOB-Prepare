@@ -78,6 +78,8 @@ SELECT zrt.id
       ,kot.status_code AS kot_status_code
       ,kot.toestandsdatum       AS toestandsdatum
       ,kot.expiration_date AS expiration_date
+      ,kot.creation AS creation
+      ,kot.modification AS modification
 FROM   brk.zakelijkrecht zrt
 LEFT JOIN (
     SELECT
