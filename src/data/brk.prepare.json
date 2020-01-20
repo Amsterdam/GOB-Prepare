@@ -1421,7 +1421,6 @@
       ],
       "query_src": "file",
       "query": "data/sql/brk/brk.store_last_id.sql"
-    },
-    
+    }
   ]
 }
