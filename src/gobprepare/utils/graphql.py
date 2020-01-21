@@ -17,6 +17,9 @@ class GraphQL:
         item = item if isinstance(item, list) else [item]
         yield from item
 
+    def _query_items(self):
+        return post_stream(f'{self.host}{self.endpoint}', {'query': self.query})
+
     def __iter__(self):
         """Post to GraphQL API and yield items from the stream.
 
@@ -28,10 +31,19 @@ class GraphQL:
         {"node": {"a": "1", "b": "xx"}}
         {"node": {"a": "2", "b": "yy"}}
         """
-        items = post_stream(f'{self.host}{self.endpoint}', {'query': self.query})
+
+        for item in self._query_items():
+            yield from self.item_to_list(json.loads(item))
+
+
+class GraphQLStreaming(GraphQL):
+    """GraphQLStreaming works as the GraphQL class, but verifies that the response received is complete.
+    """
+
+    def __iter__(self):
 
         last_item = None
-        for item in items:
+        for item in self._query_items():
             last_item = item
 
             if item != b'':

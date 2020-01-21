@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS brk_metadata.last_source_id (
   last_id INTEGER NOT NULL,
   date_registered TIMESTAMP NOT NULL,
   PRIMARY KEY (id)
-)
+);
 
 INSERT INTO brk_metadata.last_source_id (
   collection,

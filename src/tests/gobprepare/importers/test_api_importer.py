@@ -1,6 +1,5 @@
 from collections import KeysView
 
-import pytest
 from unittest import TestCase
 from unittest.mock import patch, call, ANY
 
@@ -67,7 +66,6 @@ class TestPostgresAPIImporter(TestCase):
         assert self.importer.description == config['description']
         assert self.importer.meta_type == config['meta_type']
 
-
     @patch("gobprepare.importers.api_importer.PostgresAPIImporter.get_entities", return_value=iter(test_entities))
     @patch("gobprepare.importers.api_importer.PostgresAPIImporter.get_meta_data", return_value=iter(test_meta_data))
     @patch("gobprepare.importers.api_importer.PostgresAPIImporter.import_data", return_value=3)
@@ -77,11 +75,11 @@ class TestPostgresAPIImporter(TestCase):
         mock_get_meta_data.assert_called_with()
         mock_import_data.assert_called_with(mock_get_entities.return_value, mock_get_meta_data.return_value)
 
-    @patch("gobprepare.importers.api_importer.GraphQL", return_value=iter(test_entities))
+    @patch("gobprepare.importers.api_importer.GraphQLStreaming", return_value=iter(test_entities))
     def test_get_entities(self, mock_graphql):
         self.assertEqual(list(self.importer.get_entities()), test_entities)
 
-    @patch("gobprepare.importers.api_importer.GraphQL", return_value=iter([]))
+    @patch("gobprepare.importers.api_importer.GraphQLStreaming", return_value=iter([]))
     def test_get_entities_empty(self, mock_graphql):
         self.assertEqual(list(self.importer.get_entities()), [])
 
