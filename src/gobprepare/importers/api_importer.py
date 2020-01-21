@@ -6,7 +6,7 @@ from gobcore.database.writer.postgresql import (
     write_rows_to_postgresql,
 )
 from gobcore.exceptions import GOBException
-from gobprepare.utils.graphql import GraphQL
+from gobprepare.utils.graphql import GraphQL, GraphQLStreaming
 from gobprepare.utils.sql import (
     get_create_table_sql,
     get_full_table_name,
@@ -51,7 +51,7 @@ class PostgresAPIImporter():
 
         :return: Iterator to entities.
         """
-        return GraphQL(GOB_API_HOST, STREAMING_GRAPHQL_ENDPOINT, self.query)
+        return GraphQLStreaming(GOB_API_HOST, STREAMING_GRAPHQL_ENDPOINT, self.query)
 
     def get_meta_data(self):
         """Get meta data from GraphQL API.
