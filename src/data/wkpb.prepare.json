@@ -1,0 +1,97 @@
+{
+  "version": "0.1",
+  "name": "WKPB",
+  "catalogue": "wkpb",
+  "source": {
+    "application": "Neuron",
+    "type": "oracle"
+  },
+  "destination": {
+    "application": "GOBPrepare",
+    "type": "postgres"
+  },
+  "publish_schemas": {
+    "wkpb_prep": "wkpb_prepared"
+  },
+  "actions": [
+    {
+      "type": "clear",
+      "schemas": [
+        "wkpb_prep"
+      ],
+      "id": "clear_schemas"
+    },
+    {
+      "type": "select",
+      "source": "src",
+      "query": "data/sql/wkpb/select.beperkingen.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "wkpb_prep.beperkingen",
+        "create": true,
+        "columns": [
+          {
+            "name": "id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "src_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "src_volgnummer",
+            "type": "INT"
+          },
+          {
+            "name": "bronwaarde",
+            "type": "VARCHAR(240)"
+          }
+        ]
+      },
+      "depends_on": [
+        "clear_schemas"
+      ],
+      "id": "select_beperkingen"
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "query": "data/sql/wkpb/select.rel_wkpb_bpg_brk_kot_belast_kadastrale_objecten.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "wkpb_prep.rel_wkpb_bpg_brk_kot_belast_kadastrale_objecten",
+        "create": true,
+        "columns": [
+          {
+            "name": "id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "src_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "src_volgnummer",
+            "type": "INT"
+          },
+          {
+            "name": "dst_id",
+            "type": "VARCHAR(240)"
+          },
+          {
+            "name": "dst_volgnummer",
+            "type": "INT"
+          },
+          {
+            "name": "bronwaarde",
+            "type": "VARCHAR(240)"
+          }
+        ]
+      },
+      "depends_on": [
+        "select_beperkingen"
+      ],
+      "id": "select_rel_wkpb_bpg_brk_kot_belast_kadastrale_objecten"
+    }
+  ]
+}
