@@ -33,7 +33,7 @@ SELECT
   'nrn_atg_id' AS id_column,
   max(nrn_atg_id) AS last_id,
   now() AS date_registered
-FROM brk_prepared.aantekening_kadastraal_object;
+FROM brk_prepared.aantekening_recht;
 
 INSERT INTO brk_metadata.last_source_id (
   collection,
