@@ -105,8 +105,8 @@ BEGIN
         SET relatie_g_perceel=q.relatie_g_perceel
         FROM (
             SELECT
-                kot.nrn_kot_id,
-                kot.nrn_kot_volgnr,
+                nrn_kot_id,
+                nrn_kot_volgnr,
                 array_to_json(
                         array_agg(
                                 json_build_object(
