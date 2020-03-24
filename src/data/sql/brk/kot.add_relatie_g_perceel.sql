@@ -76,8 +76,7 @@ FROM (
         LEFT JOIN jsonb_array_elements(kot.ontstaan_uit_kadastraalobject) json_elms(obj)
             ON TRUE
         LEFT JOIN brk_prep.kadastraal_object ontst_uit_kot
-            ON ontst_uit_kot.nrn_kot_id=(json_elms.obj->>'nrn_kot_id')::integer
-            AND ontst_uit_kot.nrn_kot_volgnr=(json_elms.obj->>'kot_volgnummer')::integer
+            ON ontst_uit_kot.brk_kot_id=json_elms.obj->>'brk_kot_id'
         WHERE ontst_uit_kot.index_letter='G'
             AND kot.index_letter='A'
             AND kot.relatie_g_perceel = 'null'
@@ -122,13 +121,11 @@ BEGIN
                           LEFT JOIN jsonb_array_elements(kot.ontstaan_uit_kadastraalobject) json_elms(obj)
                                     ON TRUE
                           LEFT JOIN brk_prep.kadastraal_object ontst_uit_kot
-                                    ON ontst_uit_kot.nrn_kot_id = (json_elms.obj ->> 'nrn_kot_id')::integer
-                                        AND ontst_uit_kot.nrn_kot_volgnr = (json_elms.obj ->> 'kot_volgnummer')::integer
+                                    ON ontst_uit_kot.brk_kot_id = json_elms.obj->>'brk_kot_id'
                           LEFT JOIN jsonb_array_elements(ontst_uit_kot.relatie_g_perceel) json_gperc_elms(obj)
                                     ON TRUE
                           LEFT JOIN brk_prep.kadastraal_object gperceel
-                                    ON gperceel.nrn_kot_id = (json_gperc_elms.obj ->> 'nrn_kot_id')::integer
-                                        AND gperceel.nrn_kot_volgnr = (json_gperc_elms.obj ->> 'kot_volgnummer')::integer
+                                    ON gperceel.brk_kot_id = json_gperc_elms.obj->>'brk_kot_id'
                  WHERE ontst_uit_kot.relatie_g_perceel <> 'null'
                    AND kot.index_letter = 'A'
                    AND kot.relatie_g_perceel = 'null'
