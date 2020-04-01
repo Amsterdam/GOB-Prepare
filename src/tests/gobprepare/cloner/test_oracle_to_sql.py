@@ -1,37 +1,37 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, call, patch
 
-from gobcore.exceptions import GOBEmptyResultException, GOBException
-from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
+from gobcore.exceptions import GOBException
+from gobprepare.cloner.oracle_to_sql import OracleToSqlCloner
 from tests.fixtures import random_string
 
 
-class TestOracleToPostgresCloner(TestCase):
+class TestOracleToSqlCloner(TestCase):
 
     def setUp(self):
-        self.oracle_connection_mock = MagicMock()
-        self.postgres_connection_mock = MagicMock()
+        self.oracle_datastore_mock = MagicMock()
+        self.sql_datastore_mock = MagicMock()
         self.src_schema = random_string()
         self.dst_schema = random_string()
 
-        self.cloner = OracleToPostgresCloner(
-            self.oracle_connection_mock,
+        self.cloner = OracleToSqlCloner(
+            self.oracle_datastore_mock,
             self.src_schema,
-            self.postgres_connection_mock,
+            self.sql_datastore_mock,
             self.dst_schema,
             {}
         )
 
     def test_init_no_ignore_tables(self):
         # Test empty dict
-        cloner = OracleToPostgresCloner(self.oracle_connection_mock, self.src_schema, self.postgres_connection_mock,
-                                        self.dst_schema, {})
+        cloner = OracleToSqlCloner(self.oracle_datastore_mock, self.src_schema, self.sql_datastore_mock,
+                                   self.dst_schema, {})
 
         self.assertEquals([], cloner._ignore_tables)
 
         # Test None
-        cloner = OracleToPostgresCloner(self.oracle_connection_mock, self.src_schema, self.postgres_connection_mock,
-                                        self.dst_schema, None)
+        cloner = OracleToSqlCloner(self.oracle_datastore_mock, self.src_schema, self.sql_datastore_mock,
+                                   self.dst_schema, None)
         self.assertEquals([], cloner._ignore_tables)
 
     def test_init_with_ignore_tables(self):
@@ -41,8 +41,8 @@ class TestOracleToPostgresCloner(TestCase):
                 "table_b",
             ],
         }
-        cloner = OracleToPostgresCloner(self.oracle_connection_mock, self.src_schema, self.postgres_connection_mock,
-                                        self.dst_schema, config)
+        cloner = OracleToSqlCloner(self.oracle_datastore_mock, self.src_schema, self.sql_datastore_mock,
+                                   self.dst_schema, config)
 
         self.assertEquals(config["ignore"], cloner._ignore_tables)
 
@@ -52,15 +52,15 @@ class TestOracleToPostgresCloner(TestCase):
             "include": ["table_b"],
         }
         with self.assertRaises(GOBException):
-            OracleToPostgresCloner(self.oracle_connection_mock, self.src_schema, self.postgres_connection_mock,
-                                   self.dst_schema, config)
+            OracleToSqlCloner(self.oracle_datastore_mock, self.src_schema, self.sql_datastore_mock,
+                              self.dst_schema, config)
 
     def test_init_with_include_tables(self):
         config = {
             "include": ["table_a", "table_b"]
         }
-        cloner = OracleToPostgresCloner(self.oracle_connection_mock, self.src_schema, self.postgres_connection_mock,
-                                        self.dst_schema, config)
+        cloner = OracleToSqlCloner(self.oracle_datastore_mock, self.src_schema, self.sql_datastore_mock,
+                                   self.dst_schema, config)
         self.assertEquals(config["include"], cloner._include_tables)
 
     def test_filter_tables_no_filter(self):
@@ -113,24 +113,21 @@ class TestOracleToPostgresCloner(TestCase):
 
         self.assertEqual(expected_result, self.cloner._filter_tables(input))
 
-    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
-    def test_read_source_table_names(self, mock_read_from_oracle):
+    def test_read_source_table_names(self):
         self.cloner._filter_tables = MagicMock(side_effect=lambda x: x)
-        mock_read_from_oracle.return_value = [{'table_name': 'tableA'}, {'table_name': 'tableB'}]
+        self.cloner._src_datastore.read.return_value = [{'table_name': 'tableA'}, {'table_name': 'tableB'}]
 
         self.assertEqual(['tableA', 'tableB'], self.cloner.read_source_table_names())
 
-        mock_read_from_oracle.assert_called_with(
-            self.oracle_connection_mock,
-            [f"SELECT table_name FROM all_tables WHERE owner='{self.src_schema}' ORDER BY table_name"]
+        self.cloner._src_datastore.read.assert_called_with(
+            f"SELECT table_name FROM all_tables WHERE owner='{self.src_schema}' ORDER BY table_name"
         )
-        self.cloner._filter_tables.assert_called_with(mock_read_from_oracle.return_value)
+        self.cloner._filter_tables.assert_called_with(self.cloner._src_datastore.read.return_value)
 
-    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
-    @patch("gobprepare.cloner.oracle_to_postgres.get_postgres_column_definition")
-    def test_get_source_table_definition(self, mock_get_postgres_column_definition, mock_read_from_oracle):
+    @patch("gobprepare.cloner.oracle_to_sql.get_postgres_column_definition")
+    def test_get_source_table_definition(self, mock_get_postgres_column_definition):
         mock_get_postgres_column_definition.return_value = "COLUMNDEF()"
-        mock_read_from_oracle.return_value = [
+        self.cloner._src_datastore.read.return_value = [
             {
                 "column_name": "columnA",
                 "data_type": "some_int",
@@ -157,10 +154,9 @@ class TestOracleToPostgresCloner(TestCase):
 
         mock_get_postgres_column_definition.assert_any_call("some_int", 8, None, None)
         mock_get_postgres_column_definition.assert_any_call("some_number", None, 5, 2)
-        mock_read_from_oracle.assert_called_with(
-            self.oracle_connection_mock,
-            [f"SELECT column_name, data_type, data_length, data_precision, data_scale FROM all_tab_columns WHERE "
-             f"owner='{self.src_schema}' AND table_name='{table_name}' ORDER BY column_id"],
+        self.cloner._src_datastore.read.assert_called_with(
+            f"SELECT column_name, data_type, data_length, data_precision, data_scale FROM all_tab_columns WHERE "
+             f"owner='{self.src_schema}' AND table_name='{table_name}' ORDER BY column_id",
         )
 
     def test_prepare_destination_database(self):
@@ -174,15 +170,12 @@ class TestOracleToPostgresCloner(TestCase):
             call("tabledef_a"), call("tabledef_b"), call("tabledef_c")
         ])
 
-    @patch("gobprepare.cloner.oracle_to_postgres.drop_table")
-    @patch("gobprepare.cloner.oracle_to_postgres.execute_postgresql_query")
-    def test_create_destination_table(self, mock_execute, mock_drop_table):
+    def test_create_destination_table(self):
         table_definition = ("tablename", [('id', 'INT'), ('first_name', 'VARCHAR(20)'), ('last_name', 'VARCHAR(20)')])
         self.cloner._create_destination_table(table_definition)
 
-        mock_drop_table.assert_called_with(self.postgres_connection_mock, f"{self.dst_schema}.tablename")
-        mock_execute.assert_called_with(
-            self.postgres_connection_mock,
+        self.cloner._dst_datastore.drop_table.assert_called_with(f"{self.dst_schema}.tablename")
+        self.cloner._dst_datastore.execute.assert_called_with(
             f"CREATE TABLE {self.dst_schema}.tablename (id INT NULL,first_name VARCHAR(20) NULL,last_name VARCHAR(20) NULL)"
         )
 
@@ -241,28 +234,19 @@ class TestOracleToPostgresCloner(TestCase):
         self.cloner._id_columns['_default'] = ['id']
         self.assertEqual(["id"], self.cloner._get_id_columns_for_table("table_b"))
 
-    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
-    def test_get_ids_for_table(self, mock_read_oracle):
+    def test_get_ids_for_table(self):
         self.cloner._get_id_columns_for_table = MagicMock(return_value=['id', 'id2'])
         expected_query = f"SELECT id FROM tableName ORDER BY id"
-        mock_read_oracle.return_value = [{"id": 224}, {"id": 2904}, {"id": 920}]
+        self.cloner._src_datastore.read.return_value = [{"id": 224}, {"id": 2904}, {"id": 920}]
         expected_result = [224, 2904, 920]
 
         self.assertEqual(expected_result, self.cloner._get_ids_for_table('tableName'))
-        mock_read_oracle.assert_called_with(self.cloner._src_connection, [expected_query])
+        self.cloner._src_datastore.read.assert_called_with(expected_query)
 
-    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
-    def test_get_ids_for_table_empty_table(self, mock_read_oracle):
-        self.cloner._get_id_columns_for_table = MagicMock()
-        mock_read_oracle.side_effect = GOBEmptyResultException
-
-        self.assertEqual([], self.cloner._get_ids_for_table('tableName'))
-
-    @patch("gobprepare.cloner.oracle_to_postgres.logger")
-    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
-    def test_copy_table_data(self, mock_read_oracle, mock_logger):
+    @patch("gobprepare.cloner.oracle_to_sql.logger")
+    def test_copy_table_data(self, mock_logger):
         # Mock result as list of 0's
-        mock_read_oracle.side_effect = [
+        self.cloner._src_datastore.read.side_effect = [
             self.cloner.READ_BATCH_SIZE * [0] + (self.cloner.READ_BATCH_SIZE - 1) * [0]
         ]
 
@@ -278,9 +262,9 @@ class TestOracleToPostgresCloner(TestCase):
                              ("tableName", [('colA', 'int'), ('colB', 'varchar'), ('colC', 'varchar')]))
                          )
 
-        mock_read_oracle.assert_has_calls([
-            call(self.oracle_connection_mock, [f"SELECT /*+ PARALLEL */ colA, colB, colC FROM (  "
-                                               f"SELECT colA,colB,colC FROM {self.src_schema}.tableName )"]),
+        self.cloner._src_datastore.read.assert_has_calls([
+            call(f"SELECT /*+ PARALLEL */ colA, colB, colC FROM (  "
+                 f"SELECT colA,colB,colC FROM {self.src_schema}.tableName )"),
         ])
 
         mock_logger.info.assert_called_once()
@@ -288,9 +272,8 @@ class TestOracleToPostgresCloner(TestCase):
         self.cloner._get_id_columns_for_table.assert_called_with(f"{self.cloner._src_schema}.tableName")
         self.cloner._list_to_chunks.assert_called_with('list of ids', self.cloner.READ_BATCH_SIZE)
 
-    @patch("gobprepare.cloner.oracle_to_postgres.logger")
-    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
-    def test_copy_table_data_chunk_minmax(self, mock_read_oracle, mock_logger):
+    @patch("gobprepare.cloner.oracle_to_sql.logger")
+    def test_copy_table_data_chunk_minmax(self, mock_logger):
         self.cloner._get_select_list_for_table_definition = MagicMock(return_value='cols')
         self.cloner._insert_rows = MagicMock()
         self.cloner._get_order_by_clause = MagicMock()
@@ -311,15 +294,13 @@ class TestOracleToPostgresCloner(TestCase):
             self.cloner._list_to_chunks.return_value = arg
             self.cloner._copy_table_data(('tableName', [('col_name', 'col_type')]))
             expected_query = expected_query_start + where_clause + ')'
-            mock_read_oracle.assert_called_with(self.cloner._src_connection, [expected_query])
+            self.cloner._src_datastore.read.assert_called_with(expected_query)
 
-
-    @patch("gobprepare.cloner.oracle_to_postgres.logger")
-    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
-    @patch("gobprepare.cloner.oracle_to_postgres.DEBUG", True)
-    def test_copy_table_data_with_debug(self, mock_read_from_oracle, mock_logger):
+    @patch("gobprepare.cloner.oracle_to_sql.logger")
+    @patch("gobprepare.cloner.oracle_to_sql.DEBUG", True)
+    def test_copy_table_data_with_debug(self, mock_logger):
         # Mock result as list of 0's
-        mock_read_from_oracle.side_effect = [self.cloner.READ_BATCH_SIZE * [0],
+        self.cloner._src_datastore.side_effect = [self.cloner.READ_BATCH_SIZE * [0],
                                              (self.cloner.READ_BATCH_SIZE - 1) * [0]]
 
         self.cloner._get_select_list_for_table_definition = MagicMock(return_value="colA, colB, colC")
@@ -331,21 +312,7 @@ class TestOracleToPostgresCloner(TestCase):
 
         self.assertEqual(2, mock_logger.info.call_count)
 
-    @patch("gobprepare.cloner.oracle_to_postgres.logger")
-    @patch("gobprepare.cloner.oracle_to_postgres.read_from_oracle")
-    def test_copy_table_data_empty_table(self, mock_read_from_oracle, mock_logger):
-        mock_read_from_oracle.side_effect = GOBEmptyResultException
-        self.cloner._get_select_list_for_table_definition = MagicMock(return_value="colA, colB, colC")
-        self.cloner._insert_rows = MagicMock()
-        self.cloner._get_ids_for_table = MagicMock()
-        self.cloner._get_id_columns_for_table = MagicMock()
-        self.cloner._list_to_chunks = MagicMock(return_value=[{"min": None, "max": None}])
-
-        self.assertEqual(0, self.cloner._copy_table_data(("tableName", [])))
-        mock_logger.info.assert_called_once()
-
-    @patch("gobprepare.cloner.oracle_to_postgres.write_rows_to_postgresql")
-    def test_insert_rows(self, mock_write):
+    def test_insert_rows(self):
         self.cloner.WRITE_BATCH_SIZE = 2
 
         table_definition = ("table_name", [
@@ -366,11 +333,11 @@ class TestOracleToPostgresCloner(TestCase):
         full_table_name = f"{self.dst_schema}.table_name"
         # The rows should be divided in chunks of size WRITE_BATCH_SIZE and the values should be in order according to
         # table_definition
-        mock_write.assert_has_calls([
-            call(self.postgres_connection_mock, full_table_name, [[3, "Sheldon"], [4, "Leonard"]]),
-            call(self.postgres_connection_mock, full_table_name, [[7, "Amy"], [1, "Rajesh"]]),
-            call(self.postgres_connection_mock, full_table_name, [[9, "Howard"], [5, "Penny"]]),
-            call(self.postgres_connection_mock, full_table_name, [[2, "Kripke"]]),
+        self.cloner._dst_datastore.write_rows.assert_has_calls([
+            call(full_table_name, [[3, "Sheldon"], [4, "Leonard"]]),
+            call(full_table_name, [[7, "Amy"], [1, "Rajesh"]]),
+            call(full_table_name, [[9, "Howard"], [5, "Penny"]]),
+            call(full_table_name, [[2, "Kripke"]]),
         ])
 
     def test_get_select_list_for_table_definition(self):
@@ -403,7 +370,7 @@ class TestOracleToPostgresCloner(TestCase):
         for arg, result in test_cases:
             self.assertEqual(result, self.cloner._get_select_expr(arg))
 
-    @patch("gobprepare.cloner.oracle_to_postgres.logger")
+    @patch("gobprepare.cloner.oracle_to_sql.logger")
     def test_clone(self, mock_logger):
         self.cloner._prepare_destination_database = MagicMock()
         self.cloner._copy_data = MagicMock(return_value=824802)

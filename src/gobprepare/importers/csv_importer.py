@@ -6,22 +6,24 @@ from pandas import read_csv
 from pandas.errors import ParserError
 from urllib.error import HTTPError
 
-from gobcore.database.connector import connect_to_objectstore
-from gobcore.database.writer.postgresql import execute_postgresql_query, write_rows_to_postgresql
 from gobcore.exceptions import GOBException
 
-from gobprepare.config import get_objectstore_config, CONTAINER_BASE
+from gobprepare.config import CONTAINER_BASE
+from gobcore.datastore.sql import SqlDatastore
+from gobcore.datastore.factory import DatastoreFactory
+from gobcore.datastore.objectstore import ObjectDatastore
+from gobconfig.datastore.config import get_datastore_config
 
 
-class PostgresCsvImporter():
+class SqlCsvImporter():
     """
-    Imports a CSV file into a Postgres table
+    Imports a CSV file into a SqlDatastore table
     """
     MAX_RETRIES = 5
     WAIT_RETRY = 2
 
-    def __init__(self, dst_connection, config: dict):
-        self._dst_connection = dst_connection
+    def __init__(self, dst_datastore: SqlDatastore, config: dict):
+        self._dst_datastore = dst_datastore
         self._destination = config['destination']
 
         if config.get('objectstore'):
@@ -45,7 +47,6 @@ class PostgresCsvImporter():
         """Loads CSV with data. Downloads over HTTP if necessary. Returns the datum and column metadata for further
         processing.
 
-        :param columns:
         :return:
         """
         tries = 0
@@ -81,8 +82,12 @@ class PostgresCsvImporter():
     def _load_from_objectstore(self, objectstore: str, location: str):
         new_location = self._tmp_filename(location)
 
-        connection, user = connect_to_objectstore(get_objectstore_config(objectstore))
-        obj = connection.get_object(CONTAINER_BASE, location)[1]
+        objectstore = DatastoreFactory.get_datastore(get_datastore_config(objectstore))
+        objectstore.connect()
+
+        assert isinstance(objectstore, ObjectDatastore), "Expected Objectstore"
+
+        obj = objectstore.connection.get_object(CONTAINER_BASE, location)[1]
         with open(new_location, 'wb') as fp:
             fp.write(obj)
         return new_location
@@ -93,9 +98,11 @@ class PostgresCsvImporter():
         :param columns:
         :return:
         """
+
+        # This works for Postgres and probably for most SQL databases
         columndefs = ",".join([f"{col['name']} VARCHAR({col['max_length'] + 5}) NULL" for col in columns])
         query = f"CREATE TABLE {self._destination} ({columndefs})"
-        execute_postgresql_query(self._dst_connection, query)
+        self._dst_datastore.execute(query)
 
     def _import_data(self, data: list):
         """Writes CSV data to destination table
@@ -103,7 +110,7 @@ class PostgresCsvImporter():
         :param data:
         :return:
         """
-        write_rows_to_postgresql(self._dst_connection, self._destination, data)
+        self._dst_datastore.write_rows(self._destination, data)
 
     def import_csv(self):
         """Entry method. Returns number of inserted rows

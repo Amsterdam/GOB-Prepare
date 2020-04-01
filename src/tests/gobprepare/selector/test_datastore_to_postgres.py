@@ -1,10 +1,10 @@
 from unittest.mock import MagicMock
 
-from gobprepare.selector.oracle_to_postgres import OracleToPostgresSelector
+from gobprepare.selector.datastore_to_postgres import DatastoreToPostgresSelector
 from tests.gobprepare.selector.selector_testcase import SelectorTestCase
 
 
-class TestOracleToPostgresSelector(SelectorTestCase):
+class TestDatastoreToPostgresSelector(SelectorTestCase):
 
     def test_init(self):
         src_conn = MagicMock()
@@ -15,9 +15,9 @@ class TestOracleToPostgresSelector(SelectorTestCase):
             "destination_table": {},
         }
 
-        selector = OracleToPostgresSelector(src_conn, dst_conn, config)
-        self.assertEqual(src_conn, selector._src_connection)
-        self.assertEqual(dst_conn, selector._dst_connection)
+        selector = DatastoreToPostgresSelector(src_conn, dst_conn, config)
+        self.assertEqual(src_conn, selector._src_datastore)
+        self.assertEqual(dst_conn, selector._dst_datastore)
         self.assertEqual(config, selector._config)
 
         self.assertValidSelector(selector)
