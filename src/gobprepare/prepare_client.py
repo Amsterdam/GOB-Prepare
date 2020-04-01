@@ -8,19 +8,17 @@ database.
 
 import datetime
 
-from gobcore.database.connector.oracle import connect_to_oracle
-from gobcore.database.connector.postgresql import connect_to_postgresql
-from gobcore.database.reader.postgresql import list_tables_for_schema
-from gobcore.database.writer.postgresql import drop_table, create_schema, execute_postgresql_query
+from gobcore.datastore.factory import DatastoreFactory
+from gobcore.datastore.oracle import OracleDatastore
+from gobcore.datastore.sql import SqlDatastore
+from gobconfig.datastore.config import get_datastore_config
 from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
 from gobcore.message_broker.config import PREPARE
-from gobprepare.config import get_database_config
-from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
-from gobprepare.importers.api_importer import PostgresAPIImporter
-from gobprepare.importers.csv_importer import PostgresCsvImporter
-from gobprepare.selector.oracle_to_postgres import OracleToPostgresSelector
-from gobprepare.selector.postgres_to_postgres import PostgresToPostgresSelector
+from gobprepare.cloner.oracle_to_sql import OracleToSqlCloner
+from gobprepare.importers.api_importer import SqlAPIImporter
+from gobprepare.importers.csv_importer import SqlCsvImporter
+from gobprepare.selector.datastore_to_postgres import DatastoreToPostgresSelector
 
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
@@ -34,12 +32,10 @@ class PrepareClient:
 
     Handles everything from reading prepare definition to calling the appropriate helpers.
     """
-    _src_connection = None
-    _src_user = None
-    _dst_connection = None
-    _dst_user = None
     result = {}
     prepares_imports = None
+    _src_datastore = None
+    _dst_datastore = None
 
     def __init__(self, prepare_config, msg):
         self.header = msg.get('header', {})
@@ -67,58 +63,48 @@ class PrepareClient:
 
         logger.configure(msg, "PREPARE")
 
+        self._set_datastores()
+
+    def _set_datastores(self):
+        self._src_datastore = DatastoreFactory.get_datastore(
+            get_datastore_config(self.source['application']),
+            self.source.get('read_config', {})
+        )
+        self._dst_datastore = DatastoreFactory.get_datastore(
+            get_datastore_config(self.destination['application']),
+            self.destination.get('read_config', {})
+        )
+
+        # This class assumes these types
+        assert isinstance(self._src_datastore, OracleDatastore), "Only Oracle Datastore is currently supported as src"
+        assert isinstance(self._dst_datastore, SqlDatastore), "Only Sql Datastores are currently supported as dst"
+
     def connect(self):
         """Connects to data source and destination database
 
         :return:
         """
-        self._src_connection, self._src_user = self._connect_application(self.source)
-        self._dst_connection, self._dst_user = self._connect_application(self.destination)
-
-    def _connect_application(self, application_config: dict):
-        """Connects to application database
-
-        :param application_config:
-        :return:
-        """
-        if application_config['type'] == "oracle":
-            connection, user = connect_to_oracle(get_database_config(application_config['application']))
-        elif application_config['type'] == "postgres":
-            connection, user = connect_to_postgresql(get_database_config(application_config['application']))
-        else:
-            raise NotImplementedError
-
-        return connection, user
-
-    def _close_connection(self, connection):
-        if connection is not None:
-            try:
-                connection.close()
-            except Exception:
-                # Connection already closed?
-                pass
+        self._src_datastore.connect()
+        self._dst_datastore.connect()
 
     def disconnect(self):
         """Closes open database connections
 
         :return:
         """
-        self._close_connection(self._src_connection)
-        self._close_connection(self._dst_connection)
-
-        self._src_connection = None
-        self._dst_connection = None
-        self._src_user = None
-        self._dst_user = None
+        self._src_datastore.disconnect()
+        self._dst_datastore.disconnect()
+        self._src_datastore = None
+        self._dst_datastore = None
 
     def _get_cloner(self, action):
-        if self.source['type'] == "oracle" and self.destination['type'] == "postgres":
-            cloner = OracleToPostgresCloner(self._src_connection, action['source_schema'],
-                                            self._dst_connection, action['destination_schema'],
-                                            action)
-        else:
-            raise NotImplementedError
-        return cloner
+        return OracleToSqlCloner(
+            self._src_datastore,
+            action['source_schema'],
+            self._dst_datastore,
+            action['destination_schema'],
+            action
+        )
 
     def action_clone(self, action: dict) -> int:
         """Clones the source data using an external Cloner class.
@@ -135,17 +121,14 @@ class PrepareClient:
         :param action:
         :return:
         """
-        if self.destination['type'] == "postgres":
-            for schema in action['schemas']:
-                logger.info(f"Clear schema {schema}")
-                create_schema(self._dst_connection, schema)
-                tables = list_tables_for_schema(self._dst_connection, schema)
+        for schema in action['schemas']:
+            logger.info(f"Clear schema {schema}")
+            self._dst_datastore.create_schema(schema)
+            tables = self._dst_datastore.list_tables_for_schema(schema)
 
-                for table in tables:
-                    full_tablename = f"{schema}.{table}"
-                    drop_table(self._dst_connection, full_tablename)
-        else:
-            raise NotImplementedError
+            for table in tables:
+                full_tablename = f"{schema}.{table}"
+                self._dst_datastore.drop_table(full_tablename)
 
     def action_select(self, action: dict) -> int:
         """Select action. Selects data using query and inserts the data into destination database.
@@ -153,12 +136,13 @@ class PrepareClient:
         :param action:
         :return:
         """
-        if action['source'] == 'src' and self.source['type'] == "oracle" and self.destination['type'] == "postgres":
-            selector = OracleToPostgresSelector(self._src_connection, self._dst_connection, action)
-        elif action['source'] == 'dst' and self.destination['type'] == "postgres":
-            selector = PostgresToPostgresSelector(self._dst_connection, self._dst_connection, action)
-        else:
-            raise NotImplementedError
+
+        selector = DatastoreToPostgresSelector(
+            # Select from src_datastore or dst_datastore
+            self._src_datastore if action['source'] == 'src' else self._dst_datastore,
+            self._dst_datastore,
+            action
+        )
 
         return selector.select()
 
@@ -168,12 +152,8 @@ class PrepareClient:
         :param action:
         :return:
         """
-        if self.destination['type'] == "postgres":
-            query = self._get_query(action)
-            execute_postgresql_query(self._dst_connection, query)
-            logger.info(f"Executed query '{action['description']}' on Postgres")
-        else:
-            raise NotImplementedError
+        self._dst_datastore.execute(self._get_query(action))
+        logger.info(f"Executed query '{action['description']}' on destination")
 
     def action_import_csv(self, action: dict):
         """Import CSV action. Import CSV into destination database
@@ -181,10 +161,7 @@ class PrepareClient:
         :param action:
         :return:
         """
-        if self.destination['type'] == "postgres":
-            importer = PostgresCsvImporter(self._dst_connection, action)
-        else:
-            raise NotImplementedError
+        importer = SqlCsvImporter(self._dst_datastore, action)
 
         rows_imported = importer.import_csv()
         logger.info(f"Imported {rows_imported} rows from CSV to table {action['destination']}")
@@ -196,11 +173,8 @@ class PrepareClient:
         :param action:
         :return:
         """
-        if self.destination['type'] == "postgres":
-            query = self._get_query(action)
-            importer = PostgresAPIImporter(self._dst_connection, action, query)
-        else:
-            raise NotImplementedError
+        query = self._get_query(action)
+        importer = SqlAPIImporter(self._dst_datastore, action, query)
 
         rows_imported = importer.import_api()
         logger.info(f"Imported {rows_imported} rows from API to table {action['destination']}")
@@ -405,11 +379,9 @@ class PrepareClient:
                                f"Really bad idea too though.")
 
         logger.info(f"Publish schema {dst_schema}")
-        if self.destination['type'] == "postgres":
-            execute_postgresql_query(self._dst_connection, f'DROP SCHEMA IF EXISTS "{dst_schema}" CASCADE')
-            execute_postgresql_query(self._dst_connection, f'ALTER SCHEMA "{src_schema}" RENAME TO "{dst_schema}"')
-        else:
-            raise NotImplementedError
+
+        self._dst_datastore.drop_schema(dst_schema)
+        self._dst_datastore.rename_schema(src_schema, dst_schema)
 
     def complete_prepare_process(self):
         """Function is called when all tasks are completed.

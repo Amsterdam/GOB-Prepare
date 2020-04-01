@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import patch, call, MagicMock
+from unittest.mock import patch, MagicMock
 
 from gobprepare.selector._to_postgres import ToPostgresSelector
 
@@ -30,15 +30,15 @@ class TestToPostgresSelector(TestCase):
             ]
         }
         self.selector = ToPostgresSelector()
-        self.selector._dst_connection = MagicMock()
+        self.selector._dst_datastore = MagicMock()
 
-    @patch("gobprepare.selector._to_postgres.execute_postgresql_query")
-    def test_create_destination_table(self, mock_execute):
+    def test_create_destination_table(self):
         destination_table = self.config['queries'][0]['destination_table']
 
         self.selector._create_destination_table(destination_table)
-        mock_execute.assert_called_with(self.selector._dst_connection,
-                                        "CREATE TABLE dst.table (col_a VARCHAR(20) NULL,col_b TIMESTAMP NULL)")
+        self.selector._dst_datastore.execute.assert_called_with(
+            "CREATE TABLE dst.table (col_a VARCHAR(20) NULL,col_b TIMESTAMP NULL)"
+        )
 
     @patch("gobprepare.selector._to_postgres.Json")
     def test_prepare_row(self, mock_json):
@@ -62,9 +62,8 @@ class TestToPostgresSelector(TestCase):
         row[1] = row[4] = mock_json.return_value
         self.assertEqual(row, result)
 
-    @patch("gobprepare.selector._to_postgres.write_rows_to_postgresql")
-    def test_write_rows(self, mock_write):
+    def test_write_rows(self):
         table = "some_table"
         values = [[2, 4, 5], [2, 2, 0], [4, 4, 3]]
         self.selector._write_rows(table, values)
-        mock_write.assert_called_with(self.selector._dst_connection, table, values)
+        self.selector._dst_datastore.write_rows.assert_called_with(table, values)

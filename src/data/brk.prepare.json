@@ -3,12 +3,10 @@
   "name": "BRK",
   "catalogue": "brk",
   "source": {
-    "application": "Neuron",
-    "type": "oracle"
+    "application": "Neuron"
   },
   "destination": {
-    "application": "GOBPrepare",
-    "type": "postgres"
+    "application": "GOBPrepare"
   },
   "publish_schemas": {
     "brk_prep": "brk_prepared"

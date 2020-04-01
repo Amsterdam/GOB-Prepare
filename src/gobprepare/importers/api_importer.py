@@ -1,10 +1,6 @@
 import itertools
 
-from gobcore.database.writer.postgresql import (
-    create_schema,
-    execute_postgresql_query,
-    write_rows_to_postgresql,
-)
+from gobcore.datastore.sql import SqlDatastore
 from gobcore.exceptions import GOBException
 from gobprepare.utils.graphql import GraphQL, GraphQLStreaming
 from gobprepare.utils.sql import (
@@ -19,12 +15,12 @@ from gobprepare.config import (
 )
 
 
-class PostgresAPIImporter():
+class SqlAPIImporter():
     """
     Imports a JSON from GOB API to a Postgres table
     """
-    def __init__(self, dst_connection, config: dict, query):
-        self._dst_connection = dst_connection
+    def __init__(self, dst_datastore: SqlDatastore, config: dict, query):
+        self._dst_datastore = dst_datastore
         self.query = query
         self.schema = config['schema']
         self.table_name = config['destination']
@@ -68,7 +64,7 @@ class PostgresAPIImporter():
         :param meta_data: Meta data to create a table.
         :return: Number of records imported.
         """
-        create_schema(self._dst_connection, self.schema)
+        self._dst_datastore.create_schema(self.schema)
 
         # clone entities to get field name from the first record
         entities_clone, entities = itertools.tee(entities, 2)
@@ -135,7 +131,7 @@ class PostgresAPIImporter():
             meta_fields=meta_fields,
             field_names=field_names
         )
-        execute_postgresql_query(self._dst_connection, create_table_sql)
+        self._dst_datastore.execute(create_table_sql)
 
     def import_entities(self, entities, field_names):
         """Import entities to the database using batch INSERT.
@@ -174,4 +170,4 @@ class PostgresAPIImporter():
         :param rows: List of list of row values.
         :return: None.
         """
-        write_rows_to_postgresql(self._dst_connection, get_full_table_name(self.schema, self.table_name), rows)
+        self._dst_datastore.write_rows(get_full_table_name(self.schema, self.table_name), rows)

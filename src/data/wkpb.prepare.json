@@ -3,12 +3,10 @@
   "name": "WKPB",
   "catalogue": "wkpb",
   "source": {
-    "application": "Neuron",
-    "type": "oracle"
+    "application": "Neuron"
   },
   "destination": {
-    "application": "GOBPrepare",
-    "type": "postgres"
+    "application": "GOBPrepare"
   },
   "publish_schemas": {
     "wkpb_prep": "wkpb_prepared"
