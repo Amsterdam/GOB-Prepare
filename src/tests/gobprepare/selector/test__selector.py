@@ -27,11 +27,11 @@ class TestSelector(TestCase):
                 ],
             },
         }
-        self.selector = Selector("oracle_connection", "postgres_connection", self.config)
+        self.selector = Selector("src_store", "dst_store", self.config)
 
     def test_init(self):
-        self.assertEqual("oracle_connection", self.selector._src_connection)
-        self.assertEqual("postgres_connection", self.selector._dst_connection)
+        self.assertEqual("src_store", self.selector._src_datastore)
+        self.assertEqual("dst_store", self.selector._dst_datastore)
         self.assertEqual(self.config, self.selector._config)
         self.assertEqual("\n".join(self.config['query']), self.selector.query)
 

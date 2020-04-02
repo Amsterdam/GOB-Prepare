@@ -1,13 +1,13 @@
 from collections import KeysView
 
 from unittest import TestCase
-from unittest.mock import patch, call, ANY
+from unittest.mock import patch, call, ANY, MagicMock
 
 from gobcore.exceptions import GOBException
-from gobprepare.importers.api_importer import PostgresAPIImporter
+from gobprepare.importers.api_importer import SqlAPIImporter
 
 
-dst_connection = "the dst_connection"
+dst_datastore = MagicMock()
 config =     {
   "description": "the description",
   "meta_type": "the meta_type",
@@ -53,22 +53,22 @@ test_meta_fields = {
 }
 
 
-class TestPostgresAPIImporter(TestCase):
+class TestSqlAPIImporter(TestCase):
 
     def setUp(self):
-        self.importer = PostgresAPIImporter(dst_connection, config, query)
+        self.importer = SqlAPIImporter(dst_datastore, config, query)
 
     def test_init(self):
-        assert self.importer._dst_connection == dst_connection
+        assert self.importer._dst_datastore == dst_datastore
         assert self.importer.query == query
         assert self.importer.schema == config['schema']
         assert self.importer.table_name == config['destination']
         assert self.importer.description == config['description']
         assert self.importer.meta_type == config['meta_type']
 
-    @patch("gobprepare.importers.api_importer.PostgresAPIImporter.get_entities", return_value=iter(test_entities))
-    @patch("gobprepare.importers.api_importer.PostgresAPIImporter.get_meta_data", return_value=iter(test_meta_data))
-    @patch("gobprepare.importers.api_importer.PostgresAPIImporter.import_data", return_value=3)
+    @patch("gobprepare.importers.api_importer.SqlAPIImporter.get_entities", return_value=iter(test_entities))
+    @patch("gobprepare.importers.api_importer.SqlAPIImporter.get_meta_data", return_value=iter(test_meta_data))
+    @patch("gobprepare.importers.api_importer.SqlAPIImporter.import_data", return_value=3)
     def test_import_api(self, mock_import_data, mock_get_meta_data, mock_get_entities):
         self.assertEqual(self.importer.import_api(), 3)  # number of imported records
         mock_get_entities.assert_called_with()
@@ -83,38 +83,35 @@ class TestPostgresAPIImporter(TestCase):
     def test_get_entities_empty(self, mock_graphql):
         self.assertEqual(list(self.importer.get_entities()), [])
 
-    @patch("gobprepare.importers.api_importer.PostgresAPIImporter.get_meta_query", return_value="the meta_query")
+    @patch("gobprepare.importers.api_importer.SqlAPIImporter.get_meta_query", return_value="the meta_query")
     @patch("gobprepare.importers.api_importer.GraphQL", return_value=iter(test_meta_data))
     def test_get_meta_data(self, mock_graphql, mock_get_meta_query):
         self.assertEqual(list(self.importer.get_meta_data()), test_meta_data)
         mock_get_meta_query.assert_called_with("the meta_type")
 
-    @patch("gobprepare.importers.api_importer.create_schema")
     @patch(
-        "gobprepare.importers.api_importer.PostgresAPIImporter.get_meta_fields",
+        "gobprepare.importers.api_importer.SqlAPIImporter.get_meta_fields",
         return_value={
             'a': {'name': 'a', 'description': 'A', 'type': {'name': 'String'}},
             'b': {'name': 'b', 'description': 'B', 'type': {'name': 'Int'}},
         }
     )
-    @patch("gobprepare.importers.api_importer.PostgresAPIImporter.create_table")
-    @patch("gobprepare.importers.api_importer.PostgresAPIImporter.import_entities", return_value=3)
+    @patch("gobprepare.importers.api_importer.SqlAPIImporter.create_table")
+    @patch("gobprepare.importers.api_importer.SqlAPIImporter.import_entities", return_value=3)
     def test_import_data(
             self,
             mock_import_entities,
             mock_create_table,
-            mock_get_meta_fields,
-            mock_create_schema
+            mock_get_meta_fields
         ):
         iter_test_meta_data = iter(test_meta_data)
         self.assertEqual(self.importer.import_data(iter(test_entities), iter_test_meta_data), 3)  # number of imported records
-        mock_create_schema.assert_called_with(dst_connection, config['schema'])
+        dst_datastore.create_schema.assert_called_with(config['schema'])
         mock_get_meta_fields.assert_called_with(iter_test_meta_data)
         mock_create_table.assert_called_with(test_meta_fields, KeysView(test_field_names))
         mock_import_entities.assert_called_with(ANY, KeysView(test_field_names))
 
-    @patch("gobprepare.importers.api_importer.create_schema")
-    def test_import_data_empty(self, mock_create_schema):
+    def test_import_data_empty(self):
         with self.assertRaises(GOBException):
             self.importer.import_data(iter([]), iter(test_meta_data))
 
@@ -146,8 +143,7 @@ class TestPostgresAPIImporter(TestCase):
             self.importer.get_field_names(iter([]))
 
     @patch("gobprepare.importers.api_importer.get_create_table_sql", return_value="foo")
-    @patch("gobprepare.importers.api_importer.execute_postgresql_query")
-    def test_create_table(self, mock_execute_postgresql_query, mock_get_create_table_sql):
+    def test_create_table(self, mock_get_create_table_sql):
         self.importer.create_table(test_meta_fields, test_field_names)
         mock_get_create_table_sql.assert_called_with(
             schema=self.importer.schema,
@@ -156,9 +152,9 @@ class TestPostgresAPIImporter(TestCase):
             meta_fields=test_meta_fields,
             field_names=test_field_names,
         )
-        mock_execute_postgresql_query.assert_called_with(dst_connection, "foo")
+        dst_datastore.execute.assert_called_with("foo")
 
-    @patch("gobprepare.importers.api_importer.PostgresAPIImporter.write_rows")
+    @patch("gobprepare.importers.api_importer.SqlAPIImporter.write_rows")
     @patch("gobprepare.importers.api_importer.WRITE_BATCH_SIZE", 2)
     def test_import_entities(self, mock_write_rows):
         self.assertEqual(self.importer.import_entities(iter(test_entities), test_field_names), 3)
@@ -166,8 +162,7 @@ class TestPostgresAPIImporter(TestCase):
             [call([['1', 44], ['2', 55]]), call([['3', 66]])]
         )
 
-    @patch("gobprepare.importers.api_importer.write_rows_to_postgresql")
-    def test_write_rows(self, mock_write_rows_to_postgresql):
+    def test_write_rows(self):
         rows = [['1', 44], ['2', 55]]
         self.importer.write_rows(rows)
-        mock_write_rows_to_postgresql.assert_called_with(dst_connection, '"the schema"."the destination"', rows)
+        dst_datastore.write_rows.assert_called_with('"the schema"."the destination"', rows)

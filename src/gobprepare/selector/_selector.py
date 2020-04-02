@@ -1,6 +1,7 @@
 import itertools
 from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
+from gobcore.datastore.datastore import Datastore
 
 
 class Selector():
@@ -11,14 +12,14 @@ class Selector():
     """
     WRITE_BATCH_SIZE = 50000
 
-    def __init__(self, src_connection, dst_connection, config: dict):
+    def __init__(self, src_datastore: Datastore, dst_datastore: Datastore, config: dict):
         """
-        :param src_connection:
-        :param dst_connection:
+        :param src_datastore:
+        :param dst_datastore:
         :param config:
         """
-        self._src_connection = src_connection
-        self._dst_connection = dst_connection
+        self._src_datastore = src_datastore
+        self._dst_datastore = dst_datastore
         self._config = config
         self.destination_table = config['destination_table']
         self.ignore_missing = config.get('ignore_missing', False)

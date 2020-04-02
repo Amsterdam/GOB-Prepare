@@ -2,24 +2,33 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch, call, mock_open, ANY
 
 from gobcore.exceptions import GOBException
-from gobprepare.prepare_client import PrepareClient
+from gobprepare.prepare_client import PrepareClient, OracleDatastore, SqlDatastore
 from tests import fixtures
+
+mock_oracle = MagicMock(spec=OracleDatastore)
+mock_sql = MagicMock(spec=SqlDatastore)
+
+mock_factory = MagicMock()
+mock_factory.get_datastore.side_effect = [
+    mock_oracle,
+    mock_sql,
+]
 
 
 @patch('gobprepare.prepare_client.logger')
-class TestPrepareClient(TestCase):
+@patch('gobprepare.prepare_client.get_datastore_config', MagicMock(side_effect=lambda x: x))
+@patch('gobprepare.prepare_client.DatastoreFactory', mock_factory)
+class TestPrepareClientInit(TestCase):
 
     def setUp(self):
         self.mock_dataset = {
             'version': '0.1',
             'name': 'Test Dataset',
             'source': {
-                'application': fixtures.random_string(),
-                'type': 'oracle',
+                'application': fixtures.random_string()
             },
             'destination': {
-                'application': fixtures.random_string(),
-                'type': 'postgres',
+                'application': fixtures.random_string()
             },
             'actions': [{
                 'source_schema': fixtures.random_string(),
@@ -54,107 +63,73 @@ class TestPrepareClient(TestCase):
         # Assert the logger is configured and called
         mock_logger.configure.assert_called_with({'header': ANY}, "PREPARE")
 
+        mock_factory.get_datastore.assert_has_calls([
+            call(self.mock_dataset['source']['application'], {}),
+            call(self.mock_dataset['destination']['application'], {}),
+        ])
+        self.assertEqual(mock_oracle, prepare_client._src_datastore)
+        self.assertEqual(mock_sql, prepare_client._dst_datastore)
+
+
+@patch('gobprepare.prepare_client.logger')
+@patch('gobprepare.prepare_client.PrepareClient._set_datastores', MagicMock())
+@patch('gobprepare.prepare_client.PrepareClient._src_datastore', MagicMock())
+@patch('gobprepare.prepare_client.PrepareClient._dst_datastore', MagicMock())
+class TestPrepareClient(TestCase):
+
+    def setUp(self):
+        self.mock_dataset = {
+            'version': '0.1',
+            'name': 'Test Dataset',
+            'source': {
+                'application': fixtures.random_string()
+            },
+            'destination': {
+                'application': fixtures.random_string()
+            },
+            'actions': [{
+                'source_schema': fixtures.random_string(),
+                'destination_schema': fixtures.random_string(),
+                'type': 'clone',
+                'source': 'src',
+                'mask': {
+                    "sometable": {
+                        "somecolumn": "mask"
+                    }
+                }
+            }],
+            'publish_schemas': {
+                'src schema': 'dst schema',
+            }
+        }
+
+        self.mock_msg = {
+            'header': {
+                "someheader": "value",
+                "catalogue": "somecatalogue",
+            },
+        }
+
+
     def test_connect(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client._connect_application = MagicMock(return_value=("connection", "user"))
         prepare_client.connect()
 
-        prepare_client._connect_application.assert_has_calls([
-            call(self.mock_dataset['source']),
-            call(self.mock_dataset['destination']),
-        ])
-        self.assertEqual(prepare_client._src_connection, "connection")
-        self.assertEqual(prepare_client._src_user, "user")
-        self.assertEqual(prepare_client._dst_connection, "connection")
-        self.assertEqual(prepare_client._dst_user, "user")
-
-    @patch("gobprepare.prepare_client.connect_to_oracle", return_value=["connection", "user"])
-    @patch("gobprepare.prepare_client.get_database_config", return_value={})
-    def test_connect_application(self, mock_database_config, mock_connect_oracle, mock_logger):
-        application_config = {
-            "type": "oracle",
-            "application": "SOME_APPLICATION",
-        }
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        # Reset counter
-        mock_logger.info.reset_mock()
-        result = prepare_client._connect_application(application_config)
-        self.assertEqual(("connection", "user"), result)
-        mock_connect_oracle.assert_called_once()
-        mock_database_config.assert_called_with("SOME_APPLICATION")
-        mock_connect_oracle.assert_called_with(mock_database_config.return_value)
-
-    @patch("gobprepare.prepare_client.connect_to_postgresql", return_value=["connection", "user"])
-    @patch("gobprepare.prepare_client.get_database_config", return_value={})
-    def test_connect_application_postgres(self, mock_database_config, mock_connect_postgres, mock_logger):
-        application_config = {
-            "type": "postgres",
-            "application": "SOME_APPLICATION",
-        }
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        # Reset counter
-        mock_logger.info.reset_mock()
-        result = prepare_client._connect_application(application_config)
-        self.assertEqual(("connection", "user"), result)
-        mock_connect_postgres.assert_called_once()
-        mock_database_config.assert_called_with("SOME_APPLICATION")
-        mock_connect_postgres.assert_called_with(mock_database_config.return_value)
-
-    def test_connect_application_not_existing(self, mock_logger):
-        application_config = {
-            "type": "nonexisting",
-            "application": "SOME_APPLICATION"
-        }
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-
-        with self.assertRaises(NotImplementedError):
-            prepare_client._connect_application(application_config)
+        prepare_client._src_datastore.connect.assert_called_once()
+        prepare_client._dst_datastore.connect.assert_called_once()
 
     def test_disconnect(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client._close_connection = MagicMock()
-        src_mock = MagicMock()
-        dst_mock = MagicMock()
-        prepare_client._src_connection = src_mock
-        prepare_client._dst_connection = dst_mock
-        prepare_client._src_user = "SRC USER"
-        prepare_client._dst_user = "DST USER"
-
+        src_datastore = prepare_client._src_datastore
+        dst_datastore = prepare_client._dst_datastore
         prepare_client.disconnect()
+        src_datastore.disconnect.assert_called_once()
+        dst_datastore.disconnect.assert_called_once()
 
-        self.assertIsNone(prepare_client._src_connection)
-        self.assertIsNone(prepare_client._dst_connection)
-        self.assertIsNone(prepare_client._src_user)
-        self.assertIsNone(prepare_client._dst_user)
+        self.assertIsNone(prepare_client._src_datastore)
+        self.assertIsNone(prepare_client._dst_datastore)
 
-        prepare_client._close_connection.assert_has_calls([
-            call(src_mock),
-            call(dst_mock),
-        ])
-
-        # Should not raise any errors when already closed (such as when close() is called on a None object)
-        prepare_client.disconnect()
-
-    def test_close_connection(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        connection = MagicMock()
-        prepare_client._close_connection(connection)
-        connection.close.assert_called_once()
-
-    def test_close_connection_exception(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        connection = MagicMock()
-        connection.close.side_effect = Exception
-        prepare_client._close_connection(connection)
-
-    def test_connect_invalid_source_type(self, mock_logger):
-        self.mock_dataset['source']['type'] = 'nonexistent'
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-
-        with self.assertRaises(NotImplementedError):
-            prepare_client.connect()
-
-    @patch("gobprepare.prepare_client.OracleToPostgresCloner", autospec=True)
+    @patch("gobprepare.prepare_client.OracleToSqlCloner", autospec=True)
     def test_action_clone(self, mock_cloner, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         cloner_instance = mock_cloner.return_value
@@ -165,63 +140,39 @@ class TestPrepareClient(TestCase):
         self.assertEqual(2840, result)
 
         mock_cloner.assert_called_with(
-            None,
+            prepare_client._src_datastore,
             clone_action['source_schema'],
-            None,
+            prepare_client._dst_datastore,
             clone_action['destination_schema'],
             self.mock_dataset['actions'][0],
         )
         cloner_instance.clone.assert_called_once()
 
-    def test_action_clone_invalid_source_destination_types(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        invalid_combinations = [
-            ("oracle", "nonexistent"),
-            ("nonexistent", "postgres"),
-            ("nonexistent", "nonexistent")
-        ]
-
-        for source, destination in invalid_combinations:
-            prepare_client.source['type'] = source
-            prepare_client.destination['type'] = destination
-            with self.assertRaises(NotImplementedError):
-                prepare_client.action_clone({})
-
-    @patch("gobprepare.prepare_client.drop_table")
-    @patch("gobprepare.prepare_client.create_schema")
-    @patch("gobprepare.prepare_client.list_tables_for_schema")
-    def test_action_clear(self, mock_list_tables, mock_create_schema, mock_drop_table, mock_logger):
-        mock_list_tables.return_value = ['table_a', 'table_b']
+    def test_action_clear(self, mock_logger):
         action = {
             'type': 'postgres',
             'schemas': ['schema_a', 'schema_b'],
         }
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._dst_datastore.list_tables_for_schema.return_value = ['table_a', 'table_b']
         prepare_client.action_clear(action)
 
-        mock_list_tables.assert_has_calls([
-            call(prepare_client._dst_connection, 'schema_a'),
-            call(prepare_client._dst_connection, 'schema_b'),
+        prepare_client._dst_datastore.create_schema.assert_has_calls([
+            call('schema_a'),
+            call('schema_b'),
         ])
-        mock_drop_table.assert_has_calls([
-            call(prepare_client._dst_connection, 'schema_a.table_a'),
-            call(prepare_client._dst_connection, 'schema_a.table_b'),
-            call(prepare_client._dst_connection, 'schema_b.table_a'),
-            call(prepare_client._dst_connection, 'schema_b.table_b'),
+        prepare_client._dst_datastore.drop_table.assert_has_calls([
+            call('schema_a.table_a'),
+            call('schema_a.table_b'),
+            call('schema_b.table_a'),
+            call('schema_b.table_b'),
         ])
-        mock_create_schema.assert_has_calls([
-            call(prepare_client._dst_connection, 'schema_a'),
-            call(prepare_client._dst_connection, 'schema_b'),
+        prepare_client._dst_datastore.list_tables_for_schema.assert_has_calls([
+            call('schema_a'),
+            call('schema_b'),
         ])
 
-    def test_action_clear_nonexistent_type(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client.destination['type'] = 'nonexistent'
-
-        with self.assertRaises(NotImplementedError):
-            prepare_client.action_clear({})
-
-    @patch("gobprepare.prepare_client.OracleToPostgresSelector", autospec=True)
+    @patch("gobprepare.prepare_client.DatastoreToPostgresSelector", autospec=True)
     def test_action_select_src(self, mock_selector, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         mock_selector_instance = mock_selector.return_value
@@ -234,13 +185,13 @@ class TestPrepareClient(TestCase):
         result = prepare_client.action_select(action)
         self.assertEqual(82840, result)
         mock_selector.assert_called_with(
-            prepare_client._src_connection,
-            prepare_client._dst_connection,
+            prepare_client._src_datastore,
+            prepare_client._dst_datastore,
             action
         )
         mock_selector_instance.select.assert_called_once()
 
-    @patch("gobprepare.prepare_client.PostgresToPostgresSelector", autospec=True)
+    @patch("gobprepare.prepare_client.DatastoreToPostgresSelector", autospec=True)
     def test_action_select_dst(self, mock_selector, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         mock_selector_instance = mock_selector.return_value
@@ -254,47 +205,22 @@ class TestPrepareClient(TestCase):
         self.assertEqual(82840, result)
         # Should be called with dst_connection as both source and destination for selector
         mock_selector.assert_called_with(
-            prepare_client._dst_connection,
-            prepare_client._dst_connection,
+            prepare_client._dst_datastore,
+            prepare_client._dst_datastore,
             action
         )
         mock_selector_instance.select.assert_called_once()
 
-    def test_action_select_invalid_source_destination_types(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        invalid_combinations = [
-            ("src", "oracle", "nonexistent"),
-            ("src", "nonexistent", "postgres"),
-            ("src", "nonexistent", "nonexistent"),
-            ("dst", "oracle", "nonexistent"),
-            ("dst", "nonexistent", "nonexistent"),
-            ("nonexistent", "oracle", "postgres"),
-        ]
-
-        for source_type, source, destination in invalid_combinations:
-            prepare_client.source['type'] = source
-            prepare_client.destination['type'] = destination
-            with self.assertRaises(NotImplementedError):
-                prepare_client.action_select({'source': source_type})
-
-    @patch("gobprepare.prepare_client.execute_postgresql_query")
-    def test_action_execute_sql(self, mock_execute, mock_logger):
+    def test_action_execute_sql(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client._get_query = MagicMock(return_value="the_query")
 
         action = {"action": "execute_sql", "query": "SOME QUERY", "description": "Execute the query"}
         prepare_client.action_execute_sql(action)
         prepare_client._get_query.assert_called_with(action)
-        mock_execute.assert_called_with(prepare_client._dst_connection, "the_query")
+        prepare_client._dst_datastore.execute.assert_called_with("the_query")
 
-    def test_action_execute_sql_invalid_dst(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client.destination["type"] = "somedb"
-
-        with self.assertRaises(NotImplementedError):
-            prepare_client.action_execute_sql({})
-
-    @patch("gobprepare.prepare_client.PostgresCsvImporter", autospec=True)
+    @patch("gobprepare.prepare_client.SqlCsvImporter", autospec=True)
     def test_action_import_csv(self, mock_importer, mock_logger):
         action = {
             "action": "import_csv",
@@ -309,17 +235,10 @@ class TestPrepareClient(TestCase):
         result = prepare_client.action_import_csv(action)
         self.assertEqual(4802, result)
 
-        mock_importer.assert_called_with(prepare_client._dst_connection, action)
+        mock_importer.assert_called_with(prepare_client._dst_datastore, action)
         mock_importer_instance.import_csv.assert_called_once()
 
-    def test_action_import_csv_invalid_destination(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client.destination["type"] = "somedb"
-
-        with self.assertRaises(NotImplementedError):
-            prepare_client.action_import_csv({})
-
-    @patch("gobprepare.prepare_client.PostgresAPIImporter", autospec=True)
+    @patch("gobprepare.prepare_client.SqlAPIImporter", autospec=True)
     def test_action_import_api(self, mock_importer, mock_logger):
         action = {
             "action": "import_api",
@@ -336,15 +255,8 @@ class TestPrepareClient(TestCase):
         result = prepare_client.action_import_api(action)
         self.assertEqual(77, result)
 
-        mock_importer.assert_called_with(prepare_client._dst_connection, action, "the_query")
+        mock_importer.assert_called_with(prepare_client._dst_datastore, action, "the_query")
         mock_importer_instance.import_api.assert_called_once()
-
-    def test_action_import_api_invalid_destination(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client.destination["type"] = "somedb"
-
-        with self.assertRaises(NotImplementedError):
-            prepare_client.action_import_api({})
 
     def test_action_join_actions(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
@@ -649,23 +561,14 @@ class TestPrepareClient(TestCase):
             call('src b', 'dst b'),
         ])
 
-    @patch("gobprepare.prepare_client.execute_postgresql_query")
-    def test_publish_schema(self, mock_execute, mock_logger):
+    def test_publish_schema(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client.destination = {'type': 'postgres'}
         prepare_client._dst_connection = MagicMock()
 
         prepare_client._publish_schema('src schema', 'dst schema')
 
-        mock_execute.assert_has_calls([
-            call(prepare_client._dst_connection, 'DROP SCHEMA IF EXISTS "dst schema" CASCADE'),
-            call(prepare_client._dst_connection, 'ALTER SCHEMA "src schema" RENAME TO "dst schema"'),
-        ])
-
-        prepare_client.destination = {'type': 'not implemented'}
-
-        with self.assertRaises(NotImplementedError):
-            prepare_client._publish_schema('src schema', 'dst schema')
+        prepare_client._dst_datastore.drop_schema.assert_called_with('dst schema')
+        prepare_client._dst_datastore.rename_schema.assert_called_with('src schema', 'dst schema')
 
         with self.assertRaises(GOBException):
             prepare_client._publish_schema('same src and dst', 'same src and dst')

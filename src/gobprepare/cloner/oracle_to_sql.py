@@ -9,16 +9,14 @@ from math import ceil
 from typing import Dict, List, Tuple
 
 from gobprepare.config import DEBUG
-from gobcore.exceptions import GOBException, GOBEmptyResultException
+from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
-from gobcore.database.reader.oracle import read_from_oracle
-from gobprepare.cloner.mapping.oracle_to_postgres import \
-    get_postgres_column_definition
-from gobcore.database.writer.postgresql import (drop_table, execute_postgresql_query,
-                                                write_rows_to_postgresql)
+from gobprepare.cloner.mapping.oracle_to_postgres import get_postgres_column_definition
+from gobcore.datastore.oracle import OracleDatastore
+from gobcore.datastore.sql import SqlDatastore
 
 
-class OracleToPostgresCloner():
+class OracleToSqlCloner():
     READ_BATCH_SIZE = 100000
     WRITE_BATCH_SIZE = 100000
 
@@ -27,17 +25,18 @@ class OracleToPostgresCloner():
     _include_tables = []
     _id_columns = {}
 
-    def __init__(self, oracle_connection, src_schema: str, postgres_connection, dst_schema: str, config: dict):
+    def __init__(self, oracle_store: OracleDatastore, src_schema: str, sql_store: SqlDatastore,
+                 dst_schema: str, config: dict):
         """
-        :param oracle_connection:
+        :param oracle_store:
         :param src_schema:
-        :param postgres_connection:
+        :param sql_store:
         :param dst_schema:
         :param config:
         """
-        self._src_connection = oracle_connection
+        self._src_datastore = oracle_store
         self._src_schema = src_schema
-        self._dst_connection = postgres_connection
+        self._dst_datastore = sql_store
         self._dst_schema = dst_schema
 
         if config is not None:
@@ -74,7 +73,7 @@ class OracleToPostgresCloner():
         :return:
         """
         query = f"SELECT table_name FROM all_tables WHERE owner='{self._src_schema}' ORDER BY table_name"
-        table_names = read_from_oracle(self._src_connection, [query])
+        table_names = self._src_datastore.read(query)
         table_names = self._filter_tables(table_names)
 
         return [row['table_name'] for row in table_names]
@@ -93,7 +92,7 @@ class OracleToPostgresCloner():
         """
         query = f"SELECT column_name, data_type, data_length, data_precision, data_scale " \
             f"FROM all_tab_columns WHERE owner='{self._src_schema}' AND table_name='{table}' ORDER BY column_id"
-        columns = read_from_oracle(self._src_connection, [query])
+        columns = self._src_datastore.read(query)
 
         table_definition = [
             (
@@ -130,8 +129,8 @@ class OracleToPostgresCloner():
         columns = ','.join([f"{cname} {ctype} NULL" for cname, ctype in table_columns])
         create_query = f"CREATE TABLE {self._dst_schema}.{table_name} ({columns})"
 
-        drop_table(self._dst_connection, f"{self._dst_schema}.{table_name}")
-        execute_postgresql_query(self._dst_connection, create_query)
+        self._dst_datastore.drop_table(f"{self._dst_schema}.{table_name}")
+        self._dst_datastore.execute(create_query)
 
     def _get_destination_schema_definition(self) -> List[Tuple[str, List[Tuple[str, str]]]]:
         """
@@ -214,10 +213,7 @@ class OracleToPostgresCloner():
         order_field = self._get_id_columns_for_table(full_table_name)[0]
         query = f"SELECT {order_field} FROM {full_table_name} ORDER BY {order_field}"
 
-        try:
-            result = read_from_oracle(self._src_connection, [query])
-        except GOBEmptyResultException:
-            result = []
+        result = self._src_datastore.read(query)
 
         return [row[order_field.lower()] for row in result]
 
@@ -267,10 +263,7 @@ class OracleToPostgresCloner():
                 f")"
 
             read_time = time.time()
-            try:
-                results = read_from_oracle(self._src_connection, [query])
-            except GOBEmptyResultException:
-                results = []
+            results = self._src_datastore.read(query)
             read_time = time.time() - read_time
 
             row_cnt += len(results)
@@ -317,7 +310,7 @@ class OracleToPostgresCloner():
         for chunk in chunks:
             # Input rows are dicts. Make sure values are in column order
             values = [[row[a.lower()] for (a, b) in table_columns] for row in chunk]
-            write_rows_to_postgresql(self._dst_connection, full_table_name, values)
+            self._dst_datastore.write_rows(full_table_name, values)
 
     def _get_select_list_for_table_definition(self, table_definition: Tuple[str, List]) -> str:
         """
