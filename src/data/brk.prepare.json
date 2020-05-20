@@ -26,7 +26,7 @@
       "query": [
         "         SELECT TRUNC(MAX(BSD.DATUM_AANGEMAAKT)) AS brk_bsd_toestandsdatum",
         "         ,      'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.' AS omschrijving",
-        "           FROM   BRKMON.BESTAND BSD"
+        "           FROM   G0363_BRKMON.BESTAND BSD"
       ],
       "query_src": "string",
       "destination_table": {
@@ -65,7 +65,7 @@
     },
     {
       "type": "clone",
-      "source_schema": "BRK",
+      "source_schema": "G0363_BRK",
       "destination_schema": "brk",
       "id_columns": {
         "_default": [
