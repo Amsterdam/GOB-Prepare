@@ -8,10 +8,10 @@ FROM (
   b.id
   , b.registernummer
   , b.volgnummer
-  FROM prb.beperking b
+  FROM G0363_PRB.beperking b
   -- select max volgnummer van iedere beperking
   LEFT JOIN (
-    SELECT id, MAX(volgnummer) AS volgnummer FROM prb.beperking GROUP BY id
+    SELECT id, MAX(volgnummer) AS volgnummer FROM G0363_PRB.beperking GROUP BY id
   ) m ON m.id = b.id AND m.volgnummer = b.volgnummer
   WHERE b.registernummer IS NOT NULL
   AND m.id IS NOT NULL
@@ -22,7 +22,7 @@ LEFT OUTER JOIN (
     p.begin_volgnummer,
     p.einde_volgnummer,
     p.gemcod || p.sectie || LPAD(p.pnum, 5, '0') || p.objindl || LPAD(p.objindn, 4, '0') AS belast_kadastraal_object
-  FROM prb.beperking_perceel p
+  FROM G0363_PRB.beperking_perceel p
 ) p1 ON b1.id = p1.id_beperking
 AND b1.volgnummer BETWEEN p1.begin_volgnummer AND CASE p1.einde_volgnummer WHEN 0 THEN 999999 ELSE p1.einde_volgnummer END
 WHERE p1.belast_kadastraal_object IS NOT NULL
