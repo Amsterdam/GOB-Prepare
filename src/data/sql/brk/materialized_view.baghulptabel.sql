@@ -19,8 +19,7 @@ create materialized view brk.baghulptabel as select
 	        woonplaatsnaam)
 	    ) as adressen
 from (
-SELECT kas.id
-      ,kas.kadastraalobject_id
+SELECT kas.kadastraalobject_id
       ,kas.kadastraalobject_volgnummer
       ,aot.bag_id
       ,kas.openbareruimtenaam
@@ -34,8 +33,7 @@ LEFT JOIN   brk.adresseerbaar_object aot
 ON     kas.adresseerbaar_object_id = aot.id
 WHERE  kas.adresseerbaar_object_id IS null
 UNION
-SELECT kas.id
-      ,kas.kadastraalobject_id
+SELECT kas.kadastraalobject_id
       ,kas.kadastraalobject_volgnummer
       ,aot.bag_id
       ,aot.openbareruimtenaam
