@@ -55,8 +55,6 @@ class TestPrepareClientInit(TestCase):
 
     def test_init(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        # Expect a process_id is created
-        self.assertTrue(prepare_client.process_id)
         self.assertEqual(self.mock_msg['header'], prepare_client.header)
         self.assertEqual({'src schema': 'dst schema'}, prepare_client.publish_schemas)
 
@@ -425,7 +423,6 @@ class TestPrepareClient(TestCase):
         header_keys = [
             "someheader",
             "header",
-            "process_id",
             "source",
             'application',
             "source_application",
