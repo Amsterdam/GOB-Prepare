@@ -51,11 +51,7 @@ class PrepareClient:
 
         assert isinstance(self.publish_schemas, dict)
 
-        start_timestamp = int(datetime.datetime.utcnow().replace(microsecond=0).timestamp())
-        self.process_id = self.header.get('process_id', f"{start_timestamp}.{self.source_app}{self._name}")
-
         self.header.update({
-            'process_id': self.process_id,
             'source': self.source_app,
             'application': self.source.get('application'),
         })
