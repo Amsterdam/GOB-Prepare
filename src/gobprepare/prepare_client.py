@@ -242,8 +242,7 @@ class PrepareClient:
             "header": metadata,
             "summary": {
                 **self.result,
-                "warnings": logger.get_warnings(),
-                "errors": logger.get_errors(),
+                **logger.get_summary(),
             },
         }
         return result
