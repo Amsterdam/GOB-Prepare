@@ -43,8 +43,8 @@ class PrepareClient:
         self._prepare_config = prepare_config
         self._actions = prepare_config['actions']
         self._name = prepare_config['name']
-        self.source = self._prepare_config['source']
-        self.source_app = self._prepare_config['source']['application']
+        self.source = self._prepare_config.get('source')
+        self.source_app = self._prepare_config.get('source', {}).get('application')
         self.destination = self._prepare_config['destination']
         self.destination_app = self._prepare_config['destination']['application']
         self.publish_schemas = self._prepare_config.get('publish_schemas', {})
@@ -53,7 +53,7 @@ class PrepareClient:
 
         self.header.update({
             'source': self.source_app,
-            'application': self.source.get('application'),
+            'application': self.source_app,
         })
         msg["header"] = self.header
 
@@ -62,17 +62,22 @@ class PrepareClient:
         self._set_datastores()
 
     def _set_datastores(self):
-        self._src_datastore = DatastoreFactory.get_datastore(
-            get_datastore_config(self.source['application']),
-            self.source.get('read_config', {})
-        )
+        if self.source:
+            self._src_datastore = DatastoreFactory.get_datastore(
+                get_datastore_config(self.source['application']),
+                self.source.get('read_config', {})
+            )
+
+            # This class only supports OracleDatastore as source
+            assert isinstance(self._src_datastore, OracleDatastore), \
+                "Only Oracle Datastore is currently supported as src"
+
         self._dst_datastore = DatastoreFactory.get_datastore(
             get_datastore_config(self.destination['application']),
             self.destination.get('read_config', {})
         )
 
-        # This class assumes these types
-        assert isinstance(self._src_datastore, OracleDatastore), "Only Oracle Datastore is currently supported as src"
+        # This class assumes SqlDatastore as destination.
         assert isinstance(self._dst_datastore, SqlDatastore), "Only Sql Datastores are currently supported as dst"
 
     def connect(self):
@@ -80,7 +85,8 @@ class PrepareClient:
 
         :return:
         """
-        self._src_datastore.connect()
+        if self._src_datastore:
+            self._src_datastore.connect()
         self._dst_datastore.connect()
 
     def disconnect(self):
@@ -88,12 +94,16 @@ class PrepareClient:
 
         :return:
         """
-        self._src_datastore.disconnect()
+        if self._src_datastore:
+            self._src_datastore.disconnect()
         self._dst_datastore.disconnect()
         self._src_datastore = None
         self._dst_datastore = None
 
     def _get_cloner(self, action):
+        # Assert that src datastore is set. Dst datastore is always present (would have failed at initialisation otw)
+        assert self._src_datastore is not None, "No src datastore set"
+
         return OracleToSqlCloner(
             self._src_datastore,
             action['source_schema'],
@@ -132,6 +142,8 @@ class PrepareClient:
         :param action:
         :return:
         """
+        if action['source'] == 'src':
+            assert self._src_datastore is not None, "src datastore not set"
 
         selector = DatastoreToPostgresSelector(
             # Select from src_datastore or dst_datastore
@@ -330,7 +342,8 @@ class PrepareClient:
 
         :return:
         """
-        logger.info(f"Prepare dataset {self._name} from {self.source_app} started")
+        app_msg = f" from {self.source_app}" if self.source_app else ""
+        logger.info(f"Prepare dataset {self._name}{app_msg} started")
 
         tasks = self._create_tasks()
         return self._get_task_message(tasks)
