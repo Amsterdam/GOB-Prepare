@@ -8,7 +8,8 @@ select wot.wozbelobjnr               as wozobjectnummer,
 from woz.object wot
          left join (
     select kad.wozbelobjnr,
-           array_to_json(array_agg(kad.kadastrale_identificatie)) as kadastrale_identificaties
+           array_to_json(array_agg(
+                   json_build_object('identificatie', kad.kadastrale_identificatie))) as kadastrale_identificaties
     from woz.kad_relatie kad
     group by kad.wozbelobjnr
 ) kad on kad.wozbelobjnr = wot.wozbelobjnr;
