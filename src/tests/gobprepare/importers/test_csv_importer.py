@@ -50,7 +50,7 @@ class TestPostgresCsvImporter(TestCase):
         self.config = {
             "type": "import_csv",
             "source": "http://example.com/somefile.csv",
-            "destination": "schema.table"
+            "destination": "schema.table",
         }
         self.dst_datastore = MagicMock()
         self.importer = SqlCsvImporter(self.dst_datastore, self.config)
@@ -61,14 +61,17 @@ class TestPostgresCsvImporter(TestCase):
         self.assertEqual(self.config['destination'], self.importer._destination)
         self.assertEqual(',', self.importer._separator)
         self.assertEqual({}, self.importer._column_names)
+        self.assertEqual('utf-8', self.importer._encoding)
 
     def test_init_non_defaults(self):
         self.config['column_names'] = {'csv_column': 'db_column'}
         self.config['separator'] = ';'
+        self.config['encoding'] = 'other-encoding'
 
         importer = SqlCsvImporter(self.dst_datastore, self.config)
         self.assertEqual(';', importer._separator)
         self.assertEqual({'csv_column': 'db_column'}, importer._column_names)
+        self.assertEqual('other-encoding', importer._encoding)
 
     @patch("gobprepare.importers.csv_importer.SqlCsvImporter._load_from_objectstore")
     def test_init_objectstore(self, mock_load_from_objectstore):
@@ -107,6 +110,7 @@ class TestPostgresCsvImporter(TestCase):
         self.importer._column_names = {
             'col_a': 'db_col_a'
         }
+        self.importer._encoding = 'the-encoding'
 
         result = self.importer._load_csv()
 
@@ -124,7 +128,9 @@ class TestPostgresCsvImporter(TestCase):
             ]
         }
         self.assertEqual(expected_result, result)
-        mock_read_csv.assert_called_with(self.importer._source, keep_default_na=False, sep=self.importer._separator)
+        mock_read_csv.assert_called_with(self.importer._source, keep_default_na=False, sep=self.importer._separator, encoding='the-encoding', dtype=str)
+
+
 
     @patch("gobprepare.importers.csv_importer.read_csv")
     def test_load_csv_parser_error(self, mock_read_csv):

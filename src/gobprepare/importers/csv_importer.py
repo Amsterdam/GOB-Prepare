@@ -34,6 +34,7 @@ class SqlCsvImporter():
         # Mapping of CSV columns to database columns (default CSV columns will be used if no alternative supplied)
         self._column_names = config.get('column_names', {})
         self._separator = config.get('separator', ',')
+        self._encoding = config.get('encoding', 'utf-8')
 
     def _is_empty_row(self, row):
         """Returns True if pandas row is empty
@@ -52,7 +53,13 @@ class SqlCsvImporter():
         tries = 0
         while True:
             try:
-                df = read_csv(self._source, keep_default_na=False, sep=self._separator)
+                df = read_csv(
+                    self._source,
+                    keep_default_na=False,
+                    sep=self._separator,
+                    dtype=str,
+                    encoding=self._encoding
+                )
                 break
             except ParserError:
                 raise GOBException(f"Can't parse CSV: {self._source}")
