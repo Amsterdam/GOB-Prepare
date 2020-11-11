@@ -1,0 +1,198 @@
+{
+  "version": "0.1",
+  "name": "WOZ",
+  "catalogue": "woz",
+  "publish_schemas": {
+    "woz_prep": "woz_prepared"
+  },
+  "destination": {
+    "application": "GOBPrepare"
+  },
+  "actions": [
+    {
+      "type": "clear",
+      "schemas": [
+        "woz",
+        "woz_prep"
+      ],
+      "id": "clear_schemas"
+    },
+    {
+      "type": "import_csv",
+      "source": "woz/KAD_bi_levering_13102020.csv",
+      "objectstore": "Basisinformatie",
+      "column_names": {
+        "WOZBELOBJNR": "wozbelobjnr",
+        "KADASTRALE_IDENTIFICATIE": "kadastrale_identificatie",
+        "DDINGANG_PERCEELRELATIE": "ddingang_perceelrelatie"
+      },
+      "separator": ";",
+      "destination": "woz.kad_relatie",
+      "id": "import_kad",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "source": "woz/WDO_bi_levering_13102020.csv",
+      "objectstore": "Basisinformatie",
+      "column_names": {
+        "WOZBELOBJNR": "wozbelobjnr",
+        "NR_DEEL": "nr_deel",
+        "DDINGANG_WOZDEELOBJECT": "ddingang_wozdeelobject",
+        "DSOC": "dsoc",
+        "TGO": "tgo",
+        "TGO_IDENTIFICATIE": "tgo_identificatie"
+      },
+      "separator": ";",
+      "destination": "woz.deel_object",
+      "id": "import_wdo",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "source": "woz/WOZ_bi_levering_13102020.csv",
+      "objectstore": "Basisinformatie",
+      "column_names": {
+        "WOZBELOBJNR": "wozbelobjnr",
+        "HOOFDCODE_GEBR": "hoofdcode_gebr",
+        "HOOFD_OMS": "hoofd_oms",
+        "GEBRUIKSCODE": "gebruikscode",
+        "GEBRUIK_OMS": "gebruik_oms",
+        "DDINGANG": "ddingang"
+      },
+      "encoding": "iso-8859-1",
+      "separator": ";",
+      "destination": "woz.object",
+      "id": "import_woz",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "source": "woz/dsoc_omschrijving_13102020.csv",
+      "objectstore": "Basisinformatie",
+      "column_names": {
+        "DSOC": "dsoc",
+        "OMSCHRIJVING": "omschrijving"
+      },
+      "encoding": "iso-8859-1",
+      "separator": ";",
+      "destination": "woz.dsoc_codetabel",
+      "id": "import_dsoc",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "id": "select_wozobject",
+      "depends_on": [
+        "import_kad",
+        "import_wdo",
+        "import_woz",
+        "import_dsoc"
+      ],
+      "query": "data/sql/woz/wozobject.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "woz_prep.object",
+        "create": true,
+        "columns": [
+          {
+            "name": "wozobjectnummer",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "gebruik_code",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "gebruik_oms",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "soortobject_code",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "soortobject_oms",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "begin_geldigheid",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "bevat_kadastraal_object",
+            "type": "JSON"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "id": "select_wozdeelobject",
+      "depends_on": [
+        "import_kad",
+        "import_wdo",
+        "import_woz",
+        "import_dsoc"
+      ],
+      "query": "data/sql/woz/wozdeelobject.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "woz_prep.deelobject",
+        "create": true,
+        "columns": [
+          {
+            "name": "wozdeelobjectnummer",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "deelnummer",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "wozbelobjnr",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "soort_code",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "soort_omschrijving",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "begin_geldigheid",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "is_verbonden_met_verblijfsobject",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "is_verbonden_met_ligplaats",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "is_verbonden_met_standplaats",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "heeft_pand",
+            "type": "VARCHAR"
+          }
+        ]
+      }
+    }
+  ]
+}
