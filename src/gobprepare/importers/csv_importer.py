@@ -26,10 +26,10 @@ class SqlCsvImporter():
         self._dst_datastore = dst_datastore
         self._destination = config['destination']
 
-        if config.get('objectstore'):
-            self._source = self._load_from_objectstore(config['objectstore'], config['source'])
-        else:
-            self._source = config['source']
+        if not config.get('objectstore'):
+            raise GOBException("Incomplete config. Expecting key 'objectstore'")
+
+        self._source = self._load_from_objectstore(config['objectstore'], config['read_config'])
 
         # Mapping of CSV columns to database columns (default CSV columns will be used if no alternative supplied)
         self._column_names = config.get('column_names', {})
@@ -86,15 +86,20 @@ class SqlCsvImporter():
         os.makedirs(os.path.dirname(new_location), exist_ok=True)
         return new_location
 
-    def _load_from_objectstore(self, objectstore: str, location: str):
-        new_location = self._tmp_filename(location)
-
-        objectstore = DatastoreFactory.get_datastore(get_datastore_config(objectstore))
-        objectstore.connect()
-
+    def _load_from_objectstore(self, objectstore: str, read_config: dict):
+        objectstore = DatastoreFactory.get_datastore(get_datastore_config(objectstore), read_config)
         assert isinstance(objectstore, ObjectDatastore), "Expected Objectstore"
 
-        obj = objectstore.connection.get_object(CONTAINER_BASE, location)[1]
+        objectstore.connect()
+
+        try:
+            obj_info = next(objectstore.query(None))
+        except StopIteration:
+            raise GOBException(f"File not found on Objectstore")
+
+        new_location = self._tmp_filename(obj_info['name'])
+        obj = objectstore.connection.get_object(CONTAINER_BASE, obj_info['name'])[1]
+
         with open(new_location, 'wb') as fp:
             fp.write(obj)
         return new_location
