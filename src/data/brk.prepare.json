@@ -50,8 +50,10 @@
     },
     {
       "type": "import_csv",
-      "source": "brk/Totaal_overleden.csv",
       "objectstore": "Basisinformatie",
+      "read_config": {
+        "file_filter": "brk/Totaal_overleden.csv"
+      },
       "column_names": {
         "01 - BSN": "bsn",
         "01 - Overlijdensdatum": "overlijdensdatum"
