@@ -95,7 +95,7 @@ class SqlCsvImporter():
         try:
             obj_info = next(objectstore.query(None))
         except StopIteration:
-            raise GOBException(f"File not found on Objectstore")
+            raise GOBException(f"File not found on Objectstore: {read_config['file_filter']}")
 
         new_location = self._tmp_filename(obj_info['name'])
         obj = objectstore.connection.get_object(CONTAINER_BASE, obj_info['name'])[1]
