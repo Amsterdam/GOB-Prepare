@@ -9,7 +9,10 @@ from woz.object wot
          left join (
     select kad.wozbelobjnr,
            array_to_json(array_agg(
-                   json_build_object('identificatie', kad.kadastrale_identificatie))) as kadastrale_identificaties
+                   json_build_object(
+                           'identificatie', kad.kadastrale_identificatie,
+                           'begin_geldigheid', ddingang_perceelrelatie
+                       ))) as kadastrale_identificaties
     from woz.kad_relatie kad
     group by kad.wozbelobjnr
 ) kad on kad.wozbelobjnr = wot.wozbelobjnr;
