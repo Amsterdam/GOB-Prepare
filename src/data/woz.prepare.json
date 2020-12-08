@@ -19,8 +19,10 @@
     },
     {
       "type": "import_csv",
-      "source": "woz/KAD_bi_levering_13102020.csv",
       "objectstore": "Basisinformatie",
+      "read_config": {
+        "file_filter": "woz/KAD_bi_levering_[0-9]{8}.csv"
+      },
       "column_names": {
         "WOZBELOBJNR": "wozbelobjnr",
         "KADASTRALE_IDENTIFICATIE": "kadastrale_identificatie",
@@ -35,7 +37,9 @@
     },
     {
       "type": "import_csv",
-      "source": "woz/WDO_bi_levering_13102020.csv",
+      "read_config": {
+        "file_filter": "woz/WDO_bi_levering_[0-9]{8}.csv"
+      },
       "objectstore": "Basisinformatie",
       "column_names": {
         "WOZBELOBJNR": "wozbelobjnr",
@@ -54,7 +58,9 @@
     },
     {
       "type": "import_csv",
-      "source": "woz/WOZ_bi_levering_13102020.csv",
+      "read_config": {
+        "file_filter": "woz/WOZ_bi_levering_[0-9]{8}.csv"
+      },
       "objectstore": "Basisinformatie",
       "column_names": {
         "WOZBELOBJNR": "wozbelobjnr",
@@ -74,7 +80,9 @@
     },
     {
       "type": "import_csv",
-      "source": "woz/dsoc_omschrijving_13102020.csv",
+      "read_config": {
+        "file_filter": "woz/dsoc_omschrijving_[0-9]{8}.csv"
+      },
       "objectstore": "Basisinformatie",
       "column_names": {
         "DSOC": "dsoc",

@@ -7,7 +7,8 @@ from gobcore.exceptions import GOBException
 from gobprepare.importers.csv_importer import SqlCsvImporter, CONTAINER_BASE, ObjectDatastore
 
 
-class TestPostgresCsvImporter(TestCase):
+@patch("gobprepare.importers.csv_importer.SqlCsvImporter._load_from_objectstore", MagicMock())
+class TestSqlCsvImporter(TestCase):
     class MockPandasDataFrame():
         class MockRow():
             def __init__(self, vals):
@@ -46,24 +47,38 @@ class TestPostgresCsvImporter(TestCase):
                 (3, self.MockRow(self.rows[6])),
             ]
 
-    def setUp(self) -> None:
+    def _setup_importer(self):
         self.config = {
             "type": "import_csv",
-            "source": "http://example.com/somefile.csv",
+            "read_config": {
+                "file_filter": "http://example.com/somefile.csv",
+            },
             "destination": "schema.table",
+            "objectstore": "TheObjectstore"
         }
+
         self.dst_datastore = MagicMock()
         self.importer = SqlCsvImporter(self.dst_datastore, self.config)
 
     def test_init(self):
+        self._setup_importer()
         self.assertEqual(self.dst_datastore, self.importer._dst_datastore)
-        self.assertEqual(self.config['source'], self.importer._source)
+        self.assertEqual(self.importer._load_from_objectstore.return_value, self.importer._source)
         self.assertEqual(self.config['destination'], self.importer._destination)
         self.assertEqual(',', self.importer._separator)
         self.assertEqual({}, self.importer._column_names)
         self.assertEqual('utf-8', self.importer._encoding)
 
+        self.importer._load_from_objectstore.assert_called_with("TheObjectstore", self.config['read_config'])
+
+    def test_init_no_objectstore(self):
+        config = {"destination": "dst"}
+
+        with self.assertRaises(GOBException):
+            SqlCsvImporter(MagicMock(), config)
+
     def test_init_non_defaults(self):
+        self._setup_importer()
         self.config['column_names'] = {'csv_column': 'db_column'}
         self.config['separator'] = ';'
         self.config['encoding'] = 'other-encoding'
@@ -73,16 +88,8 @@ class TestPostgresCsvImporter(TestCase):
         self.assertEqual({'csv_column': 'db_column'}, importer._column_names)
         self.assertEqual('other-encoding', importer._encoding)
 
-    @patch("gobprepare.importers.csv_importer.SqlCsvImporter._load_from_objectstore")
-    def test_init_objectstore(self, mock_load_from_objectstore):
-        self.config['objectstore'] = 'SomeObjectstoreReference'
-        self.config['source'] = 'file/on/objectstore.ext'
-
-        importer = SqlCsvImporter(self.dst_datastore, self.config)
-        mock_load_from_objectstore.assert_called_with('SomeObjectstoreReference', 'file/on/objectstore.ext')
-        self.assertEqual(mock_load_from_objectstore.return_value, importer._source)
-
     def test_empty_row(self):
+        self._setup_importer()
         class MockPandasList:
             def __init__(self, lst: list):
                 self.lst = lst
@@ -103,6 +110,7 @@ class TestPostgresCsvImporter(TestCase):
 
     @patch("gobprepare.importers.csv_importer.read_csv")
     def test_load_csv(self, mock_read_csv):
+        self._setup_importer()
         mock_pandas = self.MockPandasDataFrame()
         mock_read_csv.return_value = mock_pandas
 
@@ -131,52 +139,38 @@ class TestPostgresCsvImporter(TestCase):
         mock_read_csv.assert_called_with(self.importer._source, keep_default_na=False, sep=self.importer._separator, encoding='the-encoding', dtype=str)
 
 
-
     @patch("gobprepare.importers.csv_importer.read_csv")
     def test_load_csv_parser_error(self, mock_read_csv):
+        self._setup_importer()
         mock_read_csv.side_effect = ParserError()
+        self.importer._source = 'the source'
 
-        with self.assertRaisesRegex(GOBException, self.config['source']):
+        with self.assertRaisesRegex(GOBException, self.importer._source):
             self.importer._load_csv()
 
     @patch("gobprepare.importers.csv_importer.read_csv")
     def test_load_csv_http_error(self, mock_read_csv):
+        self._setup_importer()
         mock_read_csv.side_effect = HTTPError("", "", "", "", "")
 
         self.importer.WAIT_RETRY = 0
+        self.importer._source = 'the source'
 
-        with self.assertRaisesRegex(GOBException, self.config['source']):
+        with self.assertRaisesRegex(GOBException, self.importer._source):
             self.importer._load_csv()
 
     @patch("gobprepare.importers.csv_importer.tempfile.gettempdir", lambda: '/the_tmp_dir')
     @patch("gobprepare.importers.csv_importer.os.makedirs")
     def test_tmp_filename(self, mock_makedirs):
+        self._setup_importer()
         objectstore_filename = 'the/file/on_objectstore/dir/file.ext'
         expected_tmp_filename = '/the_tmp_dir/the/file/on_objectstore/dir/file.ext'
         self.assertEqual(expected_tmp_filename, self.importer._tmp_filename(objectstore_filename))
 
         mock_makedirs.assert_called_with('/the_tmp_dir/the/file/on_objectstore/dir', exist_ok=True)
 
-    @patch("gobprepare.importers.csv_importer.DatastoreFactory")
-    @patch("gobprepare.importers.csv_importer.get_datastore_config")
-    @patch("builtins.open")
-    def test_load_from_objectstore(self, mock_open, mock_get_config, mock_factory):
-        self.importer._tmp_filename = MagicMock()
-        mock_connection = MagicMock()
-        mock_connection.get_object.return_value = [{}, 'the object data']
-        mock_factory.get_datastore.return_value = MagicMock(spec=ObjectDatastore)
-        mock_factory.get_datastore.return_value.connection = mock_connection
-
-        result = self.importer._load_from_objectstore('ObjectStoreId', 'file/location/on/objectstore.ext')
-
-        mock_connection.get_object.assert_called_with(CONTAINER_BASE, 'file/location/on/objectstore.ext')
-        mock_get_config.assert_called_with('ObjectStoreId')
-        mock_factory.get_datastore.assert_called_with(mock_get_config.return_value)
-
-        mock_open.return_value.__enter__.return_value.write.assert_called_with('the object data')
-        self.assertEqual(self.importer._tmp_filename.return_value, result)
-
     def test_create_destination_table(self):
+        self._setup_importer()
         columns = [
             {"max_length": 20, "name": "col_a"},
             {"max_length": 19, "name": "col_b"},
@@ -188,11 +182,13 @@ class TestPostgresCsvImporter(TestCase):
         self.dst_datastore.execute.assert_called_with(expected_query)
 
     def test_import_data(self):
+        self._setup_importer()
         data = [[1, 2, 3], [4, 4, 2], [2, 4, 5]]
         self.importer._import_data(data)
         self.dst_datastore.write_rows.assert_called_with(self.importer._destination, data)
 
     def test_import_csv(self):
+        self._setup_importer()
         data = {
             "columns": [
                 {"max_length": 20, "name": "col_a"},
@@ -210,3 +206,72 @@ class TestPostgresCsvImporter(TestCase):
         self.importer._load_csv.assert_called_once()
         self.importer._create_destination_table.assert_called_with(data['columns'])
         self.importer._import_data.assert_called_with(data['data'])
+
+
+class TestSqlCsvImporterLoad(TestCase):
+
+    @patch("gobprepare.importers.csv_importer.SqlCsvImporter._tmp_filename")
+    @patch("gobprepare.importers.csv_importer.DatastoreFactory")
+    @patch("gobprepare.importers.csv_importer.get_datastore_config")
+    @patch("builtins.open")
+    def test_load_from_objectstore(self, mock_open, mock_get_config, mock_factory, mock_tmp_filename):
+        config = {
+            "type": "import_csv",
+            "read_config": {
+                "file_filter": "http://example.com/somefile.csv",
+            },
+            "destination": "schema.table",
+            "objectstore": "TheObjectstore"
+        }
+        dst_datastore = MagicMock()
+        mock_connection = MagicMock()
+        mock_connection.get_object.return_value = [{}, 'the object data']
+        mock_factory.get_datastore.return_value = MagicMock(spec=ObjectDatastore)
+        mock_factory.get_datastore.return_value.connection = mock_connection
+        mock_factory.get_datastore.return_value.query.return_value = iter([{'name': 'file/location/on/objectstore.ext'}])
+
+        importer = SqlCsvImporter(dst_datastore, config)
+        importer._tmp_filename = MagicMock()
+
+        mock_connection.get_object.assert_called_with(CONTAINER_BASE, 'file/location/on/objectstore.ext')
+        mock_get_config.assert_called_with('TheObjectstore')
+        mock_factory.get_datastore.assert_called_with(mock_get_config.return_value, config['read_config'])
+
+        mock_open.return_value.__enter__.return_value.write.assert_called_with('the object data')
+        self.assertEqual(mock_tmp_filename.return_value, importer._source)
+
+    @patch("gobprepare.importers.csv_importer.DatastoreFactory")
+    @patch("gobprepare.importers.csv_importer.get_datastore_config", MagicMock())
+    def test_load_from_objectstore_not_found(self, mock_factory):
+        mock_factory.get_datastore.return_value = MagicMock()
+        config = {
+            "type": "import_csv",
+            "read_config": {
+                "file_filter": "http://example.com/somefile.csv",
+            },
+            "destination": "schema.table",
+            "objectstore": "TheObjectstore"
+        }
+
+        mock_factory.get_datastore.return_value = MagicMock(spec=ObjectDatastore)
+        mock_factory.get_datastore.return_value.query.return_value = iter([])
+
+        with self.assertRaises(GOBException):
+            SqlCsvImporter(MagicMock(), config)
+
+    @patch("gobprepare.importers.csv_importer.DatastoreFactory")
+    @patch("gobprepare.importers.csv_importer.get_datastore_config", MagicMock())
+    def test_load_from_objectstore_invalid_store(self, mock_factory):
+        mock_factory.get_datastore.return_value = MagicMock()
+        config = {
+            "type": "import_csv",
+            "read_config": {
+                "file_filter": "http://example.com/somefile.csv",
+            },
+            "destination": "schema.table",
+            "objectstore": "TheObjectstore"
+        }
+
+        with self.assertRaisesRegex(AssertionError, "Expected Objectstore"):
+            SqlCsvImporter(MagicMock(), config)
+
