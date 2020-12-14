@@ -26,10 +26,12 @@ class SqlCsvImporter():
         self._dst_datastore = dst_datastore
         self._destination = config['destination']
 
-        if not config.get('objectstore'):
-            raise GOBException("Incomplete config. Expecting key 'objectstore'")
-
-        self._source = self._load_from_objectstore(config['objectstore'], config['read_config'])
+        if config.get('objectstore'):
+            self._source = self._load_from_objectstore(config['objectstore'], config['read_config'])
+        elif config.get('source'):
+            self._source = config.get('source')
+        else:
+            raise GOBException("Incomplete config. Expecting key 'objectstore' or 'source'")
 
         # Mapping of CSV columns to database columns (default CSV columns will be used if no alternative supplied)
         self._column_names = config.get('column_names', {})
