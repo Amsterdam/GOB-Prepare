@@ -71,7 +71,16 @@ class TestSqlCsvImporter(TestCase):
 
         self.importer._load_from_objectstore.assert_called_with("TheObjectstore", self.config['read_config'])
 
-    def test_init_no_objectstore(self):
+    def test_init_source(self):
+        config = {
+            "type": "import_csv",
+            "destination": "schema.table",
+            "source": "the source",
+        }
+        self.importer = SqlCsvImporter(MagicMock(), config)
+        self.assertEqual("the source", self.importer._source)
+
+    def test_init_no_objectstore_or_source(self):
         config = {"destination": "dst"}
 
         with self.assertRaises(GOBException):
