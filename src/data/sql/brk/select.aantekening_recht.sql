@@ -5,6 +5,7 @@ SELECT
 ,aag.omschrijving                 AS atg_aardaantekening_oms
 ,atg.omschrijving                 AS atg_omschrijving
 ,atg.einddatum                    AS atg_einddatum
+,art.tng_begindatum               AS max_tng_begindatum -- used for partial import
 ,'Aantekening Zakelijk Recht (R)' AS atg_type
 ,abn.brk_sjt_ids        		  AS brk_sjt_ids
 ,art.nrn_tng_ids				  AS nrn_tng_ids
@@ -33,6 +34,7 @@ JOIN (
 		art.aantekening_id,
 	    case when sum (case when tng.einddatum is null then 1 else 0 end) > 0 then null else max(tng.einddatum) end AS einddatum,
 	    max(tng.toestandsdatum) AS toestandsdatum,
+	    max(tng.begindatum) AS tng_begindatum,
 		array_to_json(array_agg(json_build_object('nrn_tng_id', tng.nrn_tng_id) ORDER BY tng.nrn_tng_id)) AS nrn_tng_ids
 	FROM brk.aantekeningrecht art
 	JOIN brk_prep.tenaamstelling tng
