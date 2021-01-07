@@ -20,7 +20,9 @@ WITH stukdelen AS (SELECT sdl.identificatie                         AS brk_sdl_i
                         , art.art_ids                               AS art_ids
                         , akt.akt_ids                               AS akt_ids
                         , asg.zrt_ids                               AS zrt_ids
-                        , least(tng.begindatum, asg.zrt_begindatum) AS begindatum
+                        , least(tng.min_tng_begindatum, asg.zrt_begindatum) AS begindatum
+                        , tng.min_tng_begindatum                    AS min_tng_begindatum
+                        , tng.max_tng_begindatum                    AS max_tng_begindatum
                         , CASE
         -- If any einddatum is NULL this stukdeel is still valid. Otherwise get the max
                               WHEN tng.einddatum IS NULL OR asg.zrt_einddatum IS NULL OR akt.expiration_date IS NULL OR
@@ -40,7 +42,8 @@ WITH stukdelen AS (SELECT sdl.identificatie                         AS brk_sdl_i
                                       ON (stk.soortregister_code = rce.code)
                             LEFT JOIN (
                        SELECT tip.stukdeel_identificatie,
-                              min(tng.begindatum)                                                     AS begindatum,
+                              min(tng.begindatum)                                                     AS min_tng_begindatum,
+                              max(tng.begindatum)                                                     AS max_tng_begindatum,
                               CASE
                                   WHEN sum(CASE WHEN tng.einddatum IS NULL THEN 0 ELSE 1 END) < SUM(1)
                                       THEN NULL

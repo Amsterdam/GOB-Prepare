@@ -1244,6 +1244,14 @@
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           },
           {
+            "name": "min_tng_begindatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "max_tng_begindatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
             "name": "einddatum",
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           },
