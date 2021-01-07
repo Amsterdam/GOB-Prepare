@@ -562,6 +562,14 @@
           {
             "name": "modification",
             "type": "TIMESTAMP"
+          },
+          {
+            "name": "max_ontstaan_uit_begindatum",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "max_betrokken_bij_begindatum",
+            "type": "TIMESTAMP"
           }
         ]
       }
