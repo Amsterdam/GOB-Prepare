@@ -1,8 +1,8 @@
 import os
 DEBUG = os.getenv('GOB_DEBUG', False)
 
-STREAMING_GRAPHQL_ENDPOINT = '/gob/graphql/streaming/'
-GRAPHQL_ENDPOINT = '/gob/graphql/'
+STREAMING_GRAPHQL_ENDPOINT = '/gob/public/graphql/streaming/'
+GRAPHQL_ENDPOINT = '/gob/public/graphql/'
 WRITE_BATCH_SIZE = 10000
 GOB_API_HOST = os.getenv('API_HOST', 'http://localhost:8141')
 
