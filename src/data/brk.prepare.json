@@ -742,6 +742,10 @@
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           },
           {
+            "name": "max_tng_begindatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
             "name": "atg_type",
             "type": "TEXT"
           },
@@ -1237,6 +1241,14 @@
           },
           {
             "name": "begindatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "min_tng_begindatum",
+            "type": "TIMESTAMP WITHOUT TIME ZONE"
+          },
+          {
+            "name": "max_tng_begindatum",
             "type": "TIMESTAMP WITHOUT TIME ZONE"
           },
           {
