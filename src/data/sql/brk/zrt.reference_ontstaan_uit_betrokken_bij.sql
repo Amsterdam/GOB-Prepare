@@ -1,5 +1,5 @@
 -- Reference betrokken_bij and determine max_zrt_begindatum
-UPDATE brk_prepared.zakelijk_recht zrt
+UPDATE brk_prep.zakelijk_recht zrt
 SET betrokken_bij=q2.betrokken_bij,
     max_betrokken_bij_begindatum=q2.max_zrt_begindatum
 FROM (
@@ -11,7 +11,7 @@ FROM (
                   SELECT identificatie,
                          zrt2.ontstaan_uit_asg_id,
                          max(zrt2.zrt_begindatum) zrt_begindatum
-                  FROM brk_prepared.zakelijk_recht zrt2
+                  FROM brk_prep.zakelijk_recht zrt2
                   GROUP BY identificatie, zrt2.ontstaan_uit_asg_id
         ) q
         GROUP BY ontstaan_uit_asg_id
@@ -19,7 +19,7 @@ FROM (
 WHERE q2.ontstaan_uit_asg_id = zrt.betrokken_bij_asg_id;
 
 -- Reference ontstaan_uit and determine max_zrt_begindatum
-UPDATE brk_prepared.zakelijk_recht zrt
+UPDATE brk_prep.zakelijk_recht zrt
 SET ontstaan_uit=q2.ontstaan_uit,
     max_ontstaan_uit_begindatum=q2.max_zrt_begindatum
 FROM (
@@ -31,7 +31,7 @@ FROM (
                   SELECT identificatie,
                          zrt2.betrokken_bij_asg_id,
                          max(zrt2.zrt_begindatum) zrt_begindatum
-                  FROM brk_prepared.zakelijk_recht zrt2
+                  FROM brk_prep.zakelijk_recht zrt2
                   GROUP BY identificatie, zrt2.betrokken_bij_asg_id
         ) q
         GROUP BY betrokken_bij_asg_id
