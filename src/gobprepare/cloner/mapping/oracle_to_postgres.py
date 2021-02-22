@@ -28,7 +28,7 @@ def _oracle_number_to_postgres(length: int = None, precision: int = None, scale:
     elif length <= 18:
         return 'BIGINT'
     else:
-        return f'NUMERIC'
+        return 'NUMERIC'
 
 
 _oracle_postgresql_column_mapping = {

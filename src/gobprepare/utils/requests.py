@@ -10,6 +10,6 @@ def post_stream(url, json, **kwargs):
 
     try:
         result.raise_for_status()
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         raise APIException(f"Request failed due to API exception, response code {result.status_code}")
     return result.iter_lines()
