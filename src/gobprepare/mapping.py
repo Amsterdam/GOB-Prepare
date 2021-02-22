@@ -25,7 +25,7 @@ def _build_prepare_definitions_locations_mapping():
             try:
                 mapping = get_mapping(filepath)
                 catalogue = mapping['catalogue']
-            except (KeyError, json.decoder.JSONDecodeError) as e:
+            except (KeyError, json.decoder.JSONDecodeError):
                 raise GOBException(f"Dataset file {filepath} invalid")
             result[catalogue] = filepath
     return result
