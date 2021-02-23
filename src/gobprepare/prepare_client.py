@@ -383,8 +383,8 @@ class PrepareClient:
 
     def _publish_schema(self, src_schema: str, dst_schema: str):
         if src_schema == dst_schema:
-            raise GOBException(f"Publish schema: src and dst schema are the same. Don't understand what you want."
-                               f"Really bad idea too though.")
+            raise GOBException("Publish schema: src and dst schema are the same. Don't understand what you want. "
+                               "Really bad idea too though.")
 
         logger.info(f"Publish schema {dst_schema}")
 
