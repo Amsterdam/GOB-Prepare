@@ -10,7 +10,7 @@ class Selector():
 
     Selector handles execution of queries on src_connection. The results of the queries are written to
     """
-    WRITE_BATCH_SIZE = 50000
+    WRITE_BATCH_SIZE = 25000
 
     def __init__(self, src_datastore: Datastore, dst_datastore: Datastore, config: dict):
         """
