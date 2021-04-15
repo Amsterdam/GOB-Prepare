@@ -1,0 +1,178 @@
+{
+  "version": "0.1",
+  "name": "BRP",
+  "catalogue": "brp",
+  "publish_schemas": {
+    "brp_prep": "brp_prepared"
+  },
+  "destination": {
+    "application": "GOBPrepare",
+    "type": "postgres"
+  },
+  "actions": [
+    {
+      "type": "clear",
+      "schemas": [
+        "brp",
+        "brp_prep"
+      ],
+      "id": "clear_schemas"
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "Basisinformatie",
+      "read_config": {
+        "file_filter": "brp/1 Alle actuele Personen.csv"
+      },
+      "column_names": {
+        "Administratienummer": "administratienummer",
+        "BSN": "bsn",
+        "Voor letters": "voorletters",
+        "Voornamen": "voornamen",
+        "Voor voegsel": "voorvoegsel",
+        "Geslachtsnaam": "geslachtsnaam",
+        "Geboorte datum": "geboortedatum",
+        "Geboorteplaatsnaam": "geboorteplaats",
+        "Geboorteland": "geboorteland",
+        "Code Geslacht": "geslachtsaanduiding",
+        "Administratie nummer Ouder1": "ouder1_administratienummer",
+        "BSN Ouder1": "ouder1_bsn",
+        "Voornaam Ouder1": "ouder1_voornaam",
+        "Voorvoegsel Ouder1": "ouder1_voorvoegsel",
+        "Geslachtsnaam Ouder1": "ouder1_geslachtsnaam",
+        "Geboortedatum Ouder1": "ouder1_geboortedatum",
+        "Geboorte plaatsnaam Ouder1": "ouder1_geboorteplaats",
+        "Geboorteland Ouder1": "ouder1_geboorteland",
+        "Code Geslacht Ouder1": "ouder1_geslachtsaanduiding",
+        "Administratie nummer Ouder2": "ouder2_administratienummer",
+        "BSN Ouder2": "ouder2_bsn",
+        "Voornaam Ouder2": "ouder2_voornaam",
+        "Voorvoegsel Ouder2": "ouder2_voorvoegsel",
+        "Geslachtsnaam Ouder2": "ouder2_geslachtsnaam",
+        "Geboortedatum Ouder2": "ouder2_geboortedatum",
+        "Geboorte plaatsnaam Ouder2": "ouder2_geboorteplaats",
+        "Geboorteland Ouder2": "ouder2_geboorteland",
+        "Code Geslacht Ouder2": "ouder2_geslachtsaanduiding",
+        "Code Burgerlijke Staat": "code_burgelijke_staat",
+        "Nationaliteit": "nationaliteit",
+        "Administratienummer Partner": "partner_administratienummer",
+        "BSN Partner": "partner_bsn",
+        "Datum Huwelijk": "datum_huwelijk",
+        "Datum Huwelijksontbinding": "datum_huwelijksontbinding",
+        "Datum Toetreding GBA": "datum_toetreding_gba",
+        "Datum Inschrijving Gemeente": "datum_inschrijving_gemeente",
+        "Code Functie Adres": "code_functie_adres",
+        "Datum Adreshouding": "datum_adreshouding",
+        "Straatnaam": "straatnaam",
+        "Huisnummer": "huisnummer",
+        "Huisletter": "huisletter",
+        "Toevoeging Huisnummer": "huisnummer_toevoeging",
+        "Aanduiding Huisnummer": "huisnummer_aanduiding",
+        "Postcode Numeriek": "postcode_numeriek",
+        "Postcode Alfanumeriek": "postcode_alfanumeriek",
+        "Naam Woongemeente": "naam_woongemeente",
+        "Omschrijving Locatie": "omschrijving_locatie",
+        "Land Vanwaar Ingeschreven": "land_vanwaar_ingeschreven",
+        "Datum Vestiging In Nederland": "datum_vestiging_in_nederland",
+        "Datum 1e Vestiging vanuit Buitenland": "datum_1e_vestiging_vanuit_buitenland",
+        "Code Aangifte Adreshouding": "code_aangifte_adreshouding",
+        "Code gezinsrelatie": "code_gezinsrelatie",
+        "Gezinsrelatie": "gezinsrelatie",
+        "Code Geheim": "code_geheim",
+        "Aanduiding Onderzoek Vbp": "aanduiding_onderzoek_vbp",
+        "Datum Begin Onderzoek Vbp": "datum_begin_onderzoek_vbp",
+        "Datum Einde Onderzoek Vbp": "datum_einde_onderzoek_vbp",
+        "Aantal keren in onderzoek": "aantal_keren_in_onderzoek",
+        "Ident. Verblijfplaats": "ident_verblijfplaats",
+        "Ident. Nummeraanduiding": "ident_nummeraanduiding",
+        "Aantal kinderen": "aantal_kinderen",
+        "Waarvan minderjarig": "waarvan_minderjarig",
+        "Reisdocument nummer": "reisdocument_nummer",
+        "Einddatum reisdocument": "einddatum_reisdocument",
+        "Indikatie Curateleregister": "indicatie_curatele_register"
+      },
+      "separator": ";",
+      "encoding": "iso-8859-1",
+      "destination": "brp.personen_actueel",
+      "id": "import_brp_pers_act",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "Basisinformatie",
+      "read_config": {
+        "file_filter": "brp/1 SelectHisAdres.csv"
+      },
+      "column_names": {
+        "Systeem nummer Persoon": "systeem_nummer_persoon",
+        "BSN": "bsn",
+        "Gemeente Inschrijving": "gemeente_inschrijving",
+        "Ident. Verblijfplaats": "ident_verblijfplaats",
+        "Ident. Nummeraanduiding": "ident_nummeraanduiding",
+        "Adres compleet": "adres_compleet",
+        "Straatnaam": "straatnaam",
+        "Huisnummer": "huisnummer",
+        "Huisletter": "huisletter",
+        "Toevoeging Huisnummer": "huisnummer_toevoeging",
+        "Postcode": "postcode",
+        "Datum Inschrijving Gemeente Nr.": "datum_inschrijving_gemeentenr",
+        "Code Functie Adres": "code_functie_adres",
+        "Datum Adreshouding Nr.": "datum_adreshouding_nr",
+        "Datum Vertrek Uit Nederland Nr.": "datum_vertrek_uit_nederland_nr",
+        "Code Land Vanwaar Ingeschreven": "code_land_vanwaar_ingeschreven",
+        "Datum Vestiging In Nederland Nr.": "datum_vestiging_in_nederland_nr",
+        "Aanduiding Onderzoek": "aanduiding_onderzoek",
+        "Datum Begin Onderzoek Nr.": "datum_begin_onderzoek_nr",
+        "Datum Einde Onderzoek Nr.": "datum_einde_onderzoek_nr",
+        "Datum Geldigheid Nr.": "datum_geldigheid_nr"
+      },
+      "separator": ";",
+      "encoding": "iso-8859-1",
+      "destination": "brp.adres_historisch",
+      "id": "import_brp_ads_hist",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "Basisinformatie",
+      "read_config": {
+        "file_filter": "brp/1 bewonershistorie.csv"
+      },
+      "column_names": {
+        "Ident. Verblijfplaats": "ident_verblijfplaats",
+        "Ident. Nummeraanduiding": "ident_nummeraanduiding",
+        "Straatnaam": "straatnaam",
+        "Huisnummer": "huisnummer",
+        "Huisletter": "huisletter",
+        "Toevoeging Huisnummer": "huisnummer_toevoeging",
+        "Postcode": "postcode",
+        "Administratienummer": "administratienummer",
+        "BSN": "bsn",
+        "Geboortedatum": "geboortedatum",
+        "Code Geslacht": "code_geslacht",
+        "Begindatum.bewoning": "begindatum_bewoning",
+        "Einddatum.bewoning": "einddatum_bewoning",
+        "Reden.einde.Bewoning": "reden_einde_bewoning",
+        "Indicatie.actueel.historie": "indicatie_actueel_historie",
+        "Begindatum.onderzoek": "begindatum_onderzoek",
+        "Einddatum.onderzoek": "einddatum_onderzoek",
+        "Datum.overlijden": "datum_overlijden",
+        "Gemeente.waarnr.ertrokken": "gemeente_waarnaar_vertrokken",
+        "Datum.uitschrijving.gemeente": "datum_uitschrijving_gemeente",
+        "Datum.vertrek.nederland": "datum_vertrek_nederland",
+        "Land.waarnaar.vertrokken": "land_waarnaar_vertrokken"
+      },
+      "separator": ";",
+      "encoding": "iso-8859-1",
+      "destination": "brp.bewoning_historisch",
+      "id": "import_brp_bwg_hist",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    }
+  ]
+}
