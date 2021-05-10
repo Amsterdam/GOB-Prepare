@@ -326,7 +326,7 @@
           },
           {
             "name": "koopsom",
-            "type": "INT"
+            "type": "BIGINT"
           },
           {
             "name": "koopsom_valuta",
