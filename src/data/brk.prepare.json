@@ -1181,7 +1181,7 @@
           },
           {
             "name": "sdl_koopsom",
-            "type": "INT"
+            "type": "BIGINT"
           },
           {
             "name": "sdl_koopsom_valuta",
