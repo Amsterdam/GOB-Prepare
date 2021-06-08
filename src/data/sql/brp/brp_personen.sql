@@ -14,7 +14,8 @@ select prs.systeem_nummer_persoon      as identificatie,
        prs.geslachtsaanduiding         as geslachtsaanduiding_code,
        null                            as geslachtsaanduiding_oms,
        null                            as aanduiding_naamgebruik,
---        prs.geboortedatum               as geboortedatum,
+--       split_part(prs.geboortedatum, '-', 3) || '-' || split_part(prs.geboortedatum, '-', 2) ||
+--        '-' || split_part(prs.geboortedatum, '-', 1) as geboortedatum,
        null                            as geboortedatum,
 --         prs.geboorteplaats              as geboorteplaats_oms,
        null                            as geboorteplaats_oms,
@@ -24,16 +25,14 @@ select prs.systeem_nummer_persoon      as identificatie,
        null                            as geboorteland,
        prs.nationaliteit               as nationaliteit_oms,
        null                            as nationaliteit_code,
-       prs.burgelijke_staat            as code_burgerlijke_staat,
+       prs.burgerlijke_staat           as code_burgerlijke_staat,
        prs.code_gezinsrelatie          as gezinsrelatie_code,
        prs.gezinsrelatie               as gezinsrelatie_oms,
        prs.aantal_kinderen             as aantal_kinderen,
        prs.waarvan_minderjarig         as aantal_minderjarige_kinderen,
-       prs.ident_verblijfplaats        as heeft_verblijfplaatsen,
+       prs.adres_compleet              as heeft_verblijfplaatsen,
        null                            as heeft_overlijden_gegevens,
        prs.partner_burgerservicenummer as heeft_verbintenis,
-       prs.datum_toetreding_gba        as heeft_inschrijving
+       null                            as heeft_inschrijving
 
 from brp.personen_actueel prs
-where prs.ident_verblijfplaats is not null
-  and prs.ident_nummeraanduiding is not null
