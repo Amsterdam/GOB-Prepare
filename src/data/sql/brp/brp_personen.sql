@@ -34,5 +34,4 @@ select prs.systeem_nummer_persoon      as identificatie,
        null                            as heeft_overlijden_gegevens,
        prs.partner_burgerservicenummer as heeft_verbintenis,
        null                            as heeft_inschrijving
-
 from brp.personen_actueel prs
