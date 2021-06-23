@@ -1,4 +1,4 @@
-select prs.van_persoon || '.' || prs.met_verblijfplaats || '.' || prs.datum_adreshouding as identificatie,
+select prs.van_persoon || '.' || prs.met_verblijfplaats || '.' || prs.datum_aanvang_adreshouding as identificatie,
        prs.van_persoon,
        prs.met_verblijfplaats,
        prs.functieadres,
