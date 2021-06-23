@@ -12,19 +12,15 @@ from (
                 prs.adres_compleet                                 as adres_compleet,
                 prs.woonplaats                                     as ligt_in_woonplaats,
                 prs.omschrijving_locatie                           as locatiebeschrijving,
-
                 case substr(prs.ident_verblijfplaats, 5, 2)
                     when '01' then prs.ident_verblijfplaats
                     end                                            as is_verblijfsobject,
-
                 case substr(prs.ident_verblijfplaats, 5, 2)
                     when '02' then prs.ident_verblijfplaats
                     end                                            as is_ligplaats,
-
                 case substr(prs.ident_verblijfplaats, 5, 2)
                     when '03' then prs.ident_verblijfplaats
                     end                                            as is_standplaats,
-
                 prs.ident_nummeraanduiding                         as heeft_nummeraanduiding,
                 null                                               as verblijft_in_land,
                 null                                               as buitenland_regel_1,
@@ -34,9 +30,12 @@ from (
                 prs.aanduiding_onderzoek                           as aanduiding_persoongegevens_in_onderzoek,
                 prs.datum_begin_onderzoek                          as datum_ingang_persoononderzoek,
                 prs.datum_einde_onderzoek                          as datum_einde_persoononderzoek,
-                prs.aantal_keren_in_onderzoek                      as aantal_keren_persoon_in_onderzoek
-
+                prs.aantal_keren_in_onderzoek                      as aantal_keren_persoon_in_onderzoek,
+                case
+                    when prs.datum_adreshouding = '00-00-0000'
+                        then prs.systeem_nummer_persoon||'.'||prs.systeemid_adres||'.'||prs.datum_toetreding_gba
+                        else prs.systeem_nummer_persoon||'.'||prs.systeemid_adres||'.'||prs.datum_adreshouding
+                end                                                as heeft_persoonsverblijfplaatsen
          from brp.personen_actueel as prs
      ) vbp
-
 order by vbp.identificatie, vbp.aantal_keren_persoon_in_onderzoek desc nulls last;
