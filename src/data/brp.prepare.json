@@ -70,6 +70,7 @@
         "Huisletter": "huisletter",
         "Huisnummertoevoeging": "huisnummer_toevoeging",
         "Aanduiding bij Huisnummer": "huisnummer_aanduiding",
+        "Systeemnummer Adres": "systeemid_adres",
         "compleet adres": "adres_compleet",
         "Postcode Numeriek": "postcode_numeriek",
         "Postcode Alfanumeriek": "postcode_alfanumeriek",
@@ -112,6 +113,7 @@
         "Gemeente Inschrijving": "gemeente_inschrijving",
         "Ident. Verblijfplaats": "ident_verblijfplaats",
         "Ident. Nummeraanduiding": "ident_nummeraanduiding",
+        "Systeemnummer Adres": "systeemid_adres",
         "Adres compleet": "adres_compleet",
         "Straatnaam": "straatnaam",
         "Huisnummer": "huisnummer",
@@ -281,7 +283,7 @@
             "type": "INT"
           },
           {
-            "name": "heeft_verblijfplaatsen",
+            "name": "heeft_persoonsverblijfplaatsen",
             "type": "VARCHAR"
           },
           {
@@ -314,7 +316,7 @@
         "create": true,
         "columns": [
           {
-            "name": "burgerservicenummer",
+            "name": "identificatie",
             "type": "VARCHAR"
           },
           {
@@ -584,70 +586,9 @@
           {
             "name": "aantal_keren_persoon_in_onderzoek",
             "type": "INT"
-          }
-        ]
-      }
-    },
-    {
-      "type": "select",
-      "source": "dst",
-      "id": "select_brp_oud_object",
-      "depends_on": [
-        "import_brp_pers_act",
-        "select_brp_prs_object"        
-      ],
-      "query": "data/sql/brp/brp_ouders.sql",
-      "query_src": "file",
-      "destination_table": {
-        "name": "brp_prep.ouders",
-        "create": true,
-        "columns": [
-          {
-            "name": "identificatie",
-            "type": "VARCHAR"
           },
           {
-            "name": "burgerservicenummer",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "voornamen",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "voorvoegsels",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "geslachtsnaam",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "geslachtsaanduiding_code",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "geslachtsaanduiding_oms",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "geboortedatum",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "geboorteplaats_oms",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "geboorteplaats_pl_in_buitlnd",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "geboorteplaats_heeft_gem_code",
-            "type": "VARCHAR"
-          },
-          {
-            "name": "geboorteland",
+            "name": "heeft_persoonsverblijfplaatsen",
             "type": "VARCHAR"
           }
         ]

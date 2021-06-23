@@ -1,4 +1,4 @@
-select prs.van_persoon || '.' || prs.adres_compleet || '.' || prs.datum_aanvang_adreshouding as identificatie,
+select prs.van_persoon || '.' || prs.met_verblijfplaats || '.' || prs.datum_aanvang_adreshouding as identificatie,
        prs.van_persoon,
        prs.met_verblijfplaats,
        prs.functieadres,
@@ -16,7 +16,7 @@ select prs.van_persoon || '.' || prs.adres_compleet || '.' || prs.datum_aanvang_
        prs.datum_vestiging_nederland
 from (
          select prs.systeem_nummer_persoon       as van_persoon,
-                prs.adres_compleet               as met_verblijfplaats,
+                prs.systeemid_adres              as met_verblijfplaats,
                 prs.adres_compleet               as adres_compleet,
                 prs.functieadres                 as functieadres,
                 prs.gemeente_inschrijving        as gemeente_inschrijving,

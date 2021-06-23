@@ -30,8 +30,9 @@ select prs.systeem_nummer_persoon      as identificatie,
        prs.gezinsrelatie               as gezinsrelatie_oms,
        prs.aantal_kinderen             as aantal_kinderen,
        prs.waarvan_minderjarig         as aantal_minderjarige_kinderen,
-       prs.adres_compleet              as heeft_verblijfplaatsen,
+       prs.systeem_nummer_persoon || '.' || prs.systeemid_adres || '.' || prs.datum_aanvang_adreshouding as heeft_persoonsverblijfplaatsen,
        null                            as heeft_overlijden_gegevens,
        prs.partner_burgerservicenummer as heeft_verbintenis,
-       null                            as heeft_inschrijving
+       null                            as heeft_inschrijving,
+       
 from brp.personen_actueel prs
