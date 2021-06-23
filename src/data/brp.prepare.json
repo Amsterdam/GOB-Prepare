@@ -70,7 +70,7 @@
         "Huisletter": "huisletter",
         "Huisnummertoevoeging": "huisnummer_toevoeging",
         "Aanduiding bij Huisnummer": "huisnummer_aanduiding",
-        "systeemid adres": "systeemid_adres",
+        "Systeemnummer Adres": "systeemid_adres",
         "compleet adres": "adres_compleet",
         "Postcode Numeriek": "postcode_numeriek",
         "Postcode Alfanumeriek": "postcode_alfanumeriek",
@@ -108,12 +108,12 @@
         "file_filter": "brp/6 SelectHisAdres.csv"
       },
       "column_names": {
-        "Systeem nummer Persoon": "systeem_nummer_persoon",
+        "Systeemnummer Persoon": "systeem_nummer_persoon",
         "BSN": "burgerservicenummer",
         "Gemeente Inschrijving": "gemeente_inschrijving",
         "Ident. Verblijfplaats": "ident_verblijfplaats",
         "Ident. Nummeraanduiding": "ident_nummeraanduiding",
-        "systeemid adres": "systeemid_adres",
+        "Systeemnummer Adres": "systeemid_adres",
         "Adres compleet": "adres_compleet",
         "Straatnaam": "straatnaam",
         "Huisnummer": "huisnummer",
@@ -129,10 +129,11 @@
         "Aanduiding Onderzoek": "aanduiding_onderzoek",
         "Datum Begin Onderzoek Nr.": "datum_begin_onderzoek_nr",
         "Datum Einde Onderzoek Nr.": "datum_einde_onderzoek_nr",
-        "Datum Geldigheid Nr.": "datum_geldigheid_nr"
+        "Datum Geldigheid Nr.": "datum_geldigheid_nr",
+        "Code Land Waarnaar Vertrokken": "code_land_waarnaar_vertrokken"
       },
       "separator": ";",
-      "encoding": "iso-8859-1",
+      "encoding": "utf-8",
       "destination": "brp.adres_historisch",
       "id": "import_brp_ads_hist",
       "depends_on": [
