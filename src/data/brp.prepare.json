@@ -22,7 +22,7 @@
       "type": "import_csv",
       "objectstore": "Basisinformatie",
       "read_config": {
-        "file_filter": "brp/5 Alle Actuele Personen.csv"
+        "file_filter": "brp/6 Alle Actuele Personen.csv"
       },
       "column_names": {
         "Systeemnummer Persoon": "systeem_nummer_persoon",
@@ -105,7 +105,7 @@
       "type": "import_csv",
       "objectstore": "Basisinformatie",
       "read_config": {
-        "file_filter": "brp/1 SelectHisAdres.csv"
+        "file_filter": "brp/6 SelectHisAdres.csv"
       },
       "column_names": {
         "Systeem nummer Persoon": "systeem_nummer_persoon",
@@ -143,7 +143,7 @@
       "type": "import_csv",
       "objectstore": "Basisinformatie",
       "read_config": {
-        "file_filter": "brp/5 Bewonershistorie.csv"
+        "file_filter": "brp/6 Bewonershistorie.csv"
       },
       "column_names": {
         "systeemid adres": "systeemid_adres",
