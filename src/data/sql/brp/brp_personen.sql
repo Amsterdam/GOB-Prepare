@@ -30,7 +30,11 @@ select prs.systeem_nummer_persoon      as identificatie,
        prs.gezinsrelatie               as gezinsrelatie_oms,
        prs.aantal_kinderen             as aantal_kinderen,
        prs.waarvan_minderjarig         as aantal_minderjarige_kinderen,
-       prs.adres_compleet              as heeft_verblijfplaatsen,
+       case
+           when prs.datum_adreshouding = '00-00-0000'
+               then prs.systeem_nummer_persoon||'.'||prs.systeemid_adres||'.'||prs.datum_toetreding_gba
+               else prs.systeem_nummer_persoon||'.'||prs.systeemid_adres||'.'||prs.datum_adreshouding
+       end                             as heeft_persoonsverblijfplaatsen,
        null                            as heeft_overlijden_gegevens,
        prs.partner_burgerservicenummer as heeft_verbintenis,
        null                            as heeft_inschrijving

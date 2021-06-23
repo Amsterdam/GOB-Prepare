@@ -284,7 +284,7 @@
             "type": "INT"
           },
           {
-            "name": "heeft_verblijfplaatsen",
+            "name": "heeft_persoonsverblijfplaatsen",
             "type": "VARCHAR"
           },
           {
@@ -587,6 +587,10 @@
           {
             "name": "aantal_keren_persoon_in_onderzoek",
             "type": "INT"
+          },
+          {
+            "name": "heeft_persoonsverblijfplaatsen",
+            "type": "VARCHAR"
           }
         ]
       }
