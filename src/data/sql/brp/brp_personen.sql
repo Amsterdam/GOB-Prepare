@@ -33,6 +33,6 @@ select prs.systeem_nummer_persoon      as identificatie,
        prs.systeem_nummer_persoon || '.' || prs.systeemid_adres || '.' || prs.datum_aanvang_adreshouding as heeft_persoonsverblijfplaatsen,
        null                            as heeft_overlijden_gegevens,
        prs.partner_burgerservicenummer as heeft_verbintenis,
-       null                            as heeft_inschrijving
+       null                            as heeft_inschrijving,
        
 from brp.personen_actueel prs
