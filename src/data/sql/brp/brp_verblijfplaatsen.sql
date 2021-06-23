@@ -35,7 +35,7 @@ from (
                 prs.datum_begin_onderzoek                          as datum_ingang_persoononderzoek,
                 prs.datum_einde_onderzoek                          as datum_einde_persoononderzoek,
                 prs.aantal_keren_in_onderzoek                      as aantal_keren_persoon_in_onderzoek,
-                prs.systeem_nummer_persoon || '.' || prs.systeemid_adres || '.' || prs.datum_aanvang_adreshouding as heeft_persoonsverblijfplaatsen
+                prs.systeem_nummer_persoon || '.' || prs.systeemid_adres || '.' || prs.datum_adreshouding as heeft_persoonsverblijfplaatsen
 
          from brp.personen_actueel as prs
      ) vbp
