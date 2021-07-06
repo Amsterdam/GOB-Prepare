@@ -252,7 +252,7 @@
       "ignore_missing": true,
       "id": "select_kot",
       "depends_on": [
-        "import_ready"
+        "select_meta"
       ],
       "query": "data/sql/brk/select.kadastraal_object.sql",
       "query_src": "file",
