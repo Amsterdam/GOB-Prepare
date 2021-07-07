@@ -1,3 +1,4 @@
+-- The last union is to create MULTIPOLYGONs from multiple areas with the same identificatie
 select gc2.identificatie,
        ST_Union(gc2.geometrie) as geometrie,
        gc2.is_onderdeel_van_kadastralegemeente
