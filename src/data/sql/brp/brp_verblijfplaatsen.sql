@@ -1,7 +1,7 @@
 -- deduplicate on identificatie by using the row with highest aantal_keren_in_onderzoek
 select distinct on (vbp.identificatie) *
 from (
-         select prs.adres_compleet                                 as identificatie,
+         select prs.systeemid_adres                                as identificatie,
                 prs.straatnaam                                     as straatnaam,
                 null                                               as openbare_ruimte,
                 prs.huisnummer                                     as huisnummer,
