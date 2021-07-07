@@ -17,7 +17,6 @@ select prs.van_persoon || '.' || prs.met_verblijfplaats || '.' || prs.datum_aanv
 from (
          select prs.systeem_nummer_persoon       as van_persoon,
                 prs.systeemid_adres              as met_verblijfplaats,
-                prs.adres_compleet               as adres_compleet,
                 prs.functieadres                 as functieadres,
                 prs.gemeente_inschrijving        as gemeente_inschrijving,
                 case

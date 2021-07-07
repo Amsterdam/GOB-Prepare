@@ -1,10 +1,21 @@
--- use SnapToGrid to prevent precision errors
-SELECT kad_gemeente ->> 'omschrijving'                      AS identificatie,
-       ST_UNION(ST_SnapToGrid(geometrie, 0.000001))  AS geometrie,
-       brg_gemeente ->> 'omschrijving'                      AS ligt_in_gemeente
-FROM brk_prep.kadastraal_object
-WHERE index_letter = 'G'
-  AND ST_IsValid(geometrie)
-  AND modification is NULL
-  and status_code <> 'H'
-GROUP BY kad_gemeente ->> 'omschrijving', brg_gemeente ->> 'omschrijving'
+-- The last union is to create MULTIPOLYGONs from multiple areas with the same identificatie
+select g2.identificatie,
+       ST_Union(g2.geometrie) as geometrie,
+       g2.ligt_in_gemeente
+from (
+         select g1.identificatie,
+                ST_MakePolygon(ST_ExteriorRing((ST_Dump(g1.geometrie)).geom)) as geometrie,
+                g1.ligt_in_gemeente
+         from (
+                  select kad_gemeente ->> 'omschrijving'    as identificatie,
+                         ST_Union(ST_UnaryUnion(geometrie)) as geometrie,
+                         brg_gemeente ->> 'omschrijving'    as ligt_in_gemeente
+                  from brk_prep.kadastraal_object
+                  where index_letter = 'G'
+                    and ST_IsValid(geometrie)
+                    and modification is NULL
+                    and status_code <> 'H'
+                  group by kad_gemeente ->> 'omschrijving', brg_gemeente ->> 'omschrijving'
+              ) g1
+     ) g2
+group by g2.identificatie, g2.ligt_in_gemeente

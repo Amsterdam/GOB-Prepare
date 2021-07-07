@@ -1,7 +1,7 @@
 -- deduplicate on identificatie by using the row with highest aantal_keren_in_onderzoek
 select distinct on (vbp.identificatie) *
 from (
-         select prs.adres_compleet                                 as identificatie,
+         select prs.systeemid_adres                                as identificatie,
                 prs.straatnaam                                     as straatnaam,
                 null                                               as openbare_ruimte,
                 prs.huisnummer                                     as huisnummer,
@@ -30,12 +30,7 @@ from (
                 prs.aanduiding_onderzoek                           as aanduiding_persoongegevens_in_onderzoek,
                 prs.datum_begin_onderzoek                          as datum_ingang_persoononderzoek,
                 prs.datum_einde_onderzoek                          as datum_einde_persoononderzoek,
-                prs.aantal_keren_in_onderzoek                      as aantal_keren_persoon_in_onderzoek,
-                case
-                    when prs.datum_adreshouding = '00-00-0000'
-                        then prs.systeem_nummer_persoon||'.'||prs.systeemid_adres||'.'||prs.datum_toetreding_gba
-                        else prs.systeem_nummer_persoon||'.'||prs.systeemid_adres||'.'||prs.datum_adreshouding
-                end                                                as heeft_persoonsverblijfplaatsen
+                prs.aantal_keren_in_onderzoek                      as aantal_keren_persoon_in_onderzoek
          from brp.personen_actueel as prs
      ) vbp
 order by vbp.identificatie, vbp.aantal_keren_persoon_in_onderzoek desc nulls last;
