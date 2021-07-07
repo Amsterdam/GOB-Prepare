@@ -1,3 +1,8 @@
+-- To fix "non-noded" linestring intersections:
+-- First take the UnaryUnion
+-- Then Union the result per sectie
+-- Lastly only take the outer boundary (ExteriorRing) to remove holes
+
 select s.identificatie,
        s.code,
        ST_MakePolygon(ST_ExteriorRing((ST_Dump(s.geometrie)).geom)) as geometrie,

@@ -1,3 +1,4 @@
+-- The last union is to create MULTIPOLYGONs from multiple areas with the same identificatie
 select g2.identificatie,
        ST_Union(g2.geometrie) as geometrie,
        g2.ligt_in_gemeente
