@@ -796,7 +796,7 @@
       "ignore_missing": true,
       "id": "select_akt",
       "depends_on": [
-        "create_indexes_kot"
+        "create_indexes_art"
       ],
       "query": "data/sql/brk/select.aantekening_kadastraal_object.sql",
       "query_src": "file",
@@ -1280,7 +1280,7 @@
       "ignore_missing": true,
       "id": "select_kse",
       "depends_on": [
-        "create_indexes_kot"
+        "select_sdl"
       ],
       "query": "data/sql/brk/select.kadastrale_sectie.sql",
       "query_src": "file",
@@ -1313,7 +1313,7 @@
       "ignore_missing": true,
       "id": "select_kce",
       "depends_on": [
-        "create_indexes_kot"
+        "select_kse"
       ],
       "query": "data/sql/brk/select.kadastrale_gemeentecode.sql",
       "query_src": "file",
@@ -1342,7 +1342,7 @@
       "ignore_missing": true,
       "id": "select_kge",
       "depends_on": [
-        "create_indexes_kot"
+        "select_kce"
       ],
       "query": "data/sql/brk/select.kadastrale_gemeente.sql",
       "query_src": "file",
