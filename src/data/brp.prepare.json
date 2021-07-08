@@ -585,6 +585,66 @@
           }
         ]
       }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "id": "select_brp_oud_object",
+      "depends_on": [
+        "import_brp_pers_act"
+      ],
+      "query": "data/sql/brp/brp_ouders.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brp_prep.ouders",
+        "create": true,
+        "columns": [
+          {
+            "name": "identificatie",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "burgerservicenummer",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "voornamen",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "voorvoegsels",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "geslachtsaanduiding_code",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "geslachtsaanduiding_oms",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "geboortedatum",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "geboorteplaats_oms",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "geboorteplaats_pl_in_buitlnd",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "geboorteplaats_heeft_gem_code",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "geboorteland",
+            "type": "VARCHAR"
+          }
+        ]
+      }
     }
   ]
 }
