@@ -19,6 +19,7 @@ from gobprepare.cloner.oracle_to_sql import OracleToSqlCloner
 from gobprepare.importers.api_importer import SqlAPIImporter
 from gobprepare.importers.csv_importer import SqlCsvImporter
 from gobprepare.selector.datastore_to_postgres import DatastoreToPostgresSelector
+from gobprepare.utils.exceptions import DuplicateTableError
 
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
@@ -372,10 +373,16 @@ class PrepareClient:
             action.update(self.msg['override'])
 
         self.connect()
-        self._run_prepare_action(action)
-        self.disconnect()
 
-        return self._get_result()
+        try:
+            self._run_prepare_action(action)
+        except DuplicateTableError as err:
+            print(f'WARNING: {err}, ignoring duplicate for task \'{taskid}\'')
+            return False
+        else:
+            return self._get_result()
+        finally:
+            self.disconnect()
 
     def _publish_result_schemas(self):
         for src_schema, dst_schema in self.publish_schemas.items():
