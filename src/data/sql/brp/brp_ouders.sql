@@ -46,4 +46,3 @@ select prs.systeem_nummer_persoon||'.'||'ouder2'  as identificatie,
 from brp.personen_actueel prs
 where ouder2_geslachtsnaam != '.' and ouder2_geslachtsnaam is not null
 
-
