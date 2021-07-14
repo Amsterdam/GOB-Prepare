@@ -2,7 +2,8 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch, call, mock_open, ANY
 
 from gobcore.exceptions import GOBException
-from gobprepare.prepare_client import PrepareClient, OracleDatastore, SqlDatastore
+from gobprepare.prepare_client import PrepareClient, OracleDatastore, SqlDatastore, DatastoreToPostgresSelector
+from gobprepare.utils.exceptions import DuplicateTableError
 from tests import fixtures
 
 mock_oracle = MagicMock(spec=OracleDatastore)
@@ -527,6 +528,15 @@ class TestPrepareClient(TestCase):
 
         with self.assertRaises(GOBException):
             prepare_client.run_prepare_task()
+
+    def test_run_prepare_task_duplicate_table(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._actions = [{'id': 'some_id'}, {'id': 'other_id'}]
+        prepare_client.msg = {'id': 'some_id'}
+        prepare_client._run_prepare_action = MagicMock()
+        prepare_client._run_prepare_action.side_effect = DuplicateTableError
+        result = prepare_client.run_prepare_task()
+        self.assertFalse(result)
 
     def test_run_prepare_task_original_action_and_override(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)

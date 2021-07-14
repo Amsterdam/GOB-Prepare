@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
 from gobprepare.selector._to_postgres import ToPostgresSelector
+from gobprepare.utils.exceptions import DuplicateTableError
 
 
 class TestToPostgresSelector(TestCase):
@@ -39,6 +40,13 @@ class TestToPostgresSelector(TestCase):
         self.selector._dst_datastore.execute.assert_called_with(
             "CREATE TABLE dst.table (col_a VARCHAR(20) NULL,col_b TIMESTAMP NULL)"
         )
+
+    def test_create_destination_table_error(self):
+        destination_table = self.config['queries'][0]['destination_table']
+        self.selector._dst_datastore.list_tables_for_schema.return_value = ['table']
+
+        with self.assertRaises(DuplicateTableError, msg="Table already exists: table (dst)"):
+            self.selector._create_destination_table(destination_table)
 
     @patch("gobprepare.selector._to_postgres.Json")
     def test_prepare_row(self, mock_json):
