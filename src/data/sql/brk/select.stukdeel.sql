@@ -149,6 +149,8 @@ WITH stukdelen AS (SELECT sdl.identificatie                         AS brk_sdl_i
                        GROUP BY stukdeel_identificatie
                    ) asg ON (asg.stukdeel_identificatie = sdl.identificatie)
                             JOIN brk.bestand bsd ON (1 = 1)
+    -- Exclude NL.KAD.Stukdeel.33029100 since it has 287.000 relations
+    WHERE sdl.identificatie <> 'NL.KAD.Stukdeel.33029100'
 )
 -- Interleave rows for import to avoid a heavily unbalanced tabel.
 SELECT
