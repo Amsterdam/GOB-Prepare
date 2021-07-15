@@ -31,6 +31,6 @@ select prs.systeem_nummer_persoon      as identificatie,
        prs.aantal_kinderen             as aantal_kinderen,
        prs.waarvan_minderjarig         as aantal_minderjarige_kinderen,
        null                            as heeft_overlijden_gegevens,
-       prs.partner_burgerservicenummer as heeft_verbintenis,
+       prs.systeem_nummer_persoon      as heeft_verbintenis,
        null                            as heeft_inschrijving
 from brp.personen_actueel prs
