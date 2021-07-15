@@ -1,0 +1,2 @@
+class DuplicateTableError(Exception):
+    pass
