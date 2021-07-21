@@ -44,6 +44,4 @@ select prs.systeem_nummer_persoon||'.'||'ouder2'  as identificatie,
 --         prs.ouder2_geboorteland                as geboorteland,
        null                                       as geboorteland
 from brp.personen_actueel prs
-where ouder2_geslachtsnaam != '.' and length(trim(ouder2_geslachtsnaam))>0
-
-
+where trim(ouder2_geslachtsnaam) not in ('.', '')
