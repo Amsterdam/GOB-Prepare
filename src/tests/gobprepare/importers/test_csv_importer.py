@@ -145,7 +145,14 @@ class TestSqlCsvImporter(TestCase):
             ]
         }
         self.assertEqual(expected_result, result)
-        mock_read_csv.assert_called_with(self.importer._source, keep_default_na=False, sep=self.importer._separator, encoding='the-encoding', dtype=str)
+        mock_read_csv.assert_called_with(
+            self.importer._source,
+            keep_default_na=False,
+            sep=self.importer._separator,
+            encoding='the-encoding',
+            dtype=str,
+            engine='c'
+        )
 
 
     @patch("gobprepare.importers.csv_importer.read_csv")
