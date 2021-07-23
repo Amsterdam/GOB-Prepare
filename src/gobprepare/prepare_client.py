@@ -152,8 +152,8 @@ class PrepareClient:
             self._dst_datastore,
             action
         )
-
-        return selector.select()
+        rows = selector.select()
+        return rows
 
     def action_execute_sql(self, action: dict):
         """Execute SQL action. Executes SQL on destination database.
@@ -372,12 +372,13 @@ class PrepareClient:
         if 'override' in self.msg:
             action.update(self.msg['override'])
 
+        logger.info(f"Running prepare task: '{taskid}' (action={action.get('type')})")
         self.connect()
 
         try:
             self._run_prepare_action(action)
         except DuplicateTableError as err:
-            print(f'WARNING: {err}, ignoring duplicate for task \'{taskid}\'')
+            logger.warning(f'WARNING: {err}, ignoring duplicate for task \'{taskid}\'')
             return False
         else:
             return self._get_result()
