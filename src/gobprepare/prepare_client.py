@@ -152,8 +152,8 @@ class PrepareClient:
             self._dst_datastore,
             action
         )
-
-        return selector.select()
+        rows = selector.select()
+        return rows
 
     def action_execute_sql(self, action: dict):
         """Execute SQL action. Executes SQL on destination database.
@@ -372,17 +372,26 @@ class PrepareClient:
         if 'override' in self.msg:
             action.update(self.msg['override'])
 
+        logger.info(f"Running prepare task: '{taskid}' (action={action.get('type')})")
         self.connect()
 
         try:
             self._run_prepare_action(action)
         except DuplicateTableError as err:
-            print(f'WARNING: {err}, ignoring duplicate for task \'{taskid}\'')
+            # delete table in dst (if created) and requeue the task message
+            self._handle_duplicate_table_error()
+            logger.warning(f'{err}, requeue task: \'{taskid}\'')
             return False
         else:
             return self._get_result()
         finally:
             self.disconnect()
+
+    def _handle_duplicate_table_error(self):
+        if self._prepare_config.destination_table.get('create', False):
+            table = self._prepare_config.destination_table['name']
+            self._dst_datastore.drop_table(table)
+            logger.info(f'Table dropped: f{table}')
 
     def _publish_result_schemas(self):
         for src_schema, dst_schema in self.publish_schemas.items():
