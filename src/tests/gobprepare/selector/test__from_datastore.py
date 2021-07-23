@@ -15,5 +15,7 @@ class TestFromDatastoreSelector(TestCase):
         self.selector._src_datastore.query.return_value = ['row_a', 'row_b']
         query = "some query"
         result = self.selector._read_rows(query)
-        self.assertEqual(['row_a', 'row_b'], result)
-        self.selector._src_datastore.query.assert_called_with(query)
+        self.assertEqual(['row_a', 'row_b'], list(result))
+
+        kwargs = {'name': 'named_cursor', 'arraysize': 2000, 'withhold': True}
+        self.selector._src_datastore.query.assert_called_with(query, **kwargs)

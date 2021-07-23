@@ -2,7 +2,7 @@ from psycopg2.extras import Json
 from gobprepare.utils.exceptions import DuplicateTableError
 
 
-class ToPostgresSelector():
+class ToPostgresSelector:
 
     def _create_destination_table(self, destination_table: dict) -> bool:
         """Creates destination table
@@ -32,5 +32,5 @@ class ToPostgresSelector():
                 row[idx] = Json(val)
         return row
 
-    def _write_rows(self, table: str, values):
-        self._dst_datastore.write_rows(table, values)
+    def _write_rows(self, table: str, values) -> int:
+        return self._dst_datastore.write_rows(table, values)
