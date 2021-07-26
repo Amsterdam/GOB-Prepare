@@ -60,8 +60,7 @@ class SqlCsvImporter():
                     keep_default_na=False,
                     sep=self._separator,
                     dtype=str,
-                    encoding=self._encoding,
-                    engine='c'
+                    encoding=self._encoding
                 )
                 break
             except ParserError:
@@ -80,11 +79,8 @@ class SqlCsvImporter():
             } for col in df.columns],
 
             # List of lists of values
-            "data": [
-                [str(x) if x else None for x in row.tolist()]
-                for _, row in df.iterrows()
-                if not self._is_empty_row(row)
-            ]
+            "data": [list(map(lambda x: str(x) if x else None, row.tolist())) for _, row in df.iterrows()
+                     if not self._is_empty_row(row)]
         }
 
     def _tmp_filename(self, filename: str):

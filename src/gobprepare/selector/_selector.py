@@ -49,7 +49,7 @@ class Selector():
         if self.destination_table.get('create', False):
             self._create_destination_table(self.destination_table)
 
-        rows = self._read_rows(self.query, yield_per=1_000)
+        rows = self._read_rows(self.query)
         total_cnt = 0
 
         while True:
