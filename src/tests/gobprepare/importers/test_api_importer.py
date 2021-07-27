@@ -1,4 +1,4 @@
-from collections import KeysView
+from collections.abc import KeysView
 
 from unittest import TestCase
 from unittest.mock import patch, call, ANY, MagicMock

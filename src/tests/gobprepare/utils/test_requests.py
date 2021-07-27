@@ -44,5 +44,5 @@ class TestRequests(TestCase):
         mock_get.raise_for_status = MagicMock(side_effect=RequestException)
         mock_requests_post.return_value = mock_get
 
-        with self.assertRaisesRegexp(APIException, 'Request failed due to API exception'):
+        with self.assertRaisesRegex(APIException, 'Request failed due to API exception'):
             post_stream('any url', True)

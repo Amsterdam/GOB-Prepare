@@ -27,12 +27,12 @@ class TestOracleToSqlCloner(TestCase):
         cloner = OracleToSqlCloner(self.oracle_datastore_mock, self.src_schema, self.sql_datastore_mock,
                                    self.dst_schema, {})
 
-        self.assertEquals([], cloner._ignore_tables)
+        self.assertEqual([], cloner._ignore_tables)
 
         # Test None
         cloner = OracleToSqlCloner(self.oracle_datastore_mock, self.src_schema, self.sql_datastore_mock,
                                    self.dst_schema, None)
-        self.assertEquals([], cloner._ignore_tables)
+        self.assertEqual([], cloner._ignore_tables)
 
     def test_init_with_ignore_tables(self):
         config = {
@@ -44,7 +44,7 @@ class TestOracleToSqlCloner(TestCase):
         cloner = OracleToSqlCloner(self.oracle_datastore_mock, self.src_schema, self.sql_datastore_mock,
                                    self.dst_schema, config)
 
-        self.assertEquals(config["ignore"], cloner._ignore_tables)
+        self.assertEqual(config["ignore"], cloner._ignore_tables)
 
     def test_init_with_ignore_and_include(self):
         config = {
@@ -61,7 +61,7 @@ class TestOracleToSqlCloner(TestCase):
         }
         cloner = OracleToSqlCloner(self.oracle_datastore_mock, self.src_schema, self.sql_datastore_mock,
                                    self.dst_schema, config)
-        self.assertEquals(config["include"], cloner._include_tables)
+        self.assertEqual(config["include"], cloner._include_tables)
 
     def test_filter_tables_no_filter(self):
         self.cloner._ignore_tables = []
