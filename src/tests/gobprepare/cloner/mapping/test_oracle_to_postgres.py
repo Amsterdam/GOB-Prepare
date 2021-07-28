@@ -23,7 +23,7 @@ class TestOracleToPostgresMapping(TestCase):
 
         for params, result in cases:
             length, precision, scale = params
-            self.assertEquals(result, _oracle_number_to_postgres(length, precision, scale))
+            self.assertEqual(result, _oracle_number_to_postgres(length, precision, scale))
 
     def test_oracle_number_to_postgres_errors(self):
         cases = [
@@ -51,10 +51,10 @@ class TestOracleToPostgresMapping(TestCase):
 
         for params, result in cases:
             data_type, length, precision, scale = params
-            self.assertEquals(result, get_postgres_column_definition(data_type, length, precision, scale))
+            self.assertEqual(result, get_postgres_column_definition(data_type, length, precision, scale))
 
     def test_get_postgres_column_definition_number(self):
-        self.assertEquals('NUMERIC(3,2)', get_postgres_column_definition('NUMBER', None, 3, 2))
+        self.assertEqual('NUMERIC(3,2)', get_postgres_column_definition('NUMBER', None, 3, 2))
 
     def test_get_postgres_column_definition_missing_column(self):
         with self.assertRaises(GOBException):

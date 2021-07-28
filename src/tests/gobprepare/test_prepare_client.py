@@ -588,7 +588,7 @@ class TestPrepareClient(TestCase):
         prepare_client.msg['summary'] = {'key': 'value'}
 
         result = prepare_client.complete_prepare_process()
-        self.assertEquals([], result['contents'])
+        self.assertEqual([], result['contents'])
         prepare_client._publish_result_schemas.assert_called_once()
 
     def test_split_clone_action(self, mock_logger):

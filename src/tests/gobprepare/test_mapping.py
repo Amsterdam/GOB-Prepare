@@ -46,7 +46,7 @@ class TestMapping(TestCase):
         mock_get_mapping.return_value = {
         }
 
-        with self.assertRaisesRegexp(GOBException, "Dataset file mocked/data/dir/file.json invalid"):
+        with self.assertRaisesRegex(GOBException, "Dataset file mocked/data/dir/file.json invalid"):
             _build_prepare_definitions_locations_mapping()
 
     @patch("gobprepare.mapping.get_mapping")
@@ -57,7 +57,7 @@ class TestMapping(TestCase):
         mock_os.path.isfile.return_value = True
         mock_get_mapping.side_effect = json.decoder.JSONDecodeError("", MagicMock(), 0)
 
-        with self.assertRaisesRegexp(GOBException, "Dataset file mocked/data/dir/file.json invalid"):
+        with self.assertRaisesRegex(GOBException, "Dataset file mocked/data/dir/file.json invalid"):
             _build_prepare_definitions_locations_mapping()
 
     mock_mapping = {
@@ -68,5 +68,5 @@ class TestMapping(TestCase):
     def test_get_prepare_definition_file_location(self):
         self.assertEqual('somefile.json', get_prepare_definition_file_location('cat_a'))
 
-        with self.assertRaisesRegexp(GOBException, "No prepare definition found for catalogue cat_b"):
+        with self.assertRaisesRegex(GOBException, "No prepare definition found for catalogue cat_b"):
             get_prepare_definition_file_location('cat_b')

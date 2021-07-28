@@ -39,7 +39,7 @@ where atg.identificatie not in (
     select distinct a.brk_atg_id
     from (
              select brk_atg_id, count(brk_atg_id)
-             from brk_prepared.aantekening_kadastraal_object ako
+             from brk_prep.aantekening_kadastraal_object ako
              group by brk_atg_id, nrn_kot_volgnr
              having count(*) > 1
          ) a

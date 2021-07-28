@@ -4,7 +4,7 @@ from gobcore.logging.logger import logger
 from gobcore.datastore.datastore import Datastore
 
 
-class Selector():
+class Selector:
     """
     Base Selector.
 
@@ -49,19 +49,21 @@ class Selector():
         if self.destination_table.get('create', False):
             self._create_destination_table(self.destination_table)
 
-        # yield_per used by postgres datastore, ignored in oracle
-        rows = self._read_rows(self.query, yield_per=1_000)
         total_cnt = 0
+        rows = self._read_rows(self.query)
+
+        columns = self.destination_table['columns']
+        name = self.destination_table['name']
 
         while True:
             chunk = itertools.islice(rows, self.WRITE_BATCH_SIZE)
-            values = self._values_list(chunk, self.destination_table['columns'])
-            self._write_rows(self.destination_table['name'], values)
+            values = self._values_list(chunk, columns)
+            result_rows = self._write_rows(name, values)
 
-            total_cnt += len(values)
+            total_cnt += result_rows
 
-            if len(values) < self.WRITE_BATCH_SIZE:
-                logger.info(f"Written {total_cnt} rows to destination table {self.destination_table['name']}")
+            if result_rows < self.WRITE_BATCH_SIZE:
+                logger.info(f"Written {total_cnt} rows to destination table {name}")
                 return total_cnt
 
     def _values_list(self, rows: iter, columns: list):
@@ -73,15 +75,18 @@ class Selector():
         :param columns:
         :return:
         """
-        result = []
-        for row in rows:
-            rowvals = []
-            for column in columns:
-                if column['name'].lower() in row:
-                    rowvals.append(row[column['name'].lower()])
-                elif not self.ignore_missing:
-                    raise GOBException(f"Missing column {column['name'].lower()} in query result")
-                else:
-                    rowvals.append(None)
-            result.append(self._prepare_row(rowvals, columns))
-        return result
+        ignore_missing = self.ignore_missing
+
+        def match_column(column, row) -> str:
+            name = column['name'].lower()
+
+            if name in row or ignore_missing:
+                return row.get(name, None)
+            else:
+                raise GOBException(f"Missing column {name} in query result")
+
+        def prepare_row(row) -> list:
+            row_values = [match_column(column, row) for column in columns]
+            return self._prepare_row(row_values, columns)
+
+        return [prepare_row(row) for row in rows]

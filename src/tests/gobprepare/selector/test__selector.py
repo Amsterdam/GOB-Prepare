@@ -71,13 +71,14 @@ class TestSelector(TestCase):
 
     @patch("gobprepare.selector._selector.logger")
     def test_select(self, mock_logger):
+        size = 24
         result_cnt = 97
         destination_table = self.config['destination_table']
 
-        self.selector.WRITE_BATCH_SIZE = 24
+        self.selector.WRITE_BATCH_SIZE = size
         self.selector._create_destination_table = MagicMock()
         self.selector._read_rows = MagicMock()
-        self.selector._write_rows = MagicMock()
+        self.selector._write_rows = MagicMock(side_effect=(97 // size) * [size] + [result_cnt % size])
 
         # Mock values list. Important that returned length is the same as length of input generator x.
         self.selector._values_list = lambda x, y: [[] for _ in x]
@@ -102,7 +103,7 @@ class TestSelector(TestCase):
 
         self.selector._create_destination_table = MagicMock()
         self.selector._read_rows = MagicMock()
-        self.selector._write_rows = MagicMock()
+        self.selector._write_rows = MagicMock(return_value=10)
         self.selector.select()
         # Assert that table is not created
         self.selector._create_destination_table.assert_not_called()
