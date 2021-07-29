@@ -63,7 +63,7 @@ class Selector:
             total_cnt += result_rows
 
             if result_rows < self.WRITE_BATCH_SIZE:
-                logger.info(f"Written {total_cnt} rows to destination table {name}")
+                logger.info(f"Written {total_cnt:,} rows to destination table {name}")
                 return total_cnt
 
     def _values_list(self, rows: iter, columns: list):
