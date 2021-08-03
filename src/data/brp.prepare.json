@@ -294,6 +294,14 @@
           {
             "name": "heeft_inschrijving",
             "type": "VARCHAR"
+          },
+          {
+            "name": "heeft_ouder1",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "heeft_ouder2",
+            "type": "VARCHAR"
           }
         ]
       }
