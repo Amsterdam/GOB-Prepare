@@ -665,6 +665,198 @@
           }
         ]
       }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "id": "select_brp_hist_vbl_object",
+      "depends_on": [
+        "select_brp_vbl_object"
+      ],
+    "query": "data/sql/brp/brp_hist_verblijfplaatsen.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brp_prep.verblijfplaatsen",
+        "create": false,
+        "columns": [
+          {
+            "name": "identificatie",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "straatnaam",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "huisnummer",
+            "type": "INT"
+          },
+          {
+            "name": "huisletter",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "huisnummertoevoeging",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "postcode",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "adres_compleet",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "ligt_in_woonplaats",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "is_verblijfsobject",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "is_ligplaats",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "is_standplaats",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "heeft_nummeraanduiding",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "aanduiding_persoongegevens_in_onderzoek",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "datum_ingang_persoononderzoek",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "datum_einde_persoononderzoek",
+            "type": "VARCHAR"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "id": "select_brp_hist_prs_object",
+      "depends_on": [
+        "import_brp_pers_act"
+      ],
+      "query": "data/sql/brp/brp_hist_personen.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brp_prep.personen",
+        "create": false,
+        "columns": [
+          {
+            "name": "identificatie",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "burgerservicenummer",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "a_nummer",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "geslachtsaanduiding_code",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "geboortedatum",
+            "type": "VARCHAR"
+          }
+        ]
+      }
+    },
+    {
+      "type": "select",
+      "source": "dst",
+      "id": "select_brp_hpv_object",
+      "depends_on": [
+        "select_brp_hist_prs_object", "select_brp_hist_vbl_object"
+      ],
+      "query": "data/sql/brp/brp_hist_persoonsverblijfplaatsen.sql",
+      "query_src": "file",
+      "destination_table": {
+        "name": "brp_prep.persoonsverblijfplaatsen",
+        "create": false,
+        "columns": [
+          {
+            "name": "identificatie",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "van_persoon",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "met_verblijfplaats",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "functieadres",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "gemeente_inschrijving",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "datum_inschrijving_gemeente",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "datum_aanvang_adreshouding",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "eind_datum_bewoning",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "reden_einde_bewoning",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "datum_uitschrijving_gemeente",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "gemeente_waarnaar_vertrokken",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "indicatie_actueel_historisch",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "land_vanwaar_ingeschreven",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "datum_vestiging_nederland",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "land_waarnaar_vertrokken",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "datum_vertrek_nederland",
+            "type": "VARCHAR"
+          }
+        ]
+      }
     }
   ]
 }
