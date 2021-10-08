@@ -120,7 +120,7 @@ WITH stukdelen AS (
     ) art
         ON sdl.identificatie = art.stukdeel_identificatie
     --
-    LEFT JOIN (
+    INNER JOIN (
         SELECT stukdeel_identificatie
              , array_to_json(
                  array_agg(
