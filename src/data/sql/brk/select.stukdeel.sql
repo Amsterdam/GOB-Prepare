@@ -148,15 +148,15 @@ WITH stukdelen AS (
                      END                                                               AS expiration_date
                  , atg.identificatie
                  , atg.id
-                 FROM brk.aantekeningisgebaseerdop aip
-                 --
-                 LEFT JOIN brk.aantekening atg
-                     ON atg.id = aip.aantekening_id
-                 --
-                 JOIN brk_prep.aantekening_kadastraal_object akt -- Only include AKT's
-                     ON akt.nrn_atg_id = atg.id
-                 --
-                 GROUP BY aip.stukdeel_identificatie, atg.identificatie, atg.id
+            FROM brk.aantekeningisgebaseerdop aip
+            --
+            LEFT JOIN brk.aantekening atg
+                ON atg.id = aip.aantekening_id
+            --
+            JOIN brk_prep.aantekening_kadastraal_object akt -- Only include AKT's
+                ON akt.nrn_atg_id = atg.id
+            --
+            GROUP BY aip.stukdeel_identificatie, atg.identificatie, atg.id
         ) q
         GROUP BY stukdeel_identificatie
     ) akt

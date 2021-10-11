@@ -8,5 +8,5 @@ INSERT INTO brk.import_aardaantekening
                null             as datum_tot,
                null             as type
         from brk.c_aardaantekening ca
-        where ca.code not in (select Code from brk.import_aardaantekening)
+        where ca.code not in (select code from brk.import_aardaantekening)
     )
