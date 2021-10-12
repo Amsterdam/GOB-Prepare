@@ -77,8 +77,8 @@ WITH stukdelen AS (
         GROUP BY tip.stukdeel_identificatie
     ) tng
         ON sdl.identificatie = tng.stukdeel_identificatie
---
-    LEFT JOIN (
+-- Filter stukdelen without aantekening_recht
+    INNER JOIN (
         SELECT stukdeel_identificatie
              , array_to_json(
                  array_agg(
@@ -119,7 +119,7 @@ WITH stukdelen AS (
         GROUP BY stukdeel_identificatie
     ) art
         ON sdl.identificatie = art.stukdeel_identificatie
-    --
+    -- Filter stukdelen without aantekening_kadastraal_object
     INNER JOIN (
         SELECT stukdeel_identificatie
              , array_to_json(
@@ -210,7 +210,7 @@ WITH stukdelen AS (
         ON 1 = 1
     --
     -- Exclude NL.KAD.Stukdeel.33029100 since it has 287.000 relations
-    WHERE sdl.identificatie <> 'NL.KAD.Stukdeel.33029100'
+    -- WHERE sdl.identificatie <> 'NL.KAD.Stukdeel.33029100'
 )
 -- Interleave rows for import to avoid a heavily unbalanced tabel.
 SELECT sdl.*
