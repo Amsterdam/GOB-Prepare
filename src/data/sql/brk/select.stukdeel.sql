@@ -77,8 +77,9 @@ WITH stukdelen AS (
         GROUP BY tip.stukdeel_identificatie
     ) tng
         ON sdl.identificatie = tng.stukdeel_identificatie
--- Filter stukdelen without aantekening_recht
-    INNER JOIN (
+--
+    -- Join stukdelen with aantekening_recht
+    LEFT JOIN (
         SELECT stukdeel_identificatie
              , array_to_json(
                  array_agg(
@@ -119,8 +120,9 @@ WITH stukdelen AS (
         GROUP BY stukdeel_identificatie
     ) art
         ON sdl.identificatie = art.stukdeel_identificatie
-    -- Filter stukdelen without aantekening_kadastraal_object
-    INNER JOIN (
+--
+    -- Filter and join stukdelen without aantekening_kadastraal_object (no Aantekening PB's)
+    JOIN (
         SELECT stukdeel_identificatie
              , array_to_json(
                  array_agg(
