@@ -49,6 +49,7 @@ WITH stukdelen AS (
     LEFT JOIN brk.c_registercode rce
         ON stk.soortregister_code = rce.code
 --
+    -- 1. Join stukdelen with tenaamstellingen
     LEFT JOIN (
         SELECT tip.stukdeel_identificatie
              , MIN(tng.begindatum)                                                     AS min_tng_begindatum
@@ -77,8 +78,9 @@ WITH stukdelen AS (
         GROUP BY tip.stukdeel_identificatie
     ) tng
         ON sdl.identificatie = tng.stukdeel_identificatie
--- Filter stukdelen without aantekening_recht
-    INNER JOIN (
+--
+    -- 2. Join stukdelen with aantekening_recht
+    LEFT JOIN (
         SELECT stukdeel_identificatie
              , array_to_json(
                  array_agg(
@@ -119,8 +121,9 @@ WITH stukdelen AS (
         GROUP BY stukdeel_identificatie
     ) art
         ON sdl.identificatie = art.stukdeel_identificatie
-    -- Filter stukdelen without aantekening_kadastraal_object
-    INNER JOIN (
+--
+    -- 3. Join stukdelen without aantekening_kadastraal_object (no Aantekening PB's)
+    LEFT JOIN (
         SELECT stukdeel_identificatie
              , array_to_json(
                  array_agg(
@@ -161,7 +164,8 @@ WITH stukdelen AS (
         GROUP BY stukdeel_identificatie
     ) akt
         ON sdl.identificatie = akt.stukdeel_identificatie
-    --
+--
+    -- 4. Join stukdelen with appartementsrecht
     LEFT JOIN (
         SELECT stukdeel_identificatie
              , min(zrt_begindatum)                                                     AS zrt_begindatum
@@ -208,6 +212,14 @@ WITH stukdelen AS (
     --
     JOIN brk.bestand bsd
         ON 1 = 1
+
+    -- Stukdeel must be a source document for minimal 1 of 4 objectclasses
+    WHERE COALESCE(
+        tng.tng_ids -> 0 -> 'brk_tng_id', -- tenaamstelling
+        art.art_ids -> 0 -> 'brk_art_id', -- aantekening recht
+        akt.akt_ids -> 0 -> 'brk_akt_id', -- aantekening
+        asg.zrt_ids -> 0 -> 'brk_zrt_id'  -- appartements recht
+    ) IS NOT NULL
     --
     -- Exclude NL.KAD.Stukdeel.33029100 since it has 287.000 relations
     -- WHERE sdl.identificatie <> 'NL.KAD.Stukdeel.33029100'

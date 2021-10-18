@@ -16,6 +16,11 @@ SELECT atg.identificatie                         AS brk_atg_id
 --
 FROM brk.aantekening atg
 
+-- Filter all aantekeningen based on aardaantekening != Aantekening PB
+-- https://dev.azure.com/CloudCompetenceCenter/Datateam%20Basis%20en%20Kernregistraties/_workitems/edit/17723
+JOIN (SELECT * FROM brk.import_aardaantekening aag WHERE aag.type != 'Aantekening PB') aag
+    ON atg.aardaantekening_code = aag.code
+
 JOIN brk.aantekening_kadastraalobject akt
     ON atg.id = akt.aantekening_id
 
@@ -40,11 +45,3 @@ LEFT JOIN (
     GROUP BY geb.aantekening_id
 ) geb
     ON geb.aantekening_id = atg.id
-
--- Only include aantekeningen which have an aardaantekening_code
-JOIN brk.import_aardaantekening aag
-    ON atg.aardaantekening_code = aag.code
-
--- Filter all aantekeningen based on aardaantekening != Aantekening PB
--- https://dev.azure.com/CloudCompetenceCenter/Datateam%20Basis%20en%20Kernregistraties/_workitems/edit/17723
-WHERE aag.type != 'Aantekening PB'
