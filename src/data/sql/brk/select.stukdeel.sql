@@ -122,7 +122,7 @@ WITH stukdelen AS (
         ON sdl.identificatie = art.stukdeel_identificatie
 --
     -- Filter and join stukdelen without aantekening_kadastraal_object (no Aantekening PB's)
-    JOIN (
+    LEFT JOIN (
         SELECT stukdeel_identificatie
              , array_to_json(
                  array_agg(
@@ -210,6 +210,14 @@ WITH stukdelen AS (
     --
     JOIN brk.bestand bsd
         ON 1 = 1
+
+    -- Stukdeel must be a source document for 1 of 4 objectclasses
+    WHERE COALESCE(
+        tng.tng_ids -> 0 -> 'brk_tng_id', -- tenaamstelling
+        art.art_ids -> 0 -> 'brk_art_id', -- aantekening recht
+        akt.akt_ids -> 0 -> 'brk_akt_id', -- aantekening
+        asg.zrt_ids -> 0 -> 'brk_zrt_id'  -- appartements recht
+    ) IS NOT NULL
     --
     -- Exclude NL.KAD.Stukdeel.33029100 since it has 287.000 relations
     -- WHERE sdl.identificatie <> 'NL.KAD.Stukdeel.33029100'
