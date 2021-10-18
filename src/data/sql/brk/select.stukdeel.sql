@@ -49,6 +49,7 @@ WITH stukdelen AS (
     LEFT JOIN brk.c_registercode rce
         ON stk.soortregister_code = rce.code
 --
+    -- 1. Join stukdelen with tenaamstellingen
     LEFT JOIN (
         SELECT tip.stukdeel_identificatie
              , MIN(tng.begindatum)                                                     AS min_tng_begindatum
@@ -78,7 +79,7 @@ WITH stukdelen AS (
     ) tng
         ON sdl.identificatie = tng.stukdeel_identificatie
 --
-    -- Join stukdelen with aantekening_recht
+    -- 2. Join stukdelen with aantekening_recht
     LEFT JOIN (
         SELECT stukdeel_identificatie
              , array_to_json(
@@ -121,7 +122,7 @@ WITH stukdelen AS (
     ) art
         ON sdl.identificatie = art.stukdeel_identificatie
 --
-    -- Filter and join stukdelen without aantekening_kadastraal_object (no Aantekening PB's)
+    -- 3. Join stukdelen without aantekening_kadastraal_object (no Aantekening PB's)
     LEFT JOIN (
         SELECT stukdeel_identificatie
              , array_to_json(
@@ -163,7 +164,8 @@ WITH stukdelen AS (
         GROUP BY stukdeel_identificatie
     ) akt
         ON sdl.identificatie = akt.stukdeel_identificatie
-    --
+--
+    -- 4. Join stukdelen with appartementsrecht
     LEFT JOIN (
         SELECT stukdeel_identificatie
              , min(zrt_begindatum)                                                     AS zrt_begindatum
@@ -211,7 +213,7 @@ WITH stukdelen AS (
     JOIN brk.bestand bsd
         ON 1 = 1
 
-    -- Stukdeel must be a source document for 1 of 4 objectclasses
+    -- Stukdeel must be a source document for minimal 1 of 4 objectclasses
     WHERE COALESCE(
         tng.tng_ids -> 0 -> 'brk_tng_id', -- tenaamstelling
         art.art_ids -> 0 -> 'brk_art_id', -- aantekening recht
