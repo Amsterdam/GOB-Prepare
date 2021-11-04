@@ -20,7 +20,7 @@ SELECT
   'nrn_atg_id' AS id_column,
   max(nrn_atg_id) AS last_id,
   now() AS date_registered
-FROM brk_prepared.aantekening_kadastraal_object;
+FROM brk_prep.aantekening_kadastraal_object;
 
 INSERT INTO brk_metadata.last_source_id (
   collection,
@@ -33,7 +33,7 @@ SELECT
   'nrn_atg_id' AS id_column,
   max(nrn_atg_id) AS last_id,
   now() AS date_registered
-FROM brk_prepared.aantekening_recht;
+FROM brk_prep.aantekening_recht;
 
 INSERT INTO brk_metadata.last_source_id (
   collection,
@@ -46,7 +46,7 @@ SELECT
   'nrn_sdl_id' AS id_column,
   max(nrn_sdl_id) AS last_id,
   now() AS date_registered
-FROM brk_prepared.stukdeel;
+FROM brk_prep.stukdeel;
 
 INSERT INTO brk_metadata.last_source_id (
   collection,
@@ -59,4 +59,4 @@ SELECT
   'nrn_sjt_id' AS id_column,
   max(nrn_sjt_id) AS last_id,
   now() AS date_registered
-FROM brk_prepared.kadastraal_subject;
+FROM brk_prep.kadastraal_subject;
