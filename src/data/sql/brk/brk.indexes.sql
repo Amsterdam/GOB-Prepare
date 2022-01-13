@@ -83,6 +83,5 @@ create index on brk.zakelijkrecht(ontstaan_uit);
 create index on brk.zakelijkrecht(rust_op_kadastraalobj_volgnr);
 create index on brk.zakelijkrecht(rust_op_kadastraalobject_id);
 create index on brk.import_aardaantekening(code);
-create index on brk.import_burgerlijke_gemeentes(code);
 create index on brk.import_cultuur_bebouwd(code);
 create index on brk.import_cultuur_onbebouwd(code);

@@ -79,9 +79,6 @@
         "C_AARDAANTEKENING": [
           "CODE"
         ],
-        "C_AARDFILIATIE": [
-          "CODE"
-        ],
         "C_AARDSTUKDEEL": [
           "CODE"
         ],
@@ -95,9 +92,6 @@
           "CODE"
         ],
         "C_BESCHIKKINGSBEVOEGDHEID": [
-          "CODE"
-        ],
-        "C_BURGERLIJKEGEMEENTE": [
           "CODE"
         ],
         "C_BURGERLIJKESTAAT": [
@@ -130,9 +124,6 @@
         "C_RECHTSVORM": [
           "CODE"
         ],
-        "C_REEKSCODE": [
-          "CODE"
-        ],
         "C_REGISTERCODE": [
           "CODE"
         ],
@@ -145,27 +136,22 @@
         "C_SOORTREGISTER": [
           "CODE"
         ],
-        "C_STATUS": [
-          "CODE"
-        ],
-        "C_SUBJECT_STATUS": [
-          "CODE"
-        ],
-        "C_VALUTA": [
-          "CODE"
-        ],
         "KADASTRAAL_OBJECT": [
           "ID",
           "VOLGNUMMER"
-        ],
-        "VERSIE": [
-          "NUMMER"
         ]
       },
       "ignore": [
         "^CONV_.*",
         "^MDRT_.*",
-        "^MDXT_.*"
+        "^MDXT_.*",
+        "VERSIE",
+        "C_STATUS",
+        "C_SUBJECT_STATUS",
+        "C_VALUTA",
+        "C_REEKSCODE",
+        "C_BURGERLIJKEGEMEENTE",
+        "C_AARDFILIATIE"
       ],
       "depends_on": [
         "clear_schemas"
