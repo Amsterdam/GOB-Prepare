@@ -66,7 +66,7 @@ FROM brk.kadastraal_object kot
                    ON (akrkadastralegemeentecode_code = ake.code)
          LEFT JOIN brk.c_kadastralegemeente kge
                    ON (kadastralegemeente_code = kge.code)
-         LEFT JOIN brk.c_cultuurcodeonbebouwd cod
+         LEFT JOIN brk.import_cultuur_onbebouwd cod
                    ON (kot.cultuurcodeonbebouwd_code = cod.code)
          LEFT JOIN brk.c_soortgrootte sge
                    ON (kot.soortgrootte_code = sge.code)
@@ -85,7 +85,7 @@ FROM brk.kadastraal_object kot
                                , cbd.omschrijving                 AS cult_beb
                                , cbd.code                         AS cult_beb_code
                           FROM brk.kadastraal_adres kasi
-                                   JOIN brk.c_cultuurcodebebouwd cbd
+                                   JOIN brk.import_cultuur_bebouwd cbd
                                         ON (kasi.cultuurbebouwd_code = cbd.code)
                           WHERE kasi.cultuurbebouwd_code IS NOT NULL
                           GROUP BY kasi.kadastraalobject_id
