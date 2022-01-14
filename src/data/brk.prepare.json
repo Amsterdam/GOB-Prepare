@@ -79,9 +79,6 @@
         "C_AARDAANTEKENING": [
           "CODE"
         ],
-        "C_AARDFILIATIE": [
-          "CODE"
-        ],
         "C_AARDSTUKDEEL": [
           "CODE"
         ],
@@ -95,9 +92,6 @@
           "CODE"
         ],
         "C_BESCHIKKINGSBEVOEGDHEID": [
-          "CODE"
-        ],
-        "C_BURGERLIJKEGEMEENTE": [
           "CODE"
         ],
         "C_BURGERLIJKESTAAT": [
@@ -130,9 +124,6 @@
         "C_RECHTSVORM": [
           "CODE"
         ],
-        "C_REEKSCODE": [
-          "CODE"
-        ],
         "C_REGISTERCODE": [
           "CODE"
         ],
@@ -145,27 +136,22 @@
         "C_SOORTREGISTER": [
           "CODE"
         ],
-        "C_STATUS": [
-          "CODE"
-        ],
-        "C_SUBJECT_STATUS": [
-          "CODE"
-        ],
-        "C_VALUTA": [
-          "CODE"
-        ],
         "KADASTRAAL_OBJECT": [
           "ID",
           "VOLGNUMMER"
-        ],
-        "VERSIE": [
-          "NUMMER"
         ]
       },
       "ignore": [
         "^CONV_.*",
         "^MDRT_.*",
-        "^MDXT_.*"
+        "^MDXT_.*",
+        "VERSIE",
+        "C_STATUS",
+        "C_SUBJECT_STATUS",
+        "C_VALUTA",
+        "C_REEKSCODE",
+        "C_BURGERLIJKEGEMEENTE",
+        "C_AARDFILIATIE"
       ],
       "depends_on": [
         "clear_schemas"
@@ -204,19 +190,53 @@
         "DatumTot": "datum_tot",
         "Toelichting": "type"
       },
-      "id": "import_aardaantekening",
+      "id": "import_aardaantekening_csv",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "source": "https://developer.kadaster.nl/schemas/waardelijsten/CultuurcodeBebouwd/CultuurcodeBebouwd.csv",
+      "destination": "brk.import_cultuur_bebouwd",
+      "column_names": {
+        "Code": "code",
+        "Waarde": "omschrijving",
+        "DatumVanaf": "datum_vanaf",
+        "DatumTot": "datum_tot",
+        "Toelichting": "type"
+      },
+      "id": "import_cultuur_bebouwd_csv",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "source": "https://developer.kadaster.nl/schemas/waardelijsten/CultuurcodeOnbebouwd/CultuurcodeOnbebouwd.csv",
+      "destination": "brk.import_cultuur_onbebouwd",
+      "column_names": {
+        "Code": "code",
+        "Waarde": "omschrijving",
+        "DatumVanaf": "datum_vanaf",
+        "DatumTot": "datum_tot",
+        "Toelichting": "type"
+      },
+      "id": "import_cultuur_onbebouwd_csv",
       "depends_on": [
         "clear_schemas"
       ]
     },
     {
       "type": "execute_sql",
-      "description": "Merge aardaantekening table with old entries.",
+      "description": "Insert old entries into waardelijst tabellen",
       "query_src": "file",
-      "query": "data/sql/brk/select.aardaantekening.sql",
-      "id": "merge_aardaantekening",
+      "query": "data/sql/brk/insert.old_entries_waardelijsten.sql",
+      "id": "merge_waardelijsten_old_entries",
       "depends_on": [
-        "import_aardaantekening",
+        "import_cultuur_bebouwd_csv",
+        "import_cultuur_onbebouwd_csv",
+        "import_aardaantekening_csv",
         "create_indexes_source"
       ]
     },
@@ -241,7 +261,8 @@
         "create_indexes_source",
         "create_baghulptabel",
         "import_burgerlijke_gemeentes",
-        "import_bsn_overleden"
+        "import_bsn_overleden",
+        "merge_waardelijsten_old_entries"
       ]
     },
     {
