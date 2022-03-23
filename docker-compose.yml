@@ -1,9 +1,11 @@
-version: '3.0'
+version: '3.4'
 
 services:
 
   gobprepare:
-    build: src
+    build:
+      context: src
+      target: development
     container_name: gobprepare
     environment:
       MESSAGE_BROKER_ADDRESS: rabbitmq
@@ -14,6 +16,10 @@ services:
     env_file: .env
     volumes:
       - gob-volume:/app/shared
+      - ./src/gobprepare:/app/gobprepare
+      - ./src/tests:/app/tests
+      - ${GOB_CORE_DIR-../GOB-Core}:/app/GOB-Core
+      - ${GOB_CONFIG_DIR-../GOB-Config}:/app/GOB-Config
 
   prepare_database:
     image: amsterdam/postgres11
