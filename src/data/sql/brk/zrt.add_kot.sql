@@ -37,11 +37,11 @@ BEGIN
 		    kot.toestandsdatum as toestandsdatum,
 		    kot.creation as creation,
 		    kot.modification as modification
-		FROM brk.zakelijkrecht_isbelastmet bel
-		LEFT JOIN brk_prep.zakelijk_recht zrtkot
-		    ON zrtkot.id = zakelijkrecht_id
+		FROM brk.zakelijkrecht_isbelastmet bel  
+		LEFT JOIN brk_prep.zakelijk_recht zrtkot    
+		    ON zrtkot.id = zakelijkrecht_id     
 		LEFT JOIN brk_prep.zakelijk_recht zrtbelastmet
-		    ON zrtbelastmet.id = bel.is_belast_met
+		    ON zrtbelastmet.id = bel.isbelastmet_id  --jr, 19-7-2022: nieuwe naam, was bel.is_belast_met   
 		LEFT JOIN brk_prep.kadastraal_object kot
 		    ON kot.nrn_kot_id = zrtkot.rust_op_kadastraalobject_id
 	        AND kot.nrn_kot_volgnr = zrtkot.rust_op_kadastraalobj_volgnr

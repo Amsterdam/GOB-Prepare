@@ -12,7 +12,7 @@
 
 -- Analyze database first.
 ANALYZE;
-
+     --jr, 19-7-2022: blijft werkend denk ik
 UPDATE brk_prep.kadastraal_object kot
 SET ontstaan_uit_kadastraalobject=q.ontstaan_uit_kadastraalobject
 FROM (
@@ -31,13 +31,13 @@ FROM (
                     ontst_uit_kot.nrn_kot_volgnr
             )
         ) AS ontstaan_uit_kadastraalobject
-    FROM brk_prep.kadastraal_object kot
-    LEFT JOIN brk_prep.zakelijk_recht zrt_o
+    FROM brk_prep.kadastraal_object kot         --jr, 19-7-2022: blijft
+    LEFT JOIN brk_prep.zakelijk_recht zrt_o     --jr, 19-7-2022: blijft
         ON zrt_o.rust_op_kadastraalobject_id=kot.nrn_kot_id
         AND zrt_o.rust_op_kadastraalobj_volgnr=kot.nrn_kot_volgnr
-    LEFT JOIN brk_prep.zakelijk_recht zrt_b
+    LEFT JOIN brk_prep.zakelijk_recht zrt_b     --jr, 19-7-2022: blijft
         ON zrt_b.betrokken_bij_asg_id=zrt_o.ontstaan_uit_asg_id
-    LEFT JOIN brk_prep.kadastraal_object ontst_uit_kot
+    LEFT JOIN brk_prep.kadastraal_object ontst_uit_kot     --jr, 19-7-2022: blijft
         ON zrt_b.rust_op_kadastraalobject_id=ontst_uit_kot.nrn_kot_id
         AND zrt_b.rust_op_kadastraalobj_volgnr=ontst_uit_kot.nrn_kot_volgnr
     WHERE kot.index_letter = 'A'
@@ -50,6 +50,9 @@ WHERE kot.ontstaan_uit_kadastraalobject = 'null'
     AND q.nrn_kot_volgnr = kot.nrn_kot_volgnr
 ;
 
+--de loops hieronder zijn nu overkill. dit moet opnieuw ontworpen worden.
+--daarbij kan gebruik gemaakt worden van het kenmerk 'hoofdsplitsing_identificatie' in 'kadastraal_object'. Om te bepalen welke g-percelen betrokken_bij_asg_id zijn kan gekeken worden in het kenmerk betrokken_bij_ref in zakelijk_recht
+/*
 -- Set relatie_g_perceel for all A-percelen directly related to a G-perceel
 UPDATE brk_prep.kadastraal_object kot
 SET relatie_g_perceel=q.relatie_g_perceel
@@ -233,3 +236,4 @@ END;
 $$ LANGUAGE plpgsql;
 
 SELECT undouble_relations();
+*/
