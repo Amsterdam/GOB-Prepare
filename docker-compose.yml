@@ -27,9 +27,9 @@ services:
       - "5408:5432"
     container_name: prepare_database
     environment:
-      POSTGRES_PASSWORD: insecure
-      POSTGRES_DB: gob_prepare
-      POSTGRES_USER: gob_prepare
+      POSTGRES_PASSWORD: ${GOB_PREPARE_DATABASE_PASSWORD}
+      POSTGRES_DB: ${GOB_PREPARE_DATABASE}
+      POSTGRES_USER: ${GOB_PREPARE_DATABASE_USER}
     volumes:
       - "~/.ssh/datapunt.key:/root/.ssh/datapunt.key"
     shm_size: '1gb'
