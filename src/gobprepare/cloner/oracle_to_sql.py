@@ -189,7 +189,7 @@ class OracleToSqlCloner():
 
         return result
 
-    def _get_id_columns_for_table(self, table_name: str):
+    def _get_id_columns_for_table(self, table_name: str, column_definitions: list):
         """Returns the list of id columns for table (as defined in the prepare definition)
 
         :param table_name:
@@ -198,19 +198,25 @@ class OracleToSqlCloner():
         table_name = table_name.split('.')[-1]
 
         if table_name in self._id_columns:
+            # Explicit definition takes precedence
             return self._id_columns[table_name]
-        elif "_default" in self._id_columns:
-            return self._id_columns["_default"]
-        else:
-            raise GOBException(f"Missing id columns for table {table_name}")
 
-    def _get_ids_for_table(self, full_table_name: str) -> list:
+        if "_defaults" in self._id_columns:
+            # Loop through defaults to see which columns are present
+            column_names = [name for name, type in column_definitions]
+
+            for default in self._id_columns["_defaults"]:
+                if all([c in column_names for c in default]):
+                    return default
+
+        raise GOBException(f"Missing id columns for table {table_name}")
+
+    def _get_ids_for_table(self, full_table_name: str, order_field: str) -> list:
         """Returns a list of the id's present in the source table
 
         :param full_table_name:
         :return:
         """
-        order_field = self._get_id_columns_for_table(full_table_name)[0]
         query = f"SELECT {order_field} FROM {full_table_name} ORDER BY {order_field}"
 
         result = self._src_datastore.read(query)
@@ -244,11 +250,13 @@ class OracleToSqlCloner():
         outer_select = self._get_select_list_for_table_definition(table_definition)
         inner_select = ','.join([column_name for column_name, column_type in column_definitions])
 
-        ids = self._get_ids_for_table(full_table_name)
+        id_columns = self._get_id_columns_for_table(full_table_name, column_definitions)
+        order_field = id_columns[0]
+
+        ids = self._get_ids_for_table(full_table_name, order_field)
         row_cnt = 0
 
         chunks = self._list_to_chunks(ids, self.READ_BATCH_SIZE)
-        order_field = self._get_id_columns_for_table(full_table_name)[0]
 
         for chunk in chunks:
             if chunk['min'] or chunk['max']:

@@ -25,8 +25,14 @@
       "source_schema": "G0363_BRK2",
       "destination_schema": "brk2",
       "id_columns": {
-        "_default": [
-          "ID"
+        "_defaults": [
+          ["ID", "VOLGNUMMER"],
+          ["ID"],
+          ["CODE"],
+          ["KADASTRAALOBJECT_ID", "KADASTRAALOBJECT_VOLGNUMMER"],
+          ["ZAKELIJKRECHT_ID"],
+          ["TENAAMSTELLING_ID"],
+          ["MUTATIE_ID"]
         ],
         "AANTEKENING_BETROKKENPERSOON": [
           "AANTEKENING_ID"
@@ -34,162 +40,11 @@
         "ADRESSEERBAAR_NEVENADRES": [
           "ADRESSEERBAAR_OBJECT_ID"
         ],
-        "C_AANDUIDINGGESLACHT": [
-          "CODE"
-        ],
-        "C_AANDUIDINGNAAMGEBRUIK": [
-          "CODE"
-        ],
-        "C_AARDAANTEKENING": [
-          "CODE"
-        ],
-        "C_AARDFILIATIE": [
-          "CODE"
-        ],
-        "C_AARDSTUKDEEL": [
-          "CODE"
-        ],
-        "C_AARDZAKELIJKRECHT": [
-          "CODE"
-        ],
-        "C_AKRKADASTRALEGEMEENTECODE": [
-          "CODE"
-        ],
-        "C_AUTHENTIEKGEGEVEN": [
-          "CODE"
-        ],
-        "C_BESCHIKKINGSBEVOEGDHEID": [
-          "CODE"
-        ],
-        "C_BURGERLIJKESTAAT": [
-          "CODE"
-        ],
-        "C_CULTUURCODEBEBOUWD": [
-          "CODE"
-        ],
-        "C_CULTUURCODEONBEBOUWD": [
-          "CODE"
-        ],
-        "C_GRONDSLAG": [
-          "CODE"
-        ],
-        "C_KADASTRALEGEMEENTE": [
-          "CODE"
-        ],
-        "C_KOPPELINGSWIJZE": [
-          "CODE"
-        ],
-        "C_LAND": [
-          "CODE"
-        ],
-        "C_RECHTSVORM": [
-          "CODE"
-        ],
-        "C_REEKSCODE": [
-          "CODE"
-        ],
-        "C_REGISTERCODE": [
-          "CODE"
-        ],
-        "C_SAMENWERKINGSVERBAND": [
-          "CODE"
-        ],
-        "C_SOORTERFPACHTCANON": [
-          "CODE"
-        ],
-        "C_SOORTGROOTTE": [
-          "CODE"
-        ],
-        "C_SOORTREGISTER": [
-          "CODE"
-        ],
-        "C_STATUS": [
-          "CODE"
-        ],
-        "C_STATUSHERVERKAVELING": [
-          "CODE"
-        ],
-        "C_TITELOFPREDICAAT": [
-          "CODE"
-        ],
-        "C_VALUTA": [
-          "CODE"
-        ],
-        "KADASTRAAL_OBJECT": [
-          "ID",
-          "VOLGNUMMER"
-        ],
-        "KADASTRAAL_OBJECT_AANTEKENING": [
-          "KADASTRAALOBJECT_ID",
-          "KADASTRAALOBJECT_VOLGNUMMER"
-        ],
-        "KADASTRAAL_OBJECT_BEPERKT_DOOR": [
-          "KADASTRAALOBJECT_ID",
-          "KADASTRAALOBJECT_VOLGNUMMER"
-        ],
-        "KADASTRAAL_OBJECT_BIJPIJLING": [
-          "KADASTRAALOBJECT_ID",
-          "KADASTRAALOBJECT_VOLGNUMMER"
-        ],
-        "KADASTRAAL_OBJECT_LANDRENTE": [
-          "KADASTRAALOBJECT_ID",
-          "KADASTRAALOBJECT_VOLGNUMMER"
-        ],
-        "KADASTRAAL_OBJECT_LOCATIE": [
-          "KADASTRAALOBJECT_ID",
-          "KADASTRAALOBJECT_VOLGNUMMER"
-        ],
-        "KADASTRAAL_OBJECT_MANDELIGHEID": [
-          "KADASTRAALOBJECT_ID",
-          "KADASTRAALOBJECT_VOLGNUMMER"
-        ],
-        "KADASTRAAL_OBJECT_ONDERZOEK": [
-          "KADASTRAALOBJECT_ID",
-          "KADASTRAALOBJECT_VOLGNUMMER"
-        ],
-        "KADASTRAAL_OBJECT_ONTSTAAN_UIT": [
-          "KADASTRAALOBJECT_ID",
-          "KADASTRAALOBJECT_VOLGNUMMER"
-        ],
-        "KADASTRAAL_OBJECT_PERCNUMMER": [
-          "KADASTRAALOBJECT_ID",
-          "KADASTRAALOBJECT_VOLGNUMMER"
-        ],
         "MANDELIGHEID_ISGEBASEERDOP": [
           "MANDELIGHEID_ID"
         ],
-        "MUTATIE_AARD": [
-          "MUTATIE_ID"
-        ],
-        "MUTATIE_CORRIGEERT_STUK": [
-          "MUTATIE_ID"
-        ],
         "PUBLIEKRECHTELIJKE_GEZAG": [
           "BEPERKING_ID"
-        ],
-        "TENAAMSTELLING_AANTEKENING": [
-          "TENAAMSTELLING_ID"
-        ],
-        "TENAAMSTELLING_ISGEBASEERDOP": [
-          "TENAAMSTELLING_ID"
-        ],
-        "TENAAMSTELLING_ONDERZOEK": [
-          "TENAAMSTELLING_ID"
-        ],
-        "ZAKELIJKRECHT_ERFPACHTCANON": [
-          "ZAKELIJKRECHT_ID"
-        ],
-        "ZAKELIJKRECHT_ISBELASTMET": [
-          "ZAKELIJKRECHT_ID"
-        ],
-        "ZAKELIJKRECHT_ISBEPERKTTOT": [
-          "ZAKELIJKRECHT_ID"
-        ],
-        "ZAKELIJKRECHT_ISGEBASEERDOP": [
-          "ZAKELIJKRECHT_ID"
-        ],
-        "ZAKELIJKRECHT_ONDERZOEK": [
-          "ZAKELIJKRECHT_ID"
         ]
       },
       "ignore": [
