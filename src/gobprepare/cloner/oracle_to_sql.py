@@ -202,7 +202,7 @@ class OracleToSqlCloner():
             return self._id_columns[table_name]
 
         if "_defaults" in self._id_columns:
-            # Loop through defaults to see which columns are present
+            # Loop through defaults to see which columns are present. First match is used.
             column_names = [name for name, type in column_definitions]
 
             for default in self._id_columns["_defaults"]:
