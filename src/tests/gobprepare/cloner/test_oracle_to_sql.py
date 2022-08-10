@@ -225,14 +225,18 @@ class TestOracleToSqlCloner(TestCase):
     def test_get_id_columns_for_table(self):
         self.cloner._id_columns = {
             "table_a": ["a_id", "a_id2"],
+            "_defaults": [
+                ["id", "volgnummer"],
+                ["id"],
+            ]
         }
-        self.assertEqual(["a_id", "a_id2"], self.cloner._get_id_columns_for_table("schema.table_a"))
+        self.assertEqual(["a_id", "a_id2"], self.cloner._get_id_columns_for_table("schema.table_a", []))
 
         with self.assertRaises(GOBException):
-            self.cloner._get_id_columns_for_table("table_b")
+            self.cloner._get_id_columns_for_table("table_b", [('somethingelse', 'varchar')])
 
-        self.cloner._id_columns['_default'] = ['id']
-        self.assertEqual(["id"], self.cloner._get_id_columns_for_table("table_b"))
+        self.assertEqual(["id", "volgnummer"], self.cloner._get_id_columns_for_table("table_b", [("id", "int"), ("volgnummer", "int")]))
+        self.assertEqual(["id"], self.cloner._get_id_columns_for_table("table_b", [("id", "int")]))
 
     def test_get_ids_for_table(self):
         self.cloner._get_id_columns_for_table = MagicMock(return_value=['id', 'id2'])
@@ -240,7 +244,7 @@ class TestOracleToSqlCloner(TestCase):
         self.cloner._src_datastore.read.return_value = [{"id": 224}, {"id": 2904}, {"id": 920}]
         expected_result = [224, 2904, 920]
 
-        self.assertEqual(expected_result, self.cloner._get_ids_for_table('tableName'))
+        self.assertEqual(expected_result, self.cloner._get_ids_for_table('tableName', "id"))
         self.cloner._src_datastore.read.assert_called_with(expected_query)
 
     @patch("gobprepare.cloner.oracle_to_sql.logger")
@@ -269,7 +273,10 @@ class TestOracleToSqlCloner(TestCase):
 
         mock_logger.info.assert_called_once()
         self.cloner._get_ids_for_table(f"{self.cloner._src_schema}.tableName")
-        self.cloner._get_id_columns_for_table.assert_called_with(f"{self.cloner._src_schema}.tableName")
+        self.cloner._get_id_columns_for_table.assert_called_with(
+            f"{self.cloner._src_schema}.tableName",
+            [('colA', 'int'), ('colB', 'varchar'), ('colC', 'varchar')]
+        )
         self.cloner._list_to_chunks.assert_called_with('list of ids', self.cloner.READ_BATCH_SIZE)
 
     @patch("gobprepare.cloner.oracle_to_sql.logger")

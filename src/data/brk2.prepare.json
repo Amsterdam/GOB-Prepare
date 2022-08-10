@@ -1,0 +1,59 @@
+{
+  "version": "0.1",
+  "name": "BRK2",
+  "catalogue": "brk2",
+  "source": {
+    "application": "Neuron"
+  },
+  "destination": {
+    "application": "GOBPrepare"
+  },
+  "publish_schemas": {
+    "brk2_prep": "brk2_prepared"
+  },
+  "actions": [
+    {
+      "type": "clear",
+      "schemas": [
+        "brk2",
+        "brk2_prep"
+      ],
+      "id": "clear_schemas"
+    },
+    {
+      "type": "clone",
+      "source_schema": "G0363_BRK2",
+      "destination_schema": "brk2",
+      "id_columns": {
+        "_defaults": [
+          ["ID", "VOLGNUMMER"],
+          ["ID"],
+          ["CODE"],
+          ["KADASTRAALOBJECT_ID", "KADASTRAALOBJECT_VOLGNUMMER"],
+          ["ZAKELIJKRECHT_ID"],
+          ["TENAAMSTELLING_ID"],
+          ["MUTATIE_ID"]
+        ],
+        "AANTEKENING_BETROKKENPERSOON": [
+          "AANTEKENING_ID"
+        ],
+        "ADRESSEERBAAR_NEVENADRES": [
+          "ADRESSEERBAAR_OBJECT_ID"
+        ],
+        "MANDELIGHEID_ISGEBASEERDOP": [
+          "MANDELIGHEID_ID"
+        ],
+        "PUBLIEKRECHTELIJKE_GEZAG": [
+          "BEPERKING_ID"
+        ]
+      },
+      "ignore": [
+        "VERSIE"
+      ],
+      "depends_on": [
+        "clear_schemas"
+      ],
+      "id": "clone_source"
+    }
+  ]
+}

@@ -1,9 +1,11 @@
-version: '3.0'
+version: '3.4'
 
 services:
 
   gobprepare:
-    build: src
+    build:
+      context: src
+      target: development
     container_name: gobprepare
     environment:
       MESSAGE_BROKER_ADDRESS: rabbitmq
@@ -14,6 +16,10 @@ services:
     env_file: .env
     volumes:
       - gob-volume:/app/shared
+      - ./src/gobprepare:/app/gobprepare
+      - ./src/tests:/app/tests
+      - ${GOB_CORE_DIR-../GOB-Core}:/app/GOB-Core
+      - ${GOB_CONFIG_DIR-../GOB-Config}:/app/GOB-Config
 
   prepare_database:
     image: amsterdam/postgres11
@@ -21,9 +27,9 @@ services:
       - "5408:5432"
     container_name: prepare_database
     environment:
-      POSTGRES_PASSWORD: insecure
-      POSTGRES_DB: gob_prepare
-      POSTGRES_USER: gob_prepare
+      POSTGRES_PASSWORD: ${GOB_PREPARE_DATABASE_PASSWORD}
+      POSTGRES_DB: ${GOB_PREPARE_DATABASE}
+      POSTGRES_USER: ${GOB_PREPARE_DATABASE_USER}
     volumes:
       - "~/.ssh/datapunt.key:/root/.ssh/datapunt.key"
     shm_size: '1gb'
