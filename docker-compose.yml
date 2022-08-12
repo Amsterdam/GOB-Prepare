@@ -38,8 +38,7 @@ volumes:
   gob-volume:
     external: true
 
-
 networks:
   default:
-    external:
-      name: gob-network
+    name: gob-network
+    external: true
