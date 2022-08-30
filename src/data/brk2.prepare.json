@@ -119,6 +119,16 @@
       ]
     },
     {
+      "type": "execute_sql",
+      "description": "Select meta",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.meta.sql",
+      "id": "select_meta",
+      "depends_on": [
+        "create_bestand_table"
+      ]
+    },
+    {
       "type":"execute_sql",
       "description": "Select KOT",
       "query_src": "file",
