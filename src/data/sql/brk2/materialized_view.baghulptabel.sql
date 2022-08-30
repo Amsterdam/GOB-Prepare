@@ -3,7 +3,7 @@ SELECT kadastraalobject_id,
        kadastraalobject_volgnummer,
        array_to_json(
                array_agg(
-                       json_build_object(
+                       jsonb_build_object(
                                'koppelingswijze_code', koppelingswijze_code,
                                'koppelingswijze_omschrijving', koppelingswijze_omschrijving,
                                'bag_id', bag_id,
