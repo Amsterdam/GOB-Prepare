@@ -1,6 +1,6 @@
 # GOB-Prepare
 
-Prepare source data before the import is done by the GOB-Import service.
+Prepare source data before the import is done by the [GOB-Import](https://github.com/Amsterdam/GOB-Import) service.
 
 # Infrastructure
 
@@ -10,34 +10,34 @@ is required to run this component.
 # Prerequisites
 
 Prepare should run after Import BAG is completed.
-This is because BAG verblijfsobjecten are required for import_verblijfsobjecten_geometrie action.
+This is because BAG verblijfsobjecten are required for `import_verblijfsobjecten_geometrie` action.
 
 # Docker
 
 ## Requirements
 
-* docker-compose >= 1.17
-* docker ce >= 18.03
+* docker compose >= 1.25
+* Docker CE >= 18.09
 
 ## Run
 
 ```bash
-docker-compose build
-docker-compose up &
+docker compose build
+docker compose up &
 ```
 
 ## Tests
 
 ```bash
-docker-compose -f src/.jenkins/test/docker-compose.yml build
-docker-compose -f src/.jenkins/test/docker-compose.yml run test
+docker compose -f src/.jenkins/test/docker-compose.yml build
+docker compose -f src/.jenkins/test/docker-compose.yml run test
 ```
 
 # Local
 
 ## Requirements
 
-* python >= 3.6
+* Python >= 3.6
 
 ## Initialisation
 
