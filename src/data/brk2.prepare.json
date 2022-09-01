@@ -145,7 +145,7 @@
       "type": "execute_sql",
       "description": "Select ZRT",
       "query_src": "file",
-      "query": "data/sql/brk2/select.zakelijk-recht.sql",
+      "query": "data/sql/brk2/select.zakelijk_recht.sql",
       "id": "select_zrt",
       "depends_on": [
         "select_kot"
