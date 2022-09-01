@@ -89,3 +89,8 @@ FROM brk2.zakelijkrecht zrt
                                              ON zrt2.id = zit.zakelijkrecht_id) sq
                     GROUP BY zrt_id) bel ON bel.zrt_id = zrt.id
 ;
+
+CREATE INDEX ON brk2_prep.zakelijk_recht(__id);
+CREATE INDEX ON brk2_prep.zakelijk_recht(__rust_op_kot_id, __rust_op_kot_volgnummer);
+CREATE INDEX ON brk2_prep.zakelijk_recht(__ontstaan_uit_asg_id);
+CREATE INDEX ON brk2_prep.zakelijk_recht(__betrokken_bij_asg_id);

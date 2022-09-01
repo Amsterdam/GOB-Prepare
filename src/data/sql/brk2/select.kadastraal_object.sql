@@ -80,3 +80,10 @@ FROM brk2.kadastraal_object kot
          LEFT JOIN brk2.c_authentiekgegeven kok
                    ON io.authentiekgegeven_code = kok.code
 ;
+
+CREATE INDEX ON brk2_prep.kadastraal_object(id, volgnummer);
+CREATE INDEX ON brk2_prep.kadastraal_object(identificatie, volgnummer);
+CREATE INDEX ON brk2_prep.kadastraal_object(indexletter);
+CREATE INDEX ON brk2_prep.kadastraal_object(is_ontstaan_uit_g_perceel);
+CREATE INDEX ON brk2_prep.kadastraal_object(is_ontstaan_uit_kadastraalobject);
+CREATE INDEX ON brk2_prep.kadastraal_object(heeft_een_relatie_met_verblijfsobject);
