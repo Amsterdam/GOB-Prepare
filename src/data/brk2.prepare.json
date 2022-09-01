@@ -173,6 +173,16 @@
     },
     {
       "type": "execute_sql",
+      "description": "Create references between ZRT's on betrokken_bij and ontstaan_uit",
+      "id": "create_zrt_references",
+      "depends_on": [
+        "populate_zrt"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk2/zrt.reference_ontstaan_uit_betrokken_bij.sql"
+    },
+    {
+      "type": "execute_sql",
       "description": "KOT - Set is_ontstaan_uit_g_perceel",
       "id": "set_is_ontstaan_uit_g_perceel",
       "depends_on": [

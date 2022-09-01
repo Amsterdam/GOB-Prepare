@@ -53,7 +53,9 @@ SELECT zrt.rust_op_kadastraalobj_volgnr  AS volgnummer,
        kot.eind_geldigheid               AS eind_geldigheid,
        kot.toestandsdatum                AS toestandsdatum,
        kot.datum_actueel_tot             AS datum_actueel_tot,
-       kot._expiration_date              AS _expiration_date
+       kot._expiration_date              AS _expiration_date,
+       NULL                              AS __max_betrokken_bij_begindatum,
+       NULL                              AS __max_ontstaan_uit_begindatum
 FROM brk2.zakelijkrecht zrt
          LEFT JOIN brk2.zakelijkrecht_isbeperkttot ztt ON zrt.id = ztt.zakelijkrecht_id
          LEFT JOIN brk2.c_aardzakelijkrecht a ON zrt.aardzakelijkrecht_code = a.code
