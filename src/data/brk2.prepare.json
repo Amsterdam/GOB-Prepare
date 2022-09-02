@@ -30,7 +30,7 @@
       ],
       "query_src": "string",
       "destination_table": {
-        "name": "brk.bestand",
+        "name": "brk2.bestand",
         "create": true,
         "columns": [
           {
