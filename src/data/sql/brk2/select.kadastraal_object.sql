@@ -87,3 +87,6 @@ CREATE INDEX ON brk2_prep.kadastraal_object (indexletter);
 CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (is_ontstaan_uit_g_perceel);
 CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (is_ontstaan_uit_kadastraalobject);
 CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (heeft_een_relatie_met_verblijfsobject);
+CREATE INDEX ON brk2_prep.kadastraal_object(aangeduid_door_kadastralesectie);
+CREATE INDEX ON brk2_prep.kadastraal_object(aangeduid_door_kadastralegemeentecode);
+CREATE INDEX ON brk2_prep.kadastraal_object(_expiration_date);
