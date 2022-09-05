@@ -1,39 +1,36 @@
 CREATE MATERIALIZED VIEW brk2.baghulptabel AS
 SELECT kadastraalobject_id,
        kadastraalobject_volgnummer,
-       array_to_json(
-               array_agg(
-                       jsonb_build_object(
-                               'koppelingswijze_code', koppelingswijze_code,
-                               'koppelingswijze_omschrijving', koppelingswijze_omschrijving,
-                               'bag_id', bag_id,
-                               'openbareruimtenaam', openbareruimtenaam,
-                               'huisnummer', huisnummer,
-                               'huisletter', huisletter,
-                               'huisnummertoevoeging', huisnummertoevoeging,
-                               'postcode', postcode,
-                               'woonplaatsnaam', woonplaatsnaam,
-                               'woonplaatsnaam_afwijkend', woonplaatsnaam_afwijkend,
-                               'hoofdadres_identificatie', hoofdadres_identificatie,
-                               'typering', typering
-                           ) ORDER BY
-                           koppelingswijze_code,
-                           koppelingswijze_omschrijving,
-                           bag_id,
-                           openbareruimtenaam,
-                           huisnummer,
-                           huisletter,
-                           huisnummertoevoeging,
-                           postcode,
-                           woonplaatsnaam,
-                           woonplaatsnaam_afwijkend,
-                           hoofdadres_identificatie,
-                           typering
-                   )
+       jsonb_agg(
+               jsonb_build_object(
+                       'koppelingswijze_code', koppelingswijze_code,
+                       'koppelingswijze_omschrijving', koppelingswijze_omschrijving,
+                       'bag_id', bag_id,
+                       'openbareruimtenaam', openbareruimtenaam,
+                       'huisnummer', huisnummer,
+                       'huisletter', huisletter,
+                       'huisnummertoevoeging', huisnummertoevoeging,
+                       'postcode', postcode,
+                       'woonplaatsnaam', woonplaatsnaam,
+                       'woonplaatsnaam_afwijkend', woonplaatsnaam_afwijkend,
+                       'hoofdadres_identificatie', hoofdadres_identificatie,
+                       'typering', typering
+                   ) ORDER BY
+                   koppelingswijze_code,
+                   koppelingswijze_omschrijving,
+                   bag_id,
+                   openbareruimtenaam,
+                   huisnummer,
+                   huisletter,
+                   huisnummertoevoeging,
+                   postcode,
+                   woonplaatsnaam,
+                   woonplaatsnaam_afwijkend,
+                   hoofdadres_identificatie,
+                   typering
            ) AS adressen
 FROM (SELECT kol.kadastraalobject_id
            , kol.kadastraalobject_volgnummer
-           , kot.identificatie
            , kol.koppelingswijze_code
            , ckw.omschrijving      AS koppelingswijze_omschrijving
            , obl.bag_identificatie AS bag_id

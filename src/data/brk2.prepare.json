@@ -30,7 +30,7 @@
       ],
       "query_src": "string",
       "destination_table": {
-        "name": "brk.bestand",
+        "name": "brk2.bestand",
         "create": true,
         "columns": [
           {
@@ -163,16 +163,6 @@
     },
     {
       "type": "execute_sql",
-      "description": "KOT - Set is_ontstaan_uit_kadastraalobject",
-      "id": "set_is_ontstaan_uit_kadastraalobject",
-      "depends_on": [
-        "populate_zrt"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk2/kot.set_is_ontstaan_uit_kadastraalobject.sql"
-    },
-    {
-      "type": "execute_sql",
       "description": "Create references between ZRT's on betrokken_bij and ontstaan_uit",
       "id": "create_zrt_references",
       "depends_on": [
@@ -183,13 +173,56 @@
     },
     {
       "type": "execute_sql",
+      "description": "KOT - Set is_ontstaan_uit_kadastraalobject",
+      "id": "set_is_ontstaan_uit_kadastraalobject",
+      "depends_on": [
+        "select_kot"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk2/kot.set_is_ontstaan_uit_kadastraalobject.sql"
+    },
+    {
+      "type": "execute_sql",
       "description": "KOT - Set is_ontstaan_uit_g_perceel",
       "id": "set_is_ontstaan_uit_g_perceel",
       "depends_on": [
-        "populate_zrt"
+        "select_kot"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/kot.set_is_ontstaan_uit_g_perceel.sql"
+    },
+    {
+      "type": "import_api",
+      "description": "Import BAG geometrie van verblijfsobjecten",
+      "id": "import_verblijfsobjecten_geometrie",
+      "depends_on": [
+        "set_is_ontstaan_uit_g_perceel"
+      ],
+      "query_src": "file",
+      "query": "data/api/bag/verblijfsobjecten_geometrie_import.graphql",
+      "meta_type": "bag_verblijfsobjectenRootObjectType",
+      "schema": "bag_brk2",
+      "destination": "verblijfsobjecten_geometrie"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Generate geometrie voor actuele appartementsrechten",
+      "id": "update_geometrie_appartementsrechten",
+      "depends_on": [
+        "import_verblijfsobjecten_geometrie"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk2/kot.update_a_geometrie.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Remove duplicate g-perceel relations",
+      "id": "remove_duplicate_g_perceel_relations",
+      "depends_on": [
+        "update_geometrie_appartementsrechten"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk2/kot.remove_duplicate_ontstaan_uit_relations.sql"
     }
   ]
 }
