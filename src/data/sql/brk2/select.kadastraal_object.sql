@@ -90,3 +90,5 @@ CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (heeft_een_relatie_met_ver
 CREATE INDEX ON brk2_prep.kadastraal_object(aangeduid_door_kadastralesectie);
 CREATE INDEX ON brk2_prep.kadastraal_object(aangeduid_door_kadastralegemeentecode);
 CREATE INDEX ON brk2_prep.kadastraal_object(_expiration_date);
+CREATE INDEX ON brk2_prep.kadastraal_object(id);
+CREATE INDEX ON brk2_prep.kadastraal_object USING gist (geometrie);
