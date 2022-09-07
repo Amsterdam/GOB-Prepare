@@ -28,6 +28,7 @@ COPY gobprepare gobprepare
 # For the current test period, add the datafiles
 COPY data data
 
+USER datapunt
 CMD ["python", "-m", "gobprepare"]
 
 
@@ -36,29 +37,28 @@ FROM application as development
 # Install GOB-Core and GOB-Config in development mode. Will be overridden with
 # mounts from the developer filesystem. Changes made to GOB-Core and GOB-Config
 # will be available immediately.
-#USER root
+USER root
 RUN git clone --depth=1 https://github.com/Amsterdam/GOB-Core.git
 RUN LIBGDAL_VERSION=$(gdal-config --version) pip install -e /app/GOB-Core
 RUN git clone --depth=1 https://github.com/Amsterdam/GOB-Config.git
 RUN pip install -e /app/GOB-Config
-#USER datapunt
+USER datapunt
 
 
 # Test.
 FROM application as test
-# Run tests as root for now
-#USER root
-# Remove gobcore/gobconfig tests
+USER root
+
+# Remove gobcore/gobconfig tests.
 RUN rm -rf /app/src/gobcore/tests
 RUN rm -rf /app/src/gobconfig/tests
 
-# Copy tests
+# Copy test module and tests.
+COPY test.sh .flake8 pytest.ini ./
 COPY tests tests
-COPY .flake8 .flake8
-COPY test.sh test.sh
 
-# Copy jenkins files
+# Copy Jenkins files.
 COPY .jenkins /.jenkins
 
-RUN mkdir -p /app/shared/message_broker #&& chown datapunt /app/shared
-#USER datapunt
+RUN mkdir -m 2755 -p /app/shared/message_broker && chown datapunt.datapunt /app/shared /app/shared/message_broker
+USER datapunt
