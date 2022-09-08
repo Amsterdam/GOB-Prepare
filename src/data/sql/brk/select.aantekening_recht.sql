@@ -1,4 +1,4 @@
-CREATE TABLE brk2_jeroen_speeltuin.prep_aantekeningrecht AS
+--CREATE TABLE brk2_jeroen_speeltuin.prep_aantekeningrecht AS
 SELECT	atg.identificatie			AS brk_atg_id
 , atg.id							AS nrn_atg_id
 , atg.aardaantekening_code			AS atg_aardaantekening_code
