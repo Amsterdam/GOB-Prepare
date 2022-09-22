@@ -85,22 +85,6 @@
     },
     {
       "type": "import_csv",
-      "source": "https://developer.kadaster.nl/schemas/waardelijsten/CultuurcodeOnbebouwd/CultuurcodeOnbebouwd.csv",
-      "destination": "brk2.import_cultuur_onbebouwd",
-      "column_names": {
-        "Code": "code",
-        "Waarde": "omschrijving",
-        "DatumVanaf": "datum_vanaf",
-        "DatumTot": "datum_tot",
-        "Toelichting": "type"
-      },
-      "id": "import_cultuur_onbebouwd_csv",
-      "depends_on": [
-        "clear_schemas"
-      ]
-    },
-    {
-      "type": "import_csv",
       "source": "https://developer.kadaster.nl/schemas/waardelijsten/BurgemKadgemSectie/BurgemKadgemSectie.csv",
       "destination": "brk2.import_burgerlijke_gemeentes",
       "id": "import_burgerlijke_gemeentes",
@@ -136,7 +120,6 @@
       "id": "select_kot",
       "depends_on": [
         "clone_source",
-        "import_cultuur_onbebouwd_csv",
         "import_burgerlijke_gemeentes",
         "create_baghulptabel"
       ]

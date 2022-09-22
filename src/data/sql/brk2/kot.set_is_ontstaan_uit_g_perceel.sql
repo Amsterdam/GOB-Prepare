@@ -11,17 +11,10 @@ FROM (select kot.identificatie,
                  ) as relatie_g_perceel
       from brk2_prep.kadastraal_object kot
                join brk2.zakelijkrecht zrt
-                    on kot.id = zrt.rust_op_kadastraalobject_id and
-                       kot.volgnummer = zrt.rust_op_kadastraalobj_volgnr and
-                       -- This looks like an unnecessary condition, but it makes a huge difference for the PG queryplanner
-                       zrt.isontstaanuit_identificatie is not null
-               join brk2.zakelijkrecht zrt2
-                    on zrt2.isbetrokkenbij_identificatie = zrt.isontstaanuit_identificatie and
-                        -- This looks like an unnecessary condition, but it makes a huge difference for the PG queryplanner
-                       zrt.isbetrokkenbij_identificatie is not null
+                    on zrt.isbetrokkenbij_identificatie = kot.hoofdsplitsing_identificatie
                join brk2_prep.kadastraal_object kot2
-                    on zrt2.rust_op_kadastraalobject_id = kot2.id and
-                       zrt2.rust_op_kadastraalobj_volgnr = kot2.volgnummer
+                    on zrt.rust_op_kadastraalobject_id = kot2.id and
+                       zrt.rust_op_kadastraalobj_volgnr = kot2.volgnummer
       where kot.indexletter = 'A'
       group by kot.identificatie, kot.volgnummer) q
 WHERE indexletter = 'A'

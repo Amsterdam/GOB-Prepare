@@ -8,7 +8,7 @@ SELECT kot.identificatie                           AS identificatie,
        LPAD(brg.cbscode::text, 4, '0')             AS aangeduid_door_gemeente,
        kge.omschrijving                            AS aangeduid_door_kadastralegemeente,
        kot.akrkadastralegemeentecode               AS aangeduid_door_kadastralegemeentecode,
-       kot.akrkadastralegemeentecode || kot.sectie AS aangeduid_door_kadastralesectie,
+       kot.sectie                                  AS aangeduid_door_kadastralesectie,
        kot.perceelnummer                           AS perceelnummer,
        kot.index_letter                            AS indexletter,
        kot.index_nummer                            AS indexnummer,
@@ -17,7 +17,7 @@ SELECT kot.identificatie                           AS identificatie,
        sge.omschrijving                            AS soort_grootte_omschrijving,
        kot.kadgrootte                              AS grootte,
        kot.cultuurcodeonbebouwd_code               AS soort_cultuur_onbebouwd_code,
-       cod.omschrijving                            AS soort_cultuur_ongebouwd_omschrijving,
+       cod.omschrijving                            AS soort_cultuur_onbebouwd_omschrijving,
        kot.cultuurcodebebouwd_code                 AS soort_cultuur_bebouwd_code,
        ccb.omschrijving                            AS soort_cultuur_bebouwd_omschrijving,
        kot.status_code                             AS status,
@@ -67,9 +67,9 @@ FROM brk2.kadastraal_object kot
                    ON kge.omschrijving = brg.kadgemnaam
          LEFT JOIN brk2.c_soortgrootte sge
                    ON kot.soortgrootte_code = sge.code
-         LEFT JOIN brk2.import_cultuur_onbebouwd cod
+         LEFT JOIN brk2.c_cultuurcodeonbebouwd cod
                    ON kot.cultuurcodeonbebouwd_code = cod.code
-         LEFT JOIN brk2.c_cultuurcodeonbebouwd ccb
+         LEFT JOIN brk2.c_cultuurcodebebouwd ccb
                    ON kot.cultuurcodebebouwd_code = ccb.code
          LEFT JOIN brk2.baghulptabel adr
                    ON adr.kadastraalobject_id = kot.id and adr.kadastraalobject_volgnummer = kot.volgnummer
