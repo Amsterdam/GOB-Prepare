@@ -36,10 +36,21 @@ SELECT zrt.rust_op_kadastraalobj_volgnr  AS volgnummer,
        NULL                              AS appartementsrechtsplitsingidentificatie,
        asg1.vve_identificatie            AS vve_identificatie_ontstaan_uit,
        asg2.vve_identificatie            AS vve_identificatie_betrokken_bij,
-       nullif(array_to_string(array [asg2.identificatie, asg1.identificatie], ','),
-              '')                        AS appartementsrechtsplitsingtype_code,
-       nullif(array_to_string(array [ase2.omschrijving, ase1.omschrijving], ','),
-              '')                        AS appartementsrechtsplitsingtype_omschrijving,
+       CASE
+           WHEN asg2.identificatie IS NOT NULL
+               AND asg1.identificatie IS NOT NULL THEN
+                       asg2.splitsingstype::varchar || ',' ||
+                       asg1.splitsingstype::varchar
+           ELSE
+               COALESCE(asg2.splitsingstype::varchar, asg1.splitsingstype::varchar)
+           END                           AS appartementsrechtsplitsingtype_code,
+       CASE
+           WHEN asg2.identificatie IS NOT NULL
+               AND asg1.identificatie IS NOT NULL THEN
+               ase2.omschrijving || ',' || ase1.omschrijving
+           ELSE
+               COALESCE(ase2.omschrijving, ase1.omschrijving)
+           END                           AS appartementsrechtsplitsingtype_omschrijving,
        zrt.isbestemdtot_identificatie    AS isbestemdtot_identificatie,
        zrt.toelichting_bewaarder         AS toelichting_bewaarder,
        agn.omschrijving                  AS inonderzoek,

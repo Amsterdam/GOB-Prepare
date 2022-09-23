@@ -16,6 +16,7 @@ BEGIN
 	SET
 	    __rust_op_kot_id=kot_id,
 	    __rust_op_kot_volgnummer=v.volgnummer,
+	    volgnummer=v.volgnummer,
 	    rust_op_kadastraalobject=kot_identificatie,
 	    toestandsdatum=v.toestandsdatum,
 	    begin_geldigheid=v.begin_geldigheid,
