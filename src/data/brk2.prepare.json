@@ -206,6 +206,16 @@
       ],
       "query_src": "file",
       "query": "data/sql/brk2/kot.remove_duplicate_ontstaan_uit_relations.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Select TNG",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.tenaamstelling.sql",
+      "id": "select_tng",
+      "depends_on": [
+        "create_zrt_references"
+      ]
     }
   ]
 }
