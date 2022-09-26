@@ -23,14 +23,19 @@ SELECT tng.identificatie                                               AS identi
        tng.betrokkengorswas_identificatie                              AS betrokken_gorzen_en_aanwassen_brk_subject,
        ag.omschrijving                                                 AS in_onderzoek,
        zrt.identificatie                                               AS van_brk_zakelijk_recht,
-       g.stukdeel_identificatie                                        AS is_gebaseerd_op_brk_stukdeel,
+       g.isgebaseerd_op                                                AS is_gebaseerd_op_brk_stukdeel,
        zrt.toestandsdatum                                              AS toestandsdatum
 FROM brk2.tenaamstelling tng
          LEFT JOIN brk2_prepared.zakelijk_recht zrt ON tng.vanrecht_id = zrt.__id
          LEFT JOIN brk2.gezamenlijk_aandeel ga ON tng.geldtvoordeel_identificatie = ga.identificatie
          LEFT JOIN brk2.c_samenwerkingsverband s ON s.code = tng.verkregen_namens_code
          LEFT JOIN brk2.c_burgerlijkestaat b ON b.code = tng.burgerlijkestaat_code
-         LEFT JOIN brk2.tenaamstelling_isgebaseerdop g ON g.tenaamstelling_id = tng.id
+         LEFT JOIN (SELECT g.tenaamstelling_id,
+                           JSON_AGG(JSONB_BUILD_OBJECT(
+                                   g.stukdeel_identificatie, stukdeel_identificatie
+                               )) isgebaseerd_op
+                    FROM brk2.tenaamstelling_isgebaseerdop g
+                    GROUP BY g.tenaamstelling_id) g ON tng.id = g.tenaamstelling_id
          LEFT JOIN brk2.tenaamstelling_onderzoek o ON tng.id = o.tenaamstelling_id
          LEFT JOIN brk2.inonderzoek io ON io.identificatie = o.onderzoek_identificatie
          LEFT JOIN brk2.c_authentiekgegeven ag ON io.authentiekgegeven_code = ag.code
