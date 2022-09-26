@@ -216,6 +216,29 @@
       "depends_on": [
         "create_zrt_references"
       ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create materialized view subject_expiration_date",
+      "id": "create_view_subject_actueel",
+      "depends_on": [
+        "select_tng",
+        "create_zrt_references"
+      ],
+      "query": "data/sql/brk2/materialized_view.subject_expiration_date.sql",
+      "query_src": "file"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Select SJT",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.kadastraal_subject.sql",
+      "id": "select_sjt",
+      "depends_on": [
+        "create_view_subject_actueel",
+        "select_tng",
+        "create_zrt_references"
+      ]
     }
   ]
 }
