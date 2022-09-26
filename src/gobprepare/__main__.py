@@ -1,6 +1,7 @@
 from gobcore.message_broker.config import WORKFLOW_EXCHANGE, PREPARE_QUEUE, PREPARE_RESULT_KEY, \
     PREPARE_TASK_RESULT_KEY, PREPARE_TASK_QUEUE, PREPARE_COMPLETE_QUEUE, TASK_REQUEST_KEY
 from gobcore.message_broker.messagedriven_service import messagedriven_service
+from gobcore.message_broker.typing import ServiceDefinition
 
 from gobprepare.prepare_client import PrepareClient
 from gobprepare.mapping import get_mapping, get_prepare_definition_file_location
@@ -29,7 +30,7 @@ def handle_prepare_complete_msg(msg):
     return prepare_client.complete_prepare_process()
 
 
-SERVICE_DEFINITION = {
+SERVICE_DEFINITION: ServiceDefinition = {
     'prepare_request': {
         'queue': PREPARE_QUEUE,
         'handler': handle_prepare_msg,

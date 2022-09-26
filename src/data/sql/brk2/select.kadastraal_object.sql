@@ -92,3 +92,4 @@ CREATE INDEX ON brk2_prep.kadastraal_object(aangeduid_door_kadastralegemeentecod
 CREATE INDEX ON brk2_prep.kadastraal_object(_expiration_date);
 CREATE INDEX ON brk2_prep.kadastraal_object(id);
 CREATE INDEX ON brk2_prep.kadastraal_object USING gist (geometrie);
+CREATE INDEX ON brk2_prep.kadastraal_object(hoofdsplitsing_identificatie);

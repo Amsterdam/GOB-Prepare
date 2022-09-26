@@ -58,8 +58,6 @@ class PrepareClient:
         })
         msg["header"] = self.header
 
-        logger.configure(msg, "PREPARE")
-
         self._set_datastores()
 
     def _set_datastores(self):

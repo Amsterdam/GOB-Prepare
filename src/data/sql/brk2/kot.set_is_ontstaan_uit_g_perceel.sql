@@ -1,3 +1,5 @@
+CREATE INDEX ON brk2.zakelijkrecht(isbetrokkenbij_identificatie);
+
 UPDATE brk2_prep.kadastraal_object kot
 SET is_ontstaan_uit_g_perceel = q.relatie_g_perceel
 FROM (select kot.identificatie,

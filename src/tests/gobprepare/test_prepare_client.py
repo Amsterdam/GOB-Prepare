@@ -59,9 +59,6 @@ class TestPrepareClientInit(TestCase):
         self.assertEqual(self.mock_msg['header'], prepare_client.header)
         self.assertEqual({'src schema': 'dst schema'}, prepare_client.publish_schemas)
 
-        # Assert the logger is configured and called
-        mock_logger.configure.assert_called_with({'header': ANY}, "PREPARE")
-
         mock_factory.get_datastore.assert_has_calls([
             call(self.mock_dataset['source']['application'], {}),
             call(self.mock_dataset['destination']['application'], {}),
