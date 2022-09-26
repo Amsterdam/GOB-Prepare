@@ -35,7 +35,7 @@ WITH subjecten AS ((SELECT id                            AS nrn_sjt_id
                    UNION
                    (SELECT id                           AS nrn_sjt_id
                          , identificatie                AS Identificatie_subject
-                         , 'NATUURLIJK PERSOON'         AS Type_subject
+                         , 'NIET-NATUURLIJK PERSOON'    AS Type_subject
                          , beschikkingsbevoegdheid_code AS Code_Beschikkingsbevoegdheid
                          , ind_diakriet_niet_toonbaar   AS Indicatie_diakriet_niet_toonbaar
                          , postlocatie_identificatie    AS Postlocatie_identificatie
