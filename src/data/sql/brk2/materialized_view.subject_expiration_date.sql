@@ -3,11 +3,12 @@ CREATE MATERIALIZED VIEW brk2_prep.subject_expiration_date AS (
     	q.subject_id,
     	CASE WHEN sum(CASE WHEN expiration_date IS NULL THEN 1 ELSE 0 END) > 0 THEN NULL ELSE max(expiration_date) END AS expiration_date
     FROM (
-             SELECT
-             	tng.van_subject_id,
-             	CASE WHEN sum(CASE WHEN tng.einddatum IS NULL THEN 1 ELSE 0 END) > 0 THEN NULL ELSE max(tng.einddatum) END AS expiration_date
-             FROM brk2_prep.van_brk_kadastraalsubject tng
-             GROUP BY tng.van_subject_id
+             SELECT tng.van_brk_kadastraalsubject,
+                    CASE
+                        WHEN sum(CASE WHEN tng._expiration_date IS NULL THEN 1 ELSE 0 END) > 0 THEN NULL
+                        ELSE max(tng._expiration_date) END AS expiration_date
+             FROM brk2_prep.tenaamstelling tng
+             GROUP BY tng.van_brk_kadastraalsubject
              --
              UNION
              --

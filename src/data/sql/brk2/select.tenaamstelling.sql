@@ -3,6 +3,7 @@
 -- the source database.
 -- We get these attributes from the brk2_prep.zakelijk_recht table instead of from the kadastraalobject table from the
 -- brk schema, because the kadastraal object references aren't populated on all ZRT objects in the brk schema.
+CREATE TABLE brk2_prep.tenaamstelling AS
 SELECT tng.identificatie                                               AS identificatie,
        zrt.volgnummer                                                  AS volgnummer,
        tng.tennamevan_identificatie                                    AS van_brk_kadastraalsubject,
