@@ -32,7 +32,7 @@ SELECT zrt.rust_op_kadastraalobj_volgnr  AS volgnummer,
        asg2.id                           AS __ontstaan_uit_asg_id,
        NULL                              AS betrokken_bij_zakelijkerechten,
        zrt.isbetrokkenbij_identificatie  AS betrokken_bij_appartementsrechtsplitsing_vve,
-       ztt.isbeperkttot_id               AS is_beperkt_tot,
+       ztt.is_beperkt_tot                AS is_beperkt_tot,
        NULL                              AS appartementsrechtsplitsingidentificatie,
        asg1.vve_identificatie            AS vve_identificatie_ontstaan_uit,
        asg2.vve_identificatie            AS vve_identificatie_betrokken_bij,
@@ -68,7 +68,12 @@ SELECT zrt.rust_op_kadastraalobj_volgnr  AS volgnummer,
        NULL                              AS __max_betrokken_bij_begindatum,
        NULL                              AS __max_ontstaan_uit_begindatum
 FROM brk2.zakelijkrecht zrt
-         LEFT JOIN brk2.zakelijkrecht_isbeperkttot ztt ON zrt.id = ztt.zakelijkrecht_id
+         LEFT JOIN (SELECT ztt.zakelijkrecht_id,
+                           jsonb_agg(jsonb_build_object('bronwaarde', zrt.identificatie)
+                                     ORDER BY zrt.identificatie) AS is_beperkt_tot
+                    FROM brk2.zakelijkrecht_isbeperkttot ztt
+                             JOIN brk2.zakelijkrecht zrt ON zrt.id = ztt.isbeperkttot_id
+                    GROUP BY ztt.zakelijkrecht_id) ztt ON ztt.zakelijkrecht_id = zrt.id
          LEFT JOIN brk2.c_aardzakelijkrecht a ON zrt.aardzakelijkrecht_code = a.code
          LEFT JOIN brk2_prep.kadastraal_object kot
                    ON zrt.rust_op_kadastraalobject_id = kot.id AND zrt.rust_op_kadastraalobj_volgnr = kot.volgnummer
@@ -81,24 +86,17 @@ FROM brk2.zakelijkrecht zrt
          LEFT JOIN brk2.inonderzoek iok ON iok.identificatie = zok.onderzoek_identificatie
          LEFT JOIN brk2.c_authentiekgegeven agn ON agn.code = iok.authentiekgegeven_code
          LEFT JOIN akr_codes ON zrt.aardzakelijkrecht_code = akr_codes.aard_code
-         LEFT JOIN (SELECT zrt_id,
-                           array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie)
-                                                   ORDER BY identificatie)) as is_belast_met
-                    FROM (SELECT zit.zakelijkrecht_id AS zrt_id,       --blijft
-                                 zrt2.identificatie   AS identificatie --blijft
-                          FROM brk2.zakelijkrecht_isbelastmet zit --blijft
-                                   LEFT JOIN brk2.zakelijkrecht zrt2 --blijft
-                                             ON zrt2.id = zit.isbelastmet_id) sq
-                    GROUP BY zrt_id) blm ON blm.zrt_id = zrt.id
-         LEFT JOIN (SELECT zrt_id,
-                           array_to_json(array_agg(json_build_object('zrt_identificatie', identificatie)
-                                                   ORDER BY identificatie)) as belast
-                    FROM (SELECT zit.isbelastmet_id AS zrt_id,
-                                 zrt2.identificatie AS identificatie
-                          FROM brk2.zakelijkrecht_isbelastmet zit
-                                   LEFT JOIN brk2.zakelijkrecht zrt2
-                                             ON zrt2.id = zit.zakelijkrecht_id) sq
-                    GROUP BY zrt_id) bel ON bel.zrt_id = zrt.id
+         LEFT JOIN (SELECT zit.zakelijkrecht_id AS zrt_id,
+                           jsonb_agg(jsonb_build_object('bronwaarde', zrt.identificatie)
+                                    ORDER BY zrt.identificatie) AS is_belast_met
+                    FROM brk2.zakelijkrecht_isbelastmet zit
+                             LEFT JOIN brk2.zakelijkrecht zrt ON zrt.id = zit.isbelastmet_id
+                    GROUP BY zit.zakelijkrecht_id) blm ON blm.zrt_id = zrt.id
+         LEFT JOIN (SELECT zit.isbelastmet_id                                                                AS zrt_id,
+                           jsonb_agg(jsonb_build_object('bronwaarde', zrt.identificatie) ORDER BY zrt.identificatie) AS belast
+                    FROM brk2.zakelijkrecht_isbelastmet zit
+                             LEFT JOIN brk2.zakelijkrecht zrt ON zrt.id = zit.zakelijkrecht_id
+                    GROUP BY zit.isbelastmet_id) bel on bel.zrt_id = zrt.id
 ;
 
 CREATE INDEX ON brk2_prep.zakelijk_recht(__id);
