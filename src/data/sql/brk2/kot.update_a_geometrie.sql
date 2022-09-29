@@ -4,7 +4,7 @@
 --
 --  The clause
 --  AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
---  AND kot1.aangeduid_door_kadastralegemeentecode = kot2.aangeduid_door_kadastralegemeentecode
+--  AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
 --  was added to filter out G-percelen that are not in the same aangeduid_door_kadastralesectie.
 
 WITH kot_g_poly AS (
@@ -25,7 +25,7 @@ SELECT id, volgnummer, g_poly
         WHERE kot1.indexletter = 'A'
             AND kot1._expiration_date IS NULL
             AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
-            AND kot1.aangeduid_door_kadastralegemeentecode = kot2.aangeduid_door_kadastralegemeentecode
+            AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
         GROUP BY kot1.id, kot1.volgnummer) q1),
      vbo_kot_geometrie AS (
         SELECT distinct ON(kot.id)
@@ -68,7 +68,7 @@ WITH point_g_poly AS (
         AND g_perceel->>'kot_id' IS NOT NULL
     JOIN LATERAL (
         SELECT DISTINCT ON (id)
-               id, volgnummer, aangeduid_door_kadastralesectie, aangeduid_door_kadastralegemeentecode, geometrie
+               id, volgnummer, aangeduid_door_kadastralesectie, aangeduid_door_kadastralegemeentecode_code, geometrie
             FROM brk2_prep.kadastraal_object kot2
         ORDER BY id, volgnummer DESC
         ) AS kot2
@@ -77,7 +77,7 @@ WITH point_g_poly AS (
     WHERE kot1.indexletter = 'A'
         AND kot1._expiration_date IS NULL
         AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
-        AND kot1.aangeduid_door_kadastralegemeentecode = kot2.aangeduid_door_kadastralegemeentecode
+        AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
     GROUP BY kot1.id, kot1.volgnummer)
 UPDATE brk2_prep.kadastraal_object
 SET geometrie = point_g_poly.geometrie
@@ -122,7 +122,7 @@ WHERE brk2_prep.kadastraal_object.id = near_a_poly.id
 --
 --  The clause
 --  AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
---  AND kot1.aangeduid_door_kadastralegemeentecode = kot2.aangeduid_door_kadastralegemeentecode
+--  AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
 --  was added to filter out G-percelen that are not in the same aangeduid_door_kadastralesectie.
 
 WITH kot_g_poly AS (
@@ -143,7 +143,7 @@ SELECT id, volgnummer, g_poly
         WHERE kot1.indexletter = 'A'
             AND kot1._expiration_date IS NULL
             AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
-            AND kot1.aangeduid_door_kadastralegemeentecode = kot2.aangeduid_door_kadastralegemeentecode
+            AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
         GROUP BY kot1.id, kot1.volgnummer) q1),
      vbo_kot_geometrie AS (
         SELECT distinct ON(kot.id)
@@ -186,7 +186,7 @@ WITH point_g_poly AS (
         AND g_perceel->>'kot_id' IS NOT NULL
     JOIN LATERAL (
         SELECT DISTINCT ON (id)
-               id, volgnummer, aangeduid_door_kadastralesectie, aangeduid_door_kadastralegemeentecode, geometrie
+               id, volgnummer, aangeduid_door_kadastralesectie, aangeduid_door_kadastralegemeentecode_code, geometrie
             FROM brk2_prep.kadastraal_object kot2
         ORDER BY id, volgnummer DESC
         ) AS kot2
@@ -195,7 +195,7 @@ WITH point_g_poly AS (
     WHERE kot1.indexletter = 'A'
         AND kot1._expiration_date IS NULL
         AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
-        AND kot1.aangeduid_door_kadastralegemeentecode = kot2.aangeduid_door_kadastralegemeentecode
+        AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
     GROUP BY kot1.id, kot1.volgnummer)
 UPDATE brk2_prep.kadastraal_object
 SET geometrie = point_g_poly.geometrie
