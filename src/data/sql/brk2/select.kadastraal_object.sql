@@ -5,6 +5,8 @@ SELECT kot.identificatie                    AS identificatie,
        NULL                                 AS registratiedatum,
        kot.akrkadastralegemeentecode || kot.sectie || LPAD(kot.perceelnummer::text, 5, '0') || kot.index_letter ||
        LPAD(kot.index_nummer::text, 4, '0') AS kadastrale_aanduiding,
+       kot.akrkadastralegemeentecode || kot.sectie || LPAD(kot.perceelnummer::text, 5, '0') ||
+       kot.index_letter                     AS __kadastrale_aanduiding_minus_index_nummer,
        LPAD(brg.cbscode::text, 4, '0')      AS aangeduid_door_gemeente_code,
        brg.bgmnaam                          AS aangeduid_door_gemeente_omschrijving,
        kge.code                             AS aangeduid_door_kadastralegemeente_code,
@@ -32,7 +34,7 @@ SELECT kot.identificatie                    AS identificatie,
        kot.tijdstip_ontstaan_object         AS tijdstip_ontstaan_object,
        kot.hoofdsplitsing_identificatie     AS hoofdsplitsing_identificatie,
        kot.afwijking_lijst_rechthebbenden   AS afwijking_lijst_rechthebbenden,
-       kot.geometrie                        AS geometrie,                              -- later vullen voor A-percelen
+       kot.geometrie                        AS geometrie,                       -- later vullen voor A-percelen
        prc.geometrie                        AS plaatscoordinaten,
        prc.rotatie                          AS perceelnummer_rotatie,
        prc.verschuiving_x                   AS perceelnummer_verschuiving_x,
@@ -53,10 +55,10 @@ SELECT kot.identificatie                    AS identificatie,
        COALESCE(kot.modification,
                 CASE kot.status_code
                     WHEN 'H' THEN kot.creation
-                    END)    AS _expiration_date,
-       NULL::jsonb                                 AS is_ontstaan_uit_g_perceel,       -- later vullen
-       adr.adressen                                AS heeft_een_relatie_met_verblijfsobject,
-       NULL::jsonb                                 AS is_ontstaan_uit_kadastraalobject -- later vullen
+                    END)                    AS _expiration_date,
+       NULL::jsonb                          AS is_ontstaan_uit_g_perceel,       -- later vullen
+       adr.adressen                         AS heeft_een_relatie_met_verblijfsobject,
+       NULL::jsonb                          AS is_ontstaan_uit_kadastraalobject -- later vullen
 FROM brk2.kadastraal_object kot
          LEFT JOIN brk2.kadastraal_object_percnummer prc
                    ON kot.id = prc.kadastraalobject_id AND kot.volgnummer = prc.kadastraalobject_volgnummer
@@ -90,9 +92,11 @@ CREATE INDEX ON brk2_prep.kadastraal_object (indexletter);
 CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (is_ontstaan_uit_g_perceel);
 CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (is_ontstaan_uit_kadastraalobject);
 CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (heeft_een_relatie_met_verblijfsobject);
-CREATE INDEX ON brk2_prep.kadastraal_object(aangeduid_door_kadastralesectie);
-CREATE INDEX ON brk2_prep.kadastraal_object(aangeduid_door_kadastralegemeentecode_code);
-CREATE INDEX ON brk2_prep.kadastraal_object(_expiration_date);
-CREATE INDEX ON brk2_prep.kadastraal_object(id);
+CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_kadastralesectie);
+CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_kadastralegemeentecode_code);
+CREATE INDEX ON brk2_prep.kadastraal_object (__kadastrale_aanduiding_minus_index_nummer);
+CREATE INDEX ON brk2_prep.kadastraal_object (_expiration_date);
+CREATE INDEX ON brk2_prep.kadastraal_object (id);
 CREATE INDEX ON brk2_prep.kadastraal_object USING gist (geometrie);
-CREATE INDEX ON brk2_prep.kadastraal_object(hoofdsplitsing_identificatie);
+CREATE INDEX ON brk2_prep.kadastraal_object (hoofdsplitsing_identificatie);
+CREATE INDEX ON brk2_prep.kadastraal_object (id, volgnummer, __kadastrale_aanduiding_minus_index_nummer);
