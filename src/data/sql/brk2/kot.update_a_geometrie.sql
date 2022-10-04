@@ -6,28 +6,36 @@
 --  AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
 --  AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
 --  was added to filter out G-percelen that are not in the same aangeduid_door_kadastralesectie.
+ANALYZE brk2_prep.kadastraal_object;
+ANALYZE bag_brk2.verblijfsobjecten_geometrie;
 
-WITH kot_g_poly AS (
-SELECT id, volgnummer, g_poly
-    FROM (
-        SELECT
-            kot1.id AS id,
-            kot1.volgnummer AS volgnummer,
-            ST_Union(kot2.geometrie) AS g_poly
-        FROM brk2_prep.kadastraal_object kot1
-        JOIN jsonb_array_elements(kot1.is_ontstaan_uit_g_perceel) AS g_perceel
-            ON kot1.is_ontstaan_uit_g_perceel IS NOT NULL
-            AND g_perceel->>'kot_id' IS NOT NULL
-        JOIN brk2_prep.kadastraal_object kot2
-            ON kot2.id =  (g_perceel->>'kot_id')::integer
-            AND kot2.volgnummer =  (g_perceel->>'kot_volgnummer')::integer
-            AND kot2._expiration_date IS NULL
-        WHERE kot1.indexletter = 'A'
-            AND kot1._expiration_date IS NULL
-            AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
-            AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
-        GROUP BY kot1.id, kot1.volgnummer) q1),
-     vbo_kot_geometrie AS (
+-- Create table with union of geometries of related G-percelen for all ACTUAL A-percelen
+CREATE TABLE brk2_prep.g_perceel_geo_union AS
+SELECT kot1.id                  AS id,
+       kot1.volgnummer          AS volgnummer,
+       ST_Union(kot2.geometrie) AS g_poly
+FROM brk2_prep.kadastraal_object kot1
+         JOIN JSONB_ARRAY_ELEMENTS(kot1.is_ontstaan_uit_g_perceel) AS g_perceel
+              ON kot1.is_ontstaan_uit_g_perceel IS NOT NULL
+                  AND g_perceel ->> 'kot_id' IS NOT NULL
+         JOIN brk2_prep.kadastraal_object kot2
+              ON kot2.id = (g_perceel ->> 'kot_id')::integer
+                  AND kot2.volgnummer = (g_perceel ->> 'kot_volgnummer')::integer
+                  AND kot2._expiration_date IS NULL
+WHERE kot1.indexletter = 'A'
+  AND kot1._expiration_date IS NULL
+  AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
+  AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
+GROUP BY kot1.id, kot1.volgnummer;
+
+-- Create index on new table and analyze
+CREATE INDEX ON brk2_prep.g_perceel_geo_union(id, volgnummer);
+ANALYZE brk2_prep.g_perceel_geo_union;
+
+-- 1. Set geometry for A-percelen based on related verblijfsobject. If A-perceel is in g_poly table, check if VOT
+-- geometry falls within that polygon. Otherwise skip this check.
+WITH
+    vbo_kot_geometrie AS (
         SELECT distinct ON(kot.id)
            kot.id AS id,
            kot.volgnummer AS volgnummer,
@@ -38,7 +46,7 @@ SELECT id, volgnummer, g_poly
             AND adres->>'bag_id' IS NOT NULL
         JOIN bag_brk2.verblijfsobjecten_geometrie vbo
             ON adres->>'bag_id' = vbo.identificatie
-        LEFT JOIN kot_g_poly
+        LEFT JOIN brk2_prep.g_perceel_geo_union kot_g_poly
             ON kot_g_poly.id = kot.id
             AND kot_g_poly.volgnummer = kot.volgnummer
         WHERE kot.indexletter = 'A'
@@ -53,43 +61,16 @@ WHERE brk2_prep.kadastraal_object.id = vbo_kot_geometrie.id
     AND brk2_prep.kadastraal_object.geometrie IS NULL
 ;
 
---  Then we update kadastrale objects of type 'A' without geometrie
---  using ST_PointOnSurface of related G-percelen.
-
-
-WITH point_g_poly AS (
-    SELECT
-        kot1.id AS id,
-        kot1.volgnummer AS volgnummer,
-        ST_PointOnSurface(ST_Union(kot2.geometrie)) AS geometrie
-    FROM brk2_prep.kadastraal_object kot1
-    JOIN jsonb_array_elements(kot1.is_ontstaan_uit_g_perceel) AS g_perceel
-        ON kot1.is_ontstaan_uit_g_perceel IS NOT NULL
-        AND g_perceel->>'kot_id' IS NOT NULL
-    JOIN LATERAL (
-        SELECT DISTINCT ON (id)
-               id, volgnummer, aangeduid_door_kadastralesectie, aangeduid_door_kadastralegemeentecode_code, geometrie
-            FROM brk2_prep.kadastraal_object kot2
-        ORDER BY id, volgnummer DESC
-        ) AS kot2
-        ON kot2.id = (g_perceel->>'kot_id')::integer
-        AND kot2.volgnummer = (g_perceel->>'kot_volgnummer')::integer
-    WHERE kot1.indexletter = 'A'
-        AND kot1._expiration_date IS NULL
-        AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
-        AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
-    GROUP BY kot1.id, kot1.volgnummer)
+-- 2. For all A-percelen that remain, set the geometry to point on surface of g_poly.
 UPDATE brk2_prep.kadastraal_object
-SET geometrie = point_g_poly.geometrie
-FROM point_g_poly
-WHERE brk2_prep.kadastraal_object.id = point_g_poly.id
-    AND brk2_prep.kadastraal_object.volgnummer = point_g_poly.volgnummer
-    AND brk2_prep.kadastraal_object.geometrie IS NULL
-;
+SET geometrie = ST_PointOnSurface(g_poly.g_poly)
+FROM brk2_prep.g_perceel_geo_union g_poly
+WHERE brk2_prep.kadastraal_object.id = g_poly.id
+  AND brk2_prep.kadastraal_object.volgnummer = g_poly.volgnummer
+  AND brk2_prep.kadastraal_object.geometrie IS NULL;
 
---  Then we update kadastrale objects of type 'A' without geometrie
---  using geometrie of a "near" A-perceel (within the same complex).
 
+-- 3. Set geometry of remaining A-percelen based on nearby A-percelen (with same kadastrale aanduiding minus index nr)
 WITH near_a_poly AS (
     SELECT DISTINCT ON(kot1.id)
         kot1.id,
