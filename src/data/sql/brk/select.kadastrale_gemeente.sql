@@ -14,15 +14,14 @@ from (
                          gc1.ligt_in_gemeente,
                          ST_UnaryUnion(ST_Collect(gc1.geometrie)) as geometrie
                   from (
-                           select kad_gemeente ->> 'omschrijving' as identificatie,
+                           select aangeduid_door_kadastralegemeente_omschrijving as identificatie,
                                   (ST_DumpRings(geometrie)).path  as nrings,
                                   (ST_DumpRings(geometrie)).geom  as geometrie,
-                                  brg_gemeente ->> 'omschrijving' as ligt_in_gemeente
-                           from brk_prep.kadastraal_object
-                           where index_letter = 'G'
+                                  gemeente as ligt_in_gemeente
+                           from brk2_prepared.kadastraal_object
+                           where indexletter = 'G'
                              and ST_IsValid(geometrie)
-                             and modification is null
-                             and status_code <> 'H'
+                             and datum_actueel_tot IS null
                        ) gc1
                   where gc1.nrings[1] = 0
                   group by gc1.identificatie,

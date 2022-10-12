@@ -14,15 +14,14 @@ from (
                          gc1.is_onderdeel_van_kadastralegemeente,
                          ST_UnaryUnion(ST_Collect(gc1.geometrie)) as geometrie
                   from (
-                           select kad_gemeentecode ->> 'omschrijving' as identificatie,
+                           select aangeduid_door_kadastralegemeentecode_omschrijving  as identificatie,--kad_gemeentecode ->> 'omschrijving' 
                                   (ST_DumpRings(geometrie)).path      as nrings,
                                   (ST_DumpRings(geometrie)).geom      as geometrie,
-                                  kad_gemeente ->> 'omschrijving'     as is_onderdeel_van_kadastralegemeente
-                           from brk_prep.kadastraal_object
-                           where index_letter = 'G'
+                                  aangeduid_door_kadastralegemeente_omschrijving as is_onderdeel_van_kadastralegemeente --kad_gemeente ->> 'omschrijving'    
+                           from brk2_prepared.kadastraal_object
+                           where indexletter = 'G'
                              and ST_IsValid(geometrie)
-                             and modification is null
-                             and status_code <> 'H'
+                             AND datum_actueel_tot IS null
                        ) gc1
                   where gc1.nrings[1] = 0
                   group by gc1.identificatie,
@@ -31,3 +30,4 @@ from (
      ) gc3
 group by gc3.identificatie,
          gc3.is_onderdeel_van_kadastralegemeente
+		 
