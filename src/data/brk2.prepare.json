@@ -137,7 +137,7 @@
     {
       "type": "execute_sql",
       "description": "Populate ZRT table with KOT references",
-      "id": "populate_zrt",
+      "id": "populate_zrt_with_kot",
       "depends_on": [
         "select_zrt"
       ],
@@ -149,7 +149,7 @@
       "description": "Create references between ZRT's on betrokken_bij and ontstaan_uit",
       "id": "create_zrt_references",
       "depends_on": [
-        "populate_zrt"
+        "populate_zrt_with_kot"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/zrt.reference_ontstaan_uit_betrokken_bij.sql"
@@ -159,7 +159,8 @@
       "description": "KOT - Set is_ontstaan_uit_kadastraalobject",
       "id": "set_is_ontstaan_uit_kadastraalobject",
       "depends_on": [
-        "select_kot"
+        "select_kot",
+        "populate_zrt_with_kot"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/kot.set_is_ontstaan_uit_kadastraalobject.sql"
@@ -169,7 +170,8 @@
       "description": "KOT - Set is_ontstaan_uit_g_perceel",
       "id": "set_is_ontstaan_uit_g_perceel",
       "depends_on": [
-        "select_kot"
+        "select_kot",
+        "populate_zrt_with_kot"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/kot.set_is_ontstaan_uit_g_perceel.sql"
