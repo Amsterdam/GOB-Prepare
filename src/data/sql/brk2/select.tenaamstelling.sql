@@ -5,6 +5,7 @@
 -- brk schema, because the kadastraal object references aren't populated on all ZRT objects in the brk schema.
 CREATE TABLE brk2_prep.tenaamstelling AS
 SELECT tng.identificatie                                               AS identificatie,
+       tng.id                                                          AS neuron_id,
        zrt.volgnummer                                                  AS volgnummer,
        tng.tennamevan_identificatie                                    AS van_brk_kadastraalsubject,
        zrt.begin_geldigheid                                            AS begin_geldigheid,
@@ -27,7 +28,7 @@ SELECT tng.identificatie                                               AS identi
        g.isgebaseerd_op                                                AS is_gebaseerd_op_brk_stukdeel,
        zrt.toestandsdatum                                              AS toestandsdatum
 FROM brk2.tenaamstelling tng
-         LEFT JOIN brk2_prepared.zakelijk_recht zrt ON tng.vanrecht_id = zrt.__id
+         LEFT JOIN brk2_prep.zakelijk_recht zrt ON tng.vanrecht_id = zrt.__id
          LEFT JOIN brk2.gezamenlijk_aandeel ga ON tng.geldtvoordeel_identificatie = ga.identificatie
          LEFT JOIN brk2.c_samenwerkingsverband s ON s.code = tng.verkregen_namens_code
          LEFT JOIN brk2.c_burgerlijkestaat b ON b.code = tng.burgerlijkestaat_code
