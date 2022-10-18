@@ -292,6 +292,19 @@
       "depends_on": [
         "select_kot"
       ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Select SDL",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.stukdeel.sql",
+      "id": "select_sdl",
+      "depends_on": [
+        "select_art",
+        "select_akt",
+        "select_tng",
+        "select_zrt"
+      ]
     }
   ]
 }
