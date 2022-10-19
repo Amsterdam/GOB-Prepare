@@ -221,10 +221,31 @@
     },
     {
       "type": "execute_sql",
+      "description": "Select AKT",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.aantekening_kadastraal_object.sql",
+      "id": "select_akt",
+      "depends_on": [
+        "select_kot"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Select ART",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.aantekening_recht.sql",
+      "id": "select_art",
+      "depends_on": [
+        "select_tng"
+      ]
+    },
+    {
+      "type": "execute_sql",
       "description": "Create materialized view subject_expiration_date",
       "id": "create_view_subject_actueel",
       "depends_on": [
-        "select_tng",
+        "select_akt",
+        "select_art",
         "create_zrt_references"
       ],
       "query": "data/sql/brk2/materialized_view.subject_expiration_date.sql",
@@ -240,6 +261,49 @@
         "create_view_subject_actueel",
         "select_tng",
         "create_zrt_references"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Select KSE",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.kadastrale_sectie.sql",
+      "id": "select_kse",
+      "depends_on": [
+        "select_kot"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Select KGE",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.kadastrale_gemeente.sql",
+      "id": "select_kge",
+      "depends_on": [
+        "select_kot"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Select KCE",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.kadastrale_gemeentecode.sql",
+      "id": "select_kce",
+      "depends_on": [
+        "select_kot"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Select SDL",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.stukdeel.sql",
+      "id": "select_sdl",
+      "depends_on": [
+        "select_art",
+        "select_akt",
+        "select_tng",
+        "select_zrt"
       ]
     }
   ]
