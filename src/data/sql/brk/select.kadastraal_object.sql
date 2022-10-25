@@ -32,7 +32,10 @@ SELECT kot.identificatie                    AS brk_kot_id
      , kot.cultuurcodebebouwd_code          AS cultuurcodebebouwd_code  --nieuw, ipv json object
 	 , ccb.omschrijving                     AS cultuurcodeonbebouwd_oms  --nieuw, ipv json object
      , kot.status_code                      AS status_code																			
---   --, coalesce(vkg.vkgrens, 'N')           AS ind_voorlopige_kadgrens 			--wordt vanaf nu (waarschijnlijk) afgeleid uit soortgrootte, zie commentaar bij de join. in eerste instantie dus niet meer leveren										
+	 ,	CASE 
+		WHEN soort_grootte_code IN ('2','5','6','7','8','9','10','11','12') THEN 'TRUE'
+		ELSE 'FALSE'
+		END 								AS indicatie_voorlopige_kadastrale_grens
      , kok.omschrijving                     AS inonderzoek      --nieuw          																
      , kot.referentie						AS referentie   --nieuw
 	 , kot.oudst_digitaal_bekend			AS oudst_digitaal_bekend --nieuw
