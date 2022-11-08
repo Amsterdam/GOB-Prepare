@@ -2,9 +2,6 @@
   "version": "0.1",
   "name": "BRK2",
   "catalogue": "brk2",
-  "source": {
-    "application": "Neuron"
-  },
   "destination": {
     "application": "GOBPrepare"
   },
@@ -21,11 +18,10 @@
     },
     {
       "type": "select",
-      "source": "src",
+      "source": "destination",
       "query": [
-        "         SELECT TRUNC(MAX(BSD.DATUM_AANGEMAAKT)) AS brk_bsd_toestandsdatum",
-        "         ,      'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.' AS omschrijving",
-        "           FROM   G0363_BRK2MON.BESTAND BSD"
+        "         SELECT *",
+        "         FROM (VALUES('2022-10-11 00:00:00.000000'::timestamp, 'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.')) AS t (brk_bsd_toestandsdatum, omschrijving)"
       ],
       "query_src": "string",
       "destination_table": {
