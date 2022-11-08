@@ -15,7 +15,6 @@
     {
       "type": "clear",
       "schemas": [
-        "brk2",
         "brk2_prep"
       ],
       "id": "clear_schemas"
@@ -49,41 +48,6 @@
       "id": "create_bestand_table"
     },
     {
-      "type": "clone",
-      "source_schema": "G0363_BRK2",
-      "destination_schema": "brk2",
-      "id_columns": {
-        "_defaults": [
-          ["ID", "VOLGNUMMER"],
-          ["ID"],
-          ["CODE"],
-          ["KADASTRAALOBJECT_ID", "KADASTRAALOBJECT_VOLGNUMMER"],
-          ["ZAKELIJKRECHT_ID"],
-          ["TENAAMSTELLING_ID"],
-          ["MUTATIE_ID"]
-        ],
-        "AANTEKENING_BETROKKENPERSOON": [
-          "AANTEKENING_ID"
-        ],
-        "ADRESSEERBAAR_NEVENADRES": [
-          "ADRESSEERBAAR_OBJECT_ID"
-        ],
-        "MANDELIGHEID_ISGEBASEERDOP": [
-          "MANDELIGHEID_ID"
-        ],
-        "PUBLIEKRECHTELIJKE_GEZAG": [
-          "BEPERKING_ID"
-        ]
-      },
-      "ignore": [
-        "VERSIE"
-      ],
-      "depends_on": [
-        "clear_schemas"
-      ],
-      "id": "clone_source"
-    },
-    {
       "type": "import_csv",
       "source": "https://developer.kadaster.nl/schemas/waardelijsten/BurgemKadgemSectie/BurgemKadgemSectie.csv",
       "destination": "brk2.import_burgerlijke_gemeentes",
@@ -99,7 +63,7 @@
       "query": "data/sql/brk2/materialized_view.baghulptabel.sql",
       "id": "create_baghulptabel",
       "depends_on": [
-        "clone_source"
+        "clear_schemas"
       ]
     },
     {
@@ -119,7 +83,7 @@
       "query": "data/sql/brk2/select.kadastraal_object.sql",
       "id": "select_kot",
       "depends_on": [
-        "clone_source",
+        "clear_schemas",
         "import_burgerlijke_gemeentes",
         "create_baghulptabel"
       ]
