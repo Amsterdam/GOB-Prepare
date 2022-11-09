@@ -17,6 +17,19 @@
       "id": "clear_schemas"
     },
     {
+      "type": "execute_sql",
+      "description": "Drop tables",
+      "query_src": "string",
+      "query": [
+        "DROP MATERIALIZED VIEW IF EXISTS brk2.baghulptabel;",
+        "DROP TABLE IF EXISTS brk2.import_burgerlijke_gemeentes;"
+      ],
+      "id": "drop_tables",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
       "type": "select",
       "source": "destination",
       "query": [
@@ -49,7 +62,8 @@
       "destination": "brk2.import_burgerlijke_gemeentes",
       "id": "import_burgerlijke_gemeentes",
       "depends_on": [
-        "clear_schemas"
+        "clear_schemas",
+        "drop_tables"
       ]
     },
     {
@@ -59,7 +73,8 @@
       "query": "data/sql/brk2/materialized_view.baghulptabel.sql",
       "id": "create_baghulptabel",
       "depends_on": [
-        "clear_schemas"
+        "clear_schemas",
+        "drop_tables"
       ]
     },
     {
