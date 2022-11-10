@@ -68,7 +68,6 @@ WITH subjecten AS ((SELECT id                            AS nrn_sjt_id
                          , rsin                         AS Heeft_RSIN_voor
                          , kvknummer                    AS Heeft_KvKnummer_voor
                     FROM brk2.niet_natuurlijk_persoon))
-
 SELECT sjt.Identificatie_subject            AS identificatie,
        sjt.Type_subject                     AS type_subject,
        sjt.Code_Beschikkingsbevoegdheid     AS beschikkingsbevoegdheid_code,
