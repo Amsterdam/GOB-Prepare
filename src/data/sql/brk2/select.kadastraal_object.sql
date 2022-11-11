@@ -37,7 +37,7 @@ SELECT kot.identificatie                    AS identificatie,
 		CASE 
 			WHEN kot.soort_grootte_code IN ('2','5','6','7','8','9','10','11','12') THEN 'TRUE'
 			ELSE 'FALSE'
-		END									AS indicatie_voorlopige_kadastrale_grens
+		END									AS indicatie_voorlopige_kadastrale_grens,
        kot.geometrie                        AS geometrie,                       -- later vullen voor A-percelen
        prc.geometrie                        AS plaatscoordinaten,
        prc.rotatie                          AS perceelnummer_rotatie,
