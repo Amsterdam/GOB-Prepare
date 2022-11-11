@@ -34,10 +34,10 @@ SELECT kot.identificatie                    AS identificatie,
        kot.tijdstip_ontstaan_object         AS tijdstip_ontstaan_object,
        kot.hoofdsplitsing_identificatie     AS hoofdsplitsing_identificatie,
        kot.afwijking_lijst_rechthebbenden   AS afwijking_lijst_rechthebbenden,
-		CASE 
-			WHEN kot.soort_grootte_code IN ('2','5','6','7','8','9','10','11','12') THEN 'TRUE'
-			ELSE 'FALSE'
-		END									AS indicatie_voorlopige_kadastrale_grens
+       CASE
+           WHEN kot.soortgrootte_code IN ('2', '5', '6', '7', '8', '9', '10', '11', '12') THEN TRUE
+           ELSE FALSE
+           END                              AS indicatie_voorlopige_kadastrale_grens,
        kot.geometrie                        AS geometrie,                       -- later vullen voor A-percelen
        prc.geometrie                        AS plaatscoordinaten,
        prc.rotatie                          AS perceelnummer_rotatie,
@@ -81,7 +81,7 @@ FROM brk2.kadastraal_object kot
          LEFT JOIN brk2.c_cultuurcodebebouwd ccb
                    ON kot.cultuurcodebebouwd_code = ccb.code
          LEFT JOIN brk2.baghulptabel adr
-                   ON adr.kadastraalobject_id = kot.id and adr.kadastraalobject_volgnummer = kot.volgnummer
+                   ON adr.kadastraalobject_id = kot.id AND adr.kadastraalobject_volgnummer = kot.volgnummer
          LEFT JOIN brk2.kadastraal_object_onderzoek koo
                    ON kot.id = koo.kadastraalobject_id AND kot.volgnummer = koo.kadastraalobject_volgnummer
          LEFT JOIN brk2.inonderzoek io
