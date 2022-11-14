@@ -2,6 +2,9 @@
   "version": "0.1",
   "name": "BRK2",
   "catalogue": "brk2",
+  "source": {
+    "application": "Neuron"
+  },
   "destination": {
     "application": "GOBPrepare"
   },
@@ -12,29 +15,18 @@
     {
       "type": "clear",
       "schemas": [
+        "brk2",
         "brk2_prep"
       ],
       "id": "clear_schemas"
     },
     {
-      "type": "execute_sql",
-      "description": "Drop tables",
-      "query_src": "string",
-      "query": [
-        "DROP MATERIALIZED VIEW IF EXISTS brk2.baghulptabel;",
-        "DROP TABLE IF EXISTS brk2.import_burgerlijke_gemeentes;"
-      ],
-      "id": "drop_tables",
-      "depends_on": [
-        "clear_schemas"
-      ]
-    },
-    {
       "type": "select",
-      "source": "destination",
+      "source": "src",
       "query": [
-        "         SELECT *",
-        "         FROM (VALUES('2022-10-11 00:00:00.000000'::timestamp, 'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.')) AS t (brk_bsd_toestandsdatum, omschrijving)"
+        "         SELECT TRUNC(MAX(BSD.DATUM_AANGEMAAKT)) AS brk_bsd_toestandsdatum",
+        "         ,      'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.' AS omschrijving",
+        "           FROM   G0363_BRK2MON.BESTAND BSD"
       ],
       "query_src": "string",
       "destination_table": {
@@ -57,13 +49,47 @@
       "id": "create_bestand_table"
     },
     {
+      "type": "clone",
+      "source_schema": "G0363_BRK2",
+      "destination_schema": "brk2",
+      "id_columns": {
+        "_defaults": [
+          ["ID", "VOLGNUMMER"],
+          ["ID"],
+          ["CODE"],
+          ["KADASTRAALOBJECT_ID", "KADASTRAALOBJECT_VOLGNUMMER"],
+          ["ZAKELIJKRECHT_ID"],
+          ["TENAAMSTELLING_ID"],
+          ["MUTATIE_ID"]
+        ],
+        "AANTEKENING_BETROKKENPERSOON": [
+          "AANTEKENING_ID"
+        ],
+        "ADRESSEERBAAR_NEVENADRES": [
+          "ADRESSEERBAAR_OBJECT_ID"
+        ],
+        "MANDELIGHEID_ISGEBASEERDOP": [
+          "MANDELIGHEID_ID"
+        ],
+        "PUBLIEKRECHTELIJKE_GEZAG": [
+          "BEPERKING_ID"
+        ]
+      },
+      "ignore": [
+        "VERSIE"
+      ],
+      "depends_on": [
+        "clear_schemas"
+      ],
+      "id": "clone_source"
+    },
+    {
       "type": "import_csv",
       "source": "https://developer.kadaster.nl/schemas/waardelijsten/BurgemKadgemSectie/BurgemKadgemSectie.csv",
       "destination": "brk2.import_burgerlijke_gemeentes",
       "id": "import_burgerlijke_gemeentes",
       "depends_on": [
-        "clear_schemas",
-        "drop_tables"
+        "clear_schemas"
       ]
     },
     {
@@ -73,8 +99,7 @@
       "query": "data/sql/brk2/materialized_view.baghulptabel.sql",
       "id": "create_baghulptabel",
       "depends_on": [
-        "clear_schemas",
-        "drop_tables"
+        "clone_source"
       ]
     },
     {
@@ -94,7 +119,7 @@
       "query": "data/sql/brk2/select.kadastraal_object.sql",
       "id": "select_kot",
       "depends_on": [
-        "clear_schemas",
+        "clone_source",
         "import_burgerlijke_gemeentes",
         "create_baghulptabel"
       ]
