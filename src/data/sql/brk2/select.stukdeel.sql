@@ -106,6 +106,12 @@ FROM brk2.stukdeel sdl
                           GROUP BY asg.stukdeel_identificatie, zrt.identificatie) q
                     GROUP BY q.stukdeel_identificatie) zrt ON sdl.identificatie = zrt.stukdeel_identificatie
          JOIN brk2.bestand bsd ON TRUE
--- Exclude NL.IMKAD.Stukdeel.33029100 since it has 287.000 relations
-WHERE sdl.identificatie <> 'NL.IMKAD.Stukdeel.33029100'
+WHERE COALESCE(
+                tng.tng_ids -> 0 -> 'tng_identificatie',
+                akt.akt_ids -> 0 -> 'akt_identificatie',
+                art.art_ids -> 0 -> 'art_identificatie',
+                zrt.zrt_ids -> 0 -> 'zrt_identificatie'
+    ) IS NOT NULL
+  -- Exclude NL.IMKAD.Stukdeel.33029100 since it has 287.000 relations
+  AND sdl.identificatie <> 'NL.IMKAD.Stukdeel.33029100'
 ;
