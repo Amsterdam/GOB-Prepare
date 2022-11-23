@@ -176,7 +176,8 @@
       "id": "set_is_ontstaan_uit_kadastraalobject",
       "depends_on": [
         "select_kot",
-        "populate_zrt_with_kot"
+        "populate_zrt_with_kot",
+        "create_zrt_references"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/kot.set_is_ontstaan_uit_kadastraalobject.sql"
@@ -187,7 +188,8 @@
       "id": "set_is_ontstaan_uit_g_perceel",
       "depends_on": [
         "select_kot",
-        "populate_zrt_with_kot"
+        "populate_zrt_with_kot",
+        "create_zrt_references"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/kot.set_is_ontstaan_uit_g_perceel.sql"
