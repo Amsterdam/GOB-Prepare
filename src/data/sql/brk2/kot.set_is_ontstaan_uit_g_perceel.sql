@@ -1,4 +1,4 @@
-CREATE INDEX ON brk2.zakelijkrecht(isbetrokkenbij_identificatie);
+CREATE INDEX ON brk2_prep.zakelijkrecht(betrokken_bij_appartementsrechtsplitsing_vve);
 
 UPDATE brk2_prep.kadastraal_object kot
 SET is_ontstaan_uit_g_perceel = q.relatie_g_perceel
@@ -12,11 +12,11 @@ FROM (select kot.identificatie,
                          ) ORDER BY kot2.identificatie, kot2.volgnummer
                  ) as relatie_g_perceel
       from brk2_prep.kadastraal_object kot
-               join brk2.zakelijkrecht zrt
-                    on zrt.isbetrokkenbij_identificatie = kot.hoofdsplitsing_identificatie
+               join brk2_prep.zakelijk_recht zrt
+                    on zrt.betrokken_bij_appartementsrechtsplitsing_vve = kot.hoofdsplitsing_identificatie
                join brk2_prep.kadastraal_object kot2
-                    on zrt.rust_op_kadastraalobject_id = kot2.id and
-                       zrt.rust_op_kadastraalobj_volgnr = kot2.volgnummer
+                    on zrt.__rust_op_kot_id = kot2.id and
+                       zrt.__rust_op_kot_volgnummer = kot2.volgnummer
       where kot.indexletter = 'A'
       group by kot.identificatie, kot.volgnummer) q
 WHERE indexletter = 'A'
