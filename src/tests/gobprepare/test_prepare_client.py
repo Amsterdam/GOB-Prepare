@@ -234,6 +234,20 @@ class TestPrepareClient(TestCase):
         mock_importer.assert_called_with(prepare_client._dst_datastore, action)
         mock_importer_instance.import_csv.assert_called_once()
 
+    def test_action_create_table(self, mock_logger):
+        action = {
+            "id": "create_this_table",
+            "type": "create_table",
+            "table_name": "schema.table_name",
+            "query": ["select * from laladiela"],
+            "query_src": "string"
+        }
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._dst_datastore = MagicMock()
+        prepare_client._run_prepare_action(action)
+        prepare_client._dst_datastore.execute.assert_called_with("CREATE TABLE schema.table_name AS select * from laladiela")
+        mock_logger.info.assert_called_with("Created table 'schema.table_name'")
+
     @patch("gobprepare.prepare_client.SqlAPIImporter", autospec=True)
     def test_action_import_api(self, mock_importer, mock_logger):
         action = {

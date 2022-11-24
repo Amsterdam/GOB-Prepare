@@ -1,4 +1,3 @@
-CREATE TABLE brk2_prep.kadastrale_sectie AS
 SELECT aangeduid_door_kadastralegemeentecode_omschrijving || aangeduid_door_kadastralesectie AS identificatie,
        aangeduid_door_kadastralesectie                                                       AS code,
        aangeduid_door_kadastralegemeentecode_omschrijving                                    AS is_onderdeel_van_brk_kadastrale_gemeentecode,

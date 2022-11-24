@@ -1,4 +1,3 @@
-CREATE TABLE brk2_prep.stukdeel AS
 SELECT sdl.id                                                            AS id,
        sdl.identificatie                                                 AS identificatie,
        sdl.aardstukdeel_code                                             AS aard_code,
