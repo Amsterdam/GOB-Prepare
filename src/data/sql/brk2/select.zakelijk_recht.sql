@@ -1,4 +1,3 @@
-CREATE TABLE brk2_prep.zakelijk_recht AS
 WITH asg_codes(code, omschrijving) AS (VALUES (1, 'HoofdSplitsing'),
                                               (2, 'OnderSplitsing'),
                                               (3, 'SplitsingAfkoopErfpacht')),

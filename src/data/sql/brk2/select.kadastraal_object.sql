@@ -1,4 +1,3 @@
-CREATE TABLE brk2_prep.kadastraal_object AS
 SELECT kot.identificatie                    AS identificatie,
        kot.volgnummer                       AS volgnummer,
        kot.id                               AS id,
@@ -60,7 +59,7 @@ SELECT kot.identificatie                    AS identificatie,
                     WHEN 'H' THEN kot.creation
                     END)                    AS _expiration_date,
        NULL::jsonb                          AS is_ontstaan_uit_g_perceel,       -- later vullen
-       adr.adressen                         AS heeft_een_relatie_met_verblijfsobject,
+       adr.vot_adressen                     AS heeft_een_relatie_met_verblijfsobject,
        NULL::jsonb                          AS is_ontstaan_uit_kadastraalobject -- later vullen
 FROM brk2.kadastraal_object kot
          LEFT JOIN brk2.kadastraal_object_percnummer prc

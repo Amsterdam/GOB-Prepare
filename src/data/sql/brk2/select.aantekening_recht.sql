@@ -1,4 +1,3 @@
-CREATE TABLE brk2_prep.aantekening_recht AS
 SELECT atg.id                                            AS neuron_id,
        atg.identificatie                                 AS identificatie,
        atg.einddatum_recht                               AS einddatum_recht,

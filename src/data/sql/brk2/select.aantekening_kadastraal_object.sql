@@ -1,4 +1,3 @@
-CREATE TABLE brk2_prep.aantekening_kadastraal_object AS
 SELECT atg.identificatie                                               AS identificatie,
        atg.id                                                          AS __neuron_id,
        koa.kadastraalobject_volgnummer                                 AS volgnummer,

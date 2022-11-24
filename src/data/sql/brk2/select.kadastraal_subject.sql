@@ -1,4 +1,3 @@
-CREATE TABLE brk2_prep.kadastraal_subject AS
 WITH subjecten AS ((SELECT id                            AS nrn_sjt_id
                          , identificatie                 AS Identificatie_subject
                          , 'NATUURLIJK PERSOON'          AS Type_subject

@@ -119,8 +119,9 @@
       ]
     },
     {
-      "type": "execute_sql",
+      "type": "create_table",
       "description": "Select meta",
+      "table_name": "brk2_prep.meta",
       "query_src": "file",
       "query": "data/sql/brk2/select.meta.sql",
       "id": "select_meta",
@@ -129,8 +130,9 @@
       ]
     },
     {
-      "type":"execute_sql",
+      "type": "create_table",
       "description": "Select KOT",
+      "table_name": "brk2_prep.kadastraal_object",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastraal_object.sql",
       "id": "select_kot",
@@ -141,8 +143,9 @@
       ]
     },
     {
-      "type": "execute_sql",
+      "type": "create_table",
       "description": "Select ZRT",
+      "table_name": "brk2_prep.zakelijk_recht",
       "query_src": "file",
       "query": "data/sql/brk2/select.zakelijk_recht.sql",
       "id": "select_zrt",
@@ -226,8 +229,9 @@
       "query": "data/sql/brk2/kot.remove_duplicate_ontstaan_uit_relations.sql"
     },
     {
-      "type": "execute_sql",
+      "type": "create_table",
       "description": "Select TNG",
+      "table_name": "brk2_prep.tenaamstelling",
       "query_src": "file",
       "query": "data/sql/brk2/select.tenaamstelling.sql",
       "id": "select_tng",
@@ -236,8 +240,9 @@
       ]
     },
     {
-      "type": "execute_sql",
+      "type": "create_table",
       "description": "Select AKT",
+      "table_name": "brk2_prep.aantekening_kadastraal_object",
       "query_src": "file",
       "query": "data/sql/brk2/select.aantekening_kadastraal_object.sql",
       "id": "select_akt",
@@ -247,8 +252,9 @@
       ]
     },
     {
-      "type": "execute_sql",
+      "type": "create_table",
       "description": "Select ART",
+      "table_name": "brk2_prep.aantekening_recht",
       "query_src": "file",
       "query": "data/sql/brk2/select.aantekening_recht.sql",
       "id": "select_art",
@@ -269,8 +275,9 @@
       "query_src": "file"
     },
     {
-      "type": "execute_sql",
+      "type": "create_table",
       "description": "Select SJT",
+      "table_name": "brk2_prep.kadastraal_subject",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastraal_subject.sql",
       "id": "select_sjt",
@@ -281,8 +288,9 @@
       ]
     },
     {
-      "type": "execute_sql",
+      "type": "create_table",
       "description": "Select KSE",
+      "table_name": "brk2_prep.kadastrale_sectie",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastrale_sectie.sql",
       "id": "select_kse",
@@ -291,8 +299,9 @@
       ]
     },
     {
-      "type": "execute_sql",
+      "type": "create_table",
       "description": "Select KGE",
+      "table_name": "brk2_prep.kadastrale_gemeente",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastrale_gemeente.sql",
       "id": "select_kge",
@@ -301,8 +310,9 @@
       ]
     },
     {
-      "type": "execute_sql",
+      "type": "create_table",
       "description": "Select KCE",
+      "table_name": "brk2_prep.kadastrale_gemeentecode",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastrale_gemeentecode.sql",
       "id": "select_kce",
@@ -311,8 +321,9 @@
       ]
     },
     {
-      "type": "execute_sql",
+      "type": "create_table",
       "description": "Select SDL",
+      "table_name": "brk2_prep.stukdeel",
       "query_src": "file",
       "query": "data/sql/brk2/select.stukdeel.sql",
       "id": "select_sdl",
