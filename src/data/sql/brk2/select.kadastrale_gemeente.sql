@@ -2,7 +2,6 @@
 -- Collect the polygons and Use ST_UnaryUnion to remove conflicting linestrings
 -- Take the exterior ring
 -- The last union is to create MULTIPOLYGONs from areas with the same identificatie
-CREATE TABLE brk2_prep.kadastrale_gemeente AS
 SELECT gc3.identificatie       AS identificatie,
        ST_Union(gc3.geometrie) AS geometrie,
        gc3.ligt_in_gemeente    AS ligt_in_brk_gemeente

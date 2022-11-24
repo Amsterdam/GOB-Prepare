@@ -1,4 +1,3 @@
-CREATE TABLE brk2_prep.kadastraal_object AS
 SELECT kot.identificatie                    AS identificatie,
        kot.volgnummer                       AS volgnummer,
        kot.id                               AS id,

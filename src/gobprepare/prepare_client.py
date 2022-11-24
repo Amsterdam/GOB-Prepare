@@ -174,6 +174,12 @@ class PrepareClient:
         logger.info(f"Imported {rows_imported} rows from CSV to table {action['destination']}")
         return rows_imported
 
+    def action_create_table(self, action: dict):
+        query = self._get_query(action)
+        create_query = f"CREATE TABLE {action['table_name']} AS {query}"
+        self._dst_datastore.execute(create_query)
+        logger.info(f"Created table '{action['table_name']}'")
+
     def action_import_api(self, action: dict):
         """Import API action. Import API into destination database action.
 
@@ -225,6 +231,9 @@ class PrepareClient:
             result["rows_copied"] = self.action_select(action)
         elif action["type"] == "execute_sql":
             self.action_execute_sql(action)
+            result["executed"] = "OK"
+        elif action["type"] == "create_table":
+            self.action_create_table(action)
             result["executed"] = "OK"
         elif action["type"] == "import_csv":
             result["rows_imported"] = self.action_import_csv(action)
