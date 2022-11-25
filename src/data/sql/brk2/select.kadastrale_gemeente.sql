@@ -14,7 +14,7 @@ FROM (SELECT gc2.identificatie,
             FROM (SELECT aangeduid_door_kadastralegemeente_omschrijving AS identificatie,
                          (ST_DumpRings(geometrie)).path                 AS nrings,
                          (ST_DumpRings(geometrie)).geom                 AS geometrie,
-                         gemeente                                       AS ligt_in_gemeente
+                         _gemeente                                      AS ligt_in_gemeente
                   FROM brk2_prep.kadastraal_object
                   WHERE indexletter = 'G'
                     AND ST_IsValid(geometrie)
