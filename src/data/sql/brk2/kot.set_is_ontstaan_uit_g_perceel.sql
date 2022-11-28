@@ -1,4 +1,4 @@
-CREATE INDEX ON brk2_prep.zakelijkrecht(betrokken_bij_appartementsrechtsplitsing_vve);
+CREATE INDEX ON brk2_prep.zakelijk_recht(betrokken_bij_appartementsrechtsplitsing_vve);
 
 UPDATE brk2_prep.kadastraal_object kot
 SET is_ontstaan_uit_g_perceel = q.relatie_g_perceel
