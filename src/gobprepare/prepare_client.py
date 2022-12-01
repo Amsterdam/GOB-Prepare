@@ -281,7 +281,7 @@ class PrepareClient:
         tasks = []
         for table_name in table_names:
             tasks.append({
-                'id': action['id'] + '__' + table_name.lower(),
+                'task_name': action['id'] + '__' + table_name.lower(),
                 'dependencies': action.get('depends_on', []),
                 'extra_msg': {
                     'override': {
@@ -293,12 +293,12 @@ class PrepareClient:
                 }
             })
 
-        ids = [task['id'] for task in tasks]
+        dependencies = [task['task_name'] for task in tasks]
 
         # Create join action with dependencies on new steps
         tasks.append({
-            'id': action['id'],
-            'dependencies': ids,
+            'task_name': action['id'],
+            'dependencies': dependencies,
             'extra_msg': {
                 'override': {
                     'type': 'join_actions'
@@ -320,7 +320,7 @@ class PrepareClient:
                 tasks.extend(self._split_clone_action(action))
             else:
                 tasks.append({
-                    'id': action['id'],
+                    'task_name': action['id'],
                     'dependencies': action.get('depends_on', []),
                 })
         return tasks
@@ -365,14 +365,14 @@ class PrepareClient:
 
         :return:
         """
-        taskid = self.msg['id']
-        action = [action for action in self._actions if action['id'] == taskid]
+        task_name = self.header['task_name']
+        action = [action for action in self._actions if action['id'] == task_name]
 
         if not action and 'original_action' in self.msg:
             action = [action for action in self._actions if action['id'] == self.msg['original_action']]
 
         if not action:
-            raise GOBException(f"Unknown action with id {taskid}")
+            raise GOBException(f"Unknown action with id {task_name}")
 
         action = action[0]
 
@@ -384,7 +384,7 @@ class PrepareClient:
         try:
             self._run_prepare_action(action)
         except DuplicateTableError as err:
-            print(f'WARNING: {err}, ignoring duplicate for task \'{taskid}\'')
+            print(f"WARNING: {err}, ignoring duplicate for task '{task_name}'")
             return False
         else:
             return self._get_result()
