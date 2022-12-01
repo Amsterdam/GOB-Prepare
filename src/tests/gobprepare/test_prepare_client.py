@@ -479,10 +479,10 @@ class TestPrepareClient(TestCase):
         }]
 
         self.assertEqual([{
-            'id': 'action1',
+            'task_name': 'action1',
             'dependencies': ['dep1', 'dep2']
         }, {
-            'id': 'action2',
+            'task_name': 'action2',
             'dependencies': []
         }], prepare_client._create_tasks())
 
@@ -497,7 +497,7 @@ class TestPrepareClient(TestCase):
         self.assertEqual(prepare_client._split_clone_action.return_value, result)
 
     def test_get_task_message(self, mock_logger):
-        tasks = [{'id': 'task1', 'dependencies': []}, {'id': 'task2', 'dependencies': ['task1']}]
+        tasks = [{'task_name': 'task1', 'dependencies': []}, {'task_name': 'task2', 'dependencies': ['task1']}]
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.header = {'hea': 'der', 'catalogue': 'somecatalogue'}
         prepare_client.msg = {'prepare_config': 'config.json'}
@@ -525,7 +525,7 @@ class TestPrepareClient(TestCase):
         prepare_client._get_result = MagicMock()
 
         prepare_client._actions = [{'id': 'some_id'}, {'id': 'other_id'}]
-        prepare_client.msg = {'id': 'other_id'}
+        prepare_client.header = {'task_name': 'other_id'}
 
         result = prepare_client.run_prepare_task()
         prepare_client._run_prepare_action.assert_called_with(prepare_client._actions[1])
@@ -535,7 +535,7 @@ class TestPrepareClient(TestCase):
     def test_run_prepare_task_no_action(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client._actions = [{'id': 'some_id'}, {'id': 'other_id'}]
-        prepare_client.msg = {'id': 'nonexistent'}
+        prepare_client.header = {'task_name': 'nonexistent'}
 
         with self.assertRaises(GOBException):
             prepare_client.run_prepare_task()
@@ -543,7 +543,7 @@ class TestPrepareClient(TestCase):
     def test_run_prepare_task_duplicate_table(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client._actions = [{'id': 'some_id'}, {'id': 'other_id'}]
-        prepare_client.msg = {'id': 'some_id'}
+        prepare_client.header = {'task_name': 'some_id'}
         prepare_client._run_prepare_action = MagicMock()
         prepare_client._run_prepare_action.side_effect = DuplicateTableError
         result = prepare_client.run_prepare_task()
@@ -556,7 +556,8 @@ class TestPrepareClient(TestCase):
         prepare_client.disconnect = MagicMock()
         prepare_client._get_result = MagicMock()
         prepare_client._actions = [{'id': 'some_id'}, {'id': 'other_id', 'type': 'sometype'}]
-        prepare_client.msg = {'id': 'some_other_id', 'original_action': 'other_id', 'override': {'type': 'newtype'}}
+        prepare_client.header = {'task_name': 'some_other_id'}
+        prepare_client.msg = {'original_action': 'other_id', 'override': {'type': 'newtype'}}
 
         prepare_client.run_prepare_task()
 
@@ -619,7 +620,7 @@ class TestPrepareClient(TestCase):
         result = prepare_client._split_clone_action(action)
 
         expected_result = [{
-            'id': 'some_clone_action__table_a',
+            'task_name': 'some_clone_action__table_a',
             'dependencies': action['depends_on'],
             'extra_msg': {
                 'override': {
@@ -629,7 +630,7 @@ class TestPrepareClient(TestCase):
                 'original_action': 'some_clone_action',
             }
         }, {
-            'id': 'some_clone_action__table_b',
+            'task_name': 'some_clone_action__table_b',
             'dependencies': action['depends_on'],
             'extra_msg': {
                 'override': {
@@ -639,7 +640,7 @@ class TestPrepareClient(TestCase):
                 'original_action': 'some_clone_action',
             }
         }, {
-            'id': action['id'],
+            'task_name': action['id'],
             'dependencies': ['some_clone_action__table_a', 'some_clone_action__table_b'],
             'extra_msg': {
                 'override': {
