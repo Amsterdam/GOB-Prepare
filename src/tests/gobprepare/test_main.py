@@ -1,8 +1,9 @@
+import sys
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, ANY
 
 from gobprepare.__main__ import _prepare_client_for_msg, handle_prepare_complete_msg, handle_prepare_msg, \
-    handle_prepare_step_msg, SERVICE_DEFINITION
+    handle_prepare_step_msg, SERVICE_DEFINITION, main
 
 
 class TestMain(TestCase):
@@ -61,7 +62,15 @@ class TestMain(TestCase):
 
     @patch("gobprepare.__main__.messagedriven_service")
     def test_main_entry(self, mock_messagedriven_service):
-        from gobprepare import __main__ as module
-        with patch.object(module, "__name__", "__main__"):
-            module.init()
-            mock_messagedriven_service.assert_called_with(SERVICE_DEFINITION, "Prepare")
+        sys.argv = ['python -m gobprepare']
+        main()
+        mock_messagedriven_service.assert_called_with(SERVICE_DEFINITION, "Prepare")
+
+    @patch("gobprepare.__main__.standalone.run_as_standalone", return_value=0)
+    def test_main_standalone(self, mock_run_as_standalone):
+        sys.argv = ['python -m gobprepare', 'prepare_task', '--catalogue', 'bogus', '--task_name', 'some_task']
+
+        with self.assertRaisesRegex(SystemExit, "0"):
+            main()
+
+        mock_run_as_standalone.assert_called_with(ANY, SERVICE_DEFINITION)
