@@ -1,3 +1,6 @@
+import sys
+
+from gobcore import standalone
 from gobcore.message_broker.config import WORKFLOW_EXCHANGE, PREPARE_QUEUE, PREPARE_RESULT_KEY, \
     PREPARE_TASK_RESULT_KEY, PREPARE_TASK_QUEUE, PREPARE_COMPLETE_QUEUE, TASK_REQUEST_KEY
 from gobcore.message_broker.messagedriven_service import messagedriven_service
@@ -46,6 +49,9 @@ SERVICE_DEFINITION: ServiceDefinition = {
             'key': PREPARE_TASK_RESULT_KEY,
             'exchange': WORKFLOW_EXCHANGE,
         },
+        'pass_args_standalone': [
+            'task_name',
+        ]
     },
     'prepare_complete': {
         'queue': PREPARE_COMPLETE_QUEUE,
@@ -58,9 +64,37 @@ SERVICE_DEFINITION: ServiceDefinition = {
 }
 
 
-def init():
-    if __name__ == "__main__":
+def argument_parser():
+    parser, subparsers = standalone.parent_argument_parser()
+
+    prepare_task = subparsers.add_parser(
+        name="prepare_task",
+        description="Execute a prepare task"
+    )
+    prepare_task.add_argument(
+        "--catalogue",
+        required=True,
+        help="The name of the data catalogue"
+    )
+    prepare_task.add_argument(
+        "--task_name",
+        required=True,
+        help="The task to execute"
+    )
+
+    return parser
+
+
+def main():
+    if len(sys.argv) == 1:
+        print("No arguments found, wait for messages on the message broker.")
         messagedriven_service(SERVICE_DEFINITION, "Prepare")
+    else:
+        print("Arguments found, run as standalone")
+        parser = argument_parser()
+        args = parser.parse_args()
+        sys.exit(standalone.run_as_standalone(args, SERVICE_DEFINITION))
 
 
-init()
+if __name__ == "__main__":
+    main()  # pragma: no cover
