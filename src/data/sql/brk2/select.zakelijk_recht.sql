@@ -20,7 +20,6 @@ WITH asg_codes(code, omschrijving) AS (VALUES (1, 'HoofdSplitsing'),
                                                ('23', 'OLG'),
                                                ('24', 'BPG'))
 SELECT zrt.rust_op_kadastraalobj_volgnr  AS volgnummer,
-       NULL                              AS registratiedatum,
        zrt.id                            AS __id,
        zrt.identificatie                 AS identificatie,
        bel.belast                        AS belast_zakelijkerechten,
@@ -31,8 +30,7 @@ SELECT zrt.rust_op_kadastraalobj_volgnr  AS volgnummer,
        asg2.id                           AS __ontstaan_uit_asg_id,
        NULL                              AS betrokken_bij_zakelijkerechten,
        zrt.isbetrokkenbij_identificatie  AS betrokken_bij_appartementsrechtsplitsing_vve,
-       ztt.is_beperkt_tot                AS is_beperkt_tot,
-       NULL                              AS appartementsrechtsplitsingidentificatie,
+       ztt.is_beperkt_tot                AS is_beperkt_tot_brk_tenaamstellingen,
        asg1.vve_identificatie            AS vve_identificatie_ontstaan_uit,
        asg2.vve_identificatie            AS vve_identificatie_betrokken_bij,
        CASE
@@ -68,10 +66,10 @@ SELECT zrt.rust_op_kadastraalobj_volgnr  AS volgnummer,
        NULL                              AS __max_ontstaan_uit_begindatum
 FROM brk2.zakelijkrecht zrt
          LEFT JOIN (SELECT ztt.zakelijkrecht_id,
-                           jsonb_agg(jsonb_build_object('bronwaarde', zrt.identificatie)
-                                     ORDER BY zrt.identificatie) AS is_beperkt_tot
+                           jsonb_agg(jsonb_build_object('bronwaarde', tng.identificatie)
+                                     ORDER BY tng.identificatie) AS is_beperkt_tot
                     FROM brk2.zakelijkrecht_isbeperkttot ztt
-                             JOIN brk2.zakelijkrecht zrt ON zrt.id = ztt.isbeperkttot_id
+                             JOIN brk2.tenaamstelling tng ON tng.id = ztt.isbeperkttot_id
                     GROUP BY ztt.zakelijkrecht_id) ztt ON ztt.zakelijkrecht_id = zrt.id
          LEFT JOIN brk2.c_aardzakelijkrecht a ON zrt.aardzakelijkrecht_code = a.code
          LEFT JOIN brk2_prep.kadastraal_object kot
