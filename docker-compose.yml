@@ -20,6 +20,7 @@ services:
       - ./src/tests:/app/tests
       - ${GOB_CORE_DIR-../GOB-Core}:/app/GOB-Core
       - ${GOB_CONFIG_DIR-../GOB-Config}:/app/GOB-Config
+      - ./message-result:/airflow/xcom
 
   prepare_database:
     image: amsterdam/postgres11

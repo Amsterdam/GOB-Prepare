@@ -2,9 +2,6 @@
   "version": "0.1",
   "name": "BRP",
   "catalogue": "brp",
-  "publish_schemas": {
-    "brp_prep": "brp_prepared"
-  },
   "destination": {
     "application": "GOBPrepare",
     "type": "postgres"
@@ -665,6 +662,14 @@
           }
         ]
       }
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "brp_prep": "brp_prepared"
+      },
+      "depends_on": "*"
     }
   ]
 }

@@ -43,7 +43,7 @@ class TestPrepareDefinitions(TestCase):
         actions_done = []
 
         for action in actions:
-            if "depends_on" in action:
+            if "depends_on" in action and action["depends_on"] != "*":
                 for depends_on in action["depends_on"]:
                     self.assertTrue(depends_on in actions_done)
 

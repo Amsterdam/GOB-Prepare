@@ -8,9 +8,6 @@
   "destination": {
     "application": "GOBPrepare"
   },
-  "publish_schemas": {
-    "brk2_prep": "brk2_prepared"
-  },
   "actions": [
     {
       "type": "clear",
@@ -333,6 +330,14 @@
         "select_tng",
         "select_zrt"
       ]
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "brk2_prep": "brk2_prepared"
+      },
+      "depends_on": "*"
     }
   ]
 }
