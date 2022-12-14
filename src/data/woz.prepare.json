@@ -2,9 +2,6 @@
   "version": "0.1",
   "name": "WOZ",
   "catalogue": "woz",
-  "publish_schemas": {
-    "woz_prep": "woz_prepared"
-  },
   "destination": {
     "application": "GOBPrepare"
   },
@@ -201,6 +198,14 @@
           }
         ]
       }
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "woz_prep": "woz_prepared"
+      },
+      "depends_on": "*"
     }
   ]
 }
