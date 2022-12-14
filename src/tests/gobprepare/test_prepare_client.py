@@ -420,6 +420,28 @@ class TestPrepareClient(TestCase):
             "id": "id",
         }, result)
 
+    def test_run_prepare_action_publish_schemas(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._publish_schema = MagicMock()
+        action = {
+            'type': 'publish_schemas',
+            'id': 'id',
+            'publish_schemas': {
+                'src a': 'dst a',
+                'src b': 'dst b',
+            }
+        }
+        result = prepare_client._run_prepare_action(action)
+        self.assertEqual({
+            'id': 'id',
+            'action': 'publish_schemas',
+            'published_schemas': ['dst a', 'dst b']
+        }, result)
+        prepare_client._publish_schema.assert_has_calls([
+            call('src a', 'dst a'),
+            call('src b', 'dst b'),
+        ])
+
     def test_get_result(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.result = {
@@ -476,6 +498,10 @@ class TestPrepareClient(TestCase):
         }, {
             'id': 'action2',
             'type': 'some other type',
+        }, {
+            'id': 'final_action',
+            'type': 'some type',
+            'depends_on': '*'
         }]
 
         self.assertEqual([{
@@ -484,6 +510,9 @@ class TestPrepareClient(TestCase):
         }, {
             'task_name': 'action2',
             'dependencies': []
+        }, {
+            'task_name': 'final_action',
+            'dependencies': ['action1', 'action2']
         }], prepare_client._create_tasks())
 
     def test_create_tasks_clone(self, mock_logger):
@@ -567,19 +596,6 @@ class TestPrepareClient(TestCase):
             'type': 'newtype'
         })
 
-    def test_publish_result_schemas(self, mock_logger):
-        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client._publish_schema = MagicMock()
-        prepare_client.publish_schemas = {
-            'src a': 'dst a',
-            'src b': 'dst b',
-        }
-        prepare_client._publish_result_schemas()
-        prepare_client._publish_schema.assert_has_calls([
-            call('src a', 'dst a'),
-            call('src b', 'dst b'),
-        ])
-
     def test_publish_schema(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client._dst_connection = MagicMock()
@@ -594,14 +610,10 @@ class TestPrepareClient(TestCase):
 
     def test_complete_prepare_process(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
-        prepare_client.connect = MagicMock()
-        prepare_client.disconnect = MagicMock()
-        prepare_client._publish_result_schemas = MagicMock()
         prepare_client.msg['summary'] = {'key': 'value'}
 
         result = prepare_client.complete_prepare_process()
         self.assertEqual([], result['contents'])
-        prepare_client._publish_result_schemas.assert_called_once()
 
     def test_split_clone_action(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)

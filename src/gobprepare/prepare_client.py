@@ -21,6 +21,8 @@ from gobprepare.importers.csv_importer import SqlCsvImporter
 from gobprepare.selector.datastore_to_postgres import DatastoreToPostgresSelector
 from gobprepare.utils.exceptions import DuplicateTableError
 
+from pydash.arrays import flatten_deep
+
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
 
@@ -193,6 +195,11 @@ class PrepareClient:
         logger.info(f"Imported {rows_imported} rows from API to table {action['destination']}")
         return rows_imported
 
+    def action_publish_schemas(self, action: dict):
+        for src_schema, dst_schema in action["publish_schemas"].items():
+            self._publish_schema(src_schema, dst_schema)
+        return list(action["publish_schemas"].values())
+
     def _get_query(self, action: dict):
         """Extracts query form action. Reads query from action or from file.
 
@@ -242,6 +249,8 @@ class PrepareClient:
         elif action["type"] == "join_actions":
             # Action only joins dependencies. No further actions necessary
             return None
+        elif action["type"] == "publish_schemas":
+            result["published_schemas"] = self.action_publish_schemas(action)
         else:
             raise NotImplementedError
 
@@ -308,6 +317,29 @@ class PrepareClient:
 
         return tasks
 
+    def _create_final_tasks(self, actions: list[dict]):
+        """Creates final tasks from actions that are depending on all other actions.
+
+        Adds leaf nodes as dependencies for final tasks
+
+        """
+        final_tasks = [action for action in actions if action.get('depends_on') == '*']
+        all_dependencies = flatten_deep([
+            action.get('depends_on', []) for action in self._actions if action.get('depends_on') != "*"
+        ])
+
+        # Find the leaf nodes of the task graph.
+        # Leaf nodes are nodes where no other nodes depend on. We add the final tasks after those nodes.
+        action_ids_no_childs = [
+            action['id'] for action in self._actions
+            if action['id'] not in all_dependencies
+        ]
+
+        return [{
+            'task_name': final_task['id'],
+            'dependencies': [action_id for action_id in action_ids_no_childs if action_id != final_task['id']]
+        } for final_task in final_tasks]
+
     def _create_tasks(self):
         """Creates tasks to be put on the message bus from the actions defined in the config
 
@@ -318,12 +350,17 @@ class PrepareClient:
             if action['type'] == 'clone':
                 # Split a clone action into smaller tasks
                 tasks.extend(self._split_clone_action(action))
+            elif action.get('depends_on') == '*':
+                # Depends on all other tasks, will be handles separately below
+                continue
             else:
                 tasks.append({
                     'task_name': action['id'],
                     'dependencies': action.get('depends_on', []),
                 })
-        return tasks
+        final_tasks = self._create_final_tasks(self._actions)
+
+        return tasks + final_tasks
 
     def _get_task_message(self, tasks):
         """Publishes tasks for further processing.
@@ -391,10 +428,6 @@ class PrepareClient:
         finally:
             self.disconnect()
 
-    def _publish_result_schemas(self):
-        for src_schema, dst_schema in self.publish_schemas.items():
-            self._publish_schema(src_schema, dst_schema)
-
     def _publish_schema(self, src_schema: str, dst_schema: str):
         if src_schema == dst_schema:
             raise GOBException("Publish schema: src and dst schema are the same. Don't understand what you want. "
@@ -412,10 +445,6 @@ class PrepareClient:
 
         :return:
         """
-        self.connect()
-        self._publish_result_schemas()
-        self.disconnect()
-
         metadata = {
             **self.header,
             **self.msg,  # Return original message in header

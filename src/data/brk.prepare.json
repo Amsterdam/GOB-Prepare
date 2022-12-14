@@ -8,9 +8,6 @@
   "destination": {
     "application": "GOBPrepare"
   },
-  "publish_schemas": {
-    "brk_prep": "brk_prepared"
-  },
   "actions": [
     {
       "type": "clear",
@@ -1424,6 +1421,14 @@
       ],
       "query_src": "file",
       "query": "data/sql/brk/brk.store_last_id.sql"
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "brk_prep": "brk_prepared"
+      },
+      "depends_on": "*"
     }
   ]
 }

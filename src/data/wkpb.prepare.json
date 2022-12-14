@@ -8,9 +8,6 @@
   "destination": {
     "application": "GOBPrepare"
   },
-  "publish_schemas": {
-    "wkpb_prep": "wkpb_prepared"
-  },
   "actions": [
     {
       "type": "clear",
@@ -90,6 +87,14 @@
         "select_beperkingen"
       ],
       "id": "select_rel_wkpb_bpg_brk_kot_belast_kadastrale_objecten"
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "wkpb_prep": "wkpb_prepared"
+      },
+      "depends_on": "*"
     }
   ]
 }
