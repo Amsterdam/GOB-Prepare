@@ -1,5 +1,6 @@
 from psycopg2.extras import Json
 from gobprepare.utils.exceptions import DuplicateTableError
+from gobprepare.utils.postgres import create_table_columnar_query
 
 
 class ToPostgresSelector:
@@ -16,7 +17,7 @@ class ToPostgresSelector:
             raise DuplicateTableError(f"Table already exists: {table} ({schema})")
 
         columns = ','.join([f"{column['name']} {column['type']} NULL" for column in destination_table['columns']])
-        create_query = f"CREATE TABLE {destination_table['name']} ({columns})"
+        create_query = create_table_columnar_query(self._dst_datastore, destination_table['name'], columns)
         self._dst_datastore.execute(create_query)
         return True
 

@@ -33,12 +33,18 @@ class TestToPostgresSelector(TestCase):
         self.selector = ToPostgresSelector()
         self.selector._dst_datastore = MagicMock()
 
-    def test_create_destination_table(self):
+    @patch("gobprepare.selector._to_postgres.create_table_columnar_query")
+    def test_create_destination_table(self, mock_create_table):
         destination_table = self.config['queries'][0]['destination_table']
 
         self.selector._create_destination_table(destination_table)
+        mock_create_table.assert_called_with(
+            self.selector._dst_datastore,
+            "dst.table",
+            "col_a VARCHAR(20) NULL,col_b TIMESTAMP NULL",
+        )
         self.selector._dst_datastore.execute.assert_called_with(
-            "CREATE TABLE dst.table (col_a VARCHAR(20) NULL,col_b TIMESTAMP NULL)"
+            mock_create_table.return_value
         )
 
     def test_create_destination_table_error(self):

@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch, call, mock_open, ANY
 
 from gobcore.exceptions import GOBException
-from gobprepare.prepare_client import PrepareClient, OracleDatastore, SqlDatastore, DatastoreToPostgresSelector
+from gobprepare.prepare_client import PrepareClient, OracleDatastore, SqlDatastore
 from gobprepare.utils.exceptions import DuplicateTableError
 from tests import fixtures
 
@@ -125,7 +125,7 @@ class TestPrepareClient(TestCase):
         self.assertIsNone(prepare_client._src_datastore)
         self.assertIsNone(prepare_client._dst_datastore)
 
-    @patch("gobprepare.prepare_client.OracleToSqlCloner", autospec=True)
+    @patch("gobprepare.prepare_client.OracleToPostgresCloner", autospec=True)
     def test_action_clone(self, mock_cloner, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         cloner_instance = mock_cloner.return_value
@@ -234,7 +234,8 @@ class TestPrepareClient(TestCase):
         mock_importer.assert_called_with(prepare_client._dst_datastore, action)
         mock_importer_instance.import_csv.assert_called_once()
 
-    def test_action_create_table(self, mock_logger):
+    @patch("gobprepare.prepare_client.create_table_columnar_as_query")
+    def test_action_create_table(self, mock_create_table, mock_logger):
         action = {
             "id": "create_this_table",
             "type": "create_table",
@@ -245,7 +246,12 @@ class TestPrepareClient(TestCase):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client._dst_datastore = MagicMock()
         prepare_client._run_prepare_action(action)
-        prepare_client._dst_datastore.execute.assert_called_with("CREATE TABLE schema.table_name AS select * from laladiela")
+        mock_create_table.assert_called_with(
+            prepare_client._dst_datastore,
+            "schema.table_name",
+            "select * from laladiela"
+        )
+        prepare_client._dst_datastore.execute.assert_called_with(mock_create_table.return_value)
         mock_logger.info.assert_called_with("Created table 'schema.table_name'")
 
     @patch("gobprepare.prepare_client.SqlAPIImporter", autospec=True)
