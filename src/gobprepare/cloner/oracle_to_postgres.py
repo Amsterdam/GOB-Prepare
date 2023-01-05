@@ -19,7 +19,7 @@ from gobprepare.utils.postgres import create_table_columnar_query
 
 
 class OracleToPostgresCloner():
-    READ_BATCH_SIZE = 100000
+    READ_BATCH_SIZE = 10
     WRITE_BATCH_SIZE = 100000
 
     schema_definition = None
@@ -255,10 +255,11 @@ class OracleToPostgresCloner():
         id_columns = self._get_id_columns_for_table(full_table_name, column_definitions)
         order_field = id_columns[0]
 
-        ids = self._get_ids_for_table(full_table_name, order_field)
+        # ids = self._get_ids_for_table(full_table_name, order_field)
         row_cnt = 0
 
-        chunks = self._list_to_chunks(ids, self.READ_BATCH_SIZE)
+        # chunks = self._list_to_chunks(ids, self.READ_BATCH_SIZE)
+        chunks = [{'min': None, 'max': None}]
 
         for chunk in chunks:
             if chunk['min'] or chunk['max']:
@@ -266,7 +267,7 @@ class OracleToPostgresCloner():
                 where_min = f"{order_field} >= '{chunk['min']}'" if chunk['min'] is not None else ""
                 where = f"WHERE {where_min} {'AND' if where_min and where_max else ''} {where_max}"
             else:
-                where = ""
+                where = "OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY"
             query = "" \
                 f"SELECT /*+ PARALLEL */ {outer_select} FROM (" \
                 f"  SELECT {inner_select} FROM {full_table_name} {where}" \
@@ -281,6 +282,7 @@ class OracleToPostgresCloner():
             write_start = time.time()
             self._insert_rows(table_definition, results)
             write_time = time.time() - write_start
+            break
 
             if DEBUG:
                 logger.info("Total: {:>8.1f}s  "

@@ -6,7 +6,6 @@ services:
     build:
       context: src
       target: development
-    container_name: gobprepare
     environment:
       MESSAGE_BROKER_ADDRESS: rabbitmq
       GOB_SHARED_DIR: /app/shared
@@ -17,6 +16,7 @@ services:
     volumes:
       - gob-volume:/app/shared
       - ./src/gobprepare:/app/gobprepare
+      - ./src/data:/app/data
       - ./src/tests:/app/tests
       - ${GOB_CORE_DIR-../GOB-Core}:/app/GOB-Core
       - ${GOB_CONFIG_DIR-../GOB-Config}:/app/GOB-Config
