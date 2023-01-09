@@ -31,8 +31,8 @@ SELECT zrt.rust_op_kadastraalobj_volgnr  AS volgnummer,
        NULL::jsonb                       AS betrokken_bij_brk_zakelijke_rechten,
        zrt.isbetrokkenbij_identificatie  AS betrokken_bij_appartementsrechtsplitsing_vve,
        ztt.is_beperkt_tot                AS is_beperkt_tot_brk_tenaamstellingen,
-       asg1.vve_identificatie            AS vve_identificatie_ontstaan_uit,
-       asg2.vve_identificatie            AS vve_identificatie_betrokken_bij,
+       asg1.vve_identificatie            AS vve_identificatie_betrokken_bij,
+	   asg2.vve_identificatie            AS vve_identificatie_ontstaan_uit,
        CASE
            WHEN asg2.identificatie IS NOT NULL
                AND asg1.identificatie IS NOT NULL THEN
