@@ -184,8 +184,8 @@
     {
       "type": "execute_sql",
       "description": "Analyze database and finish import",
-      "query_src": "file",
-      "query": "data/sql/brk/analyze.sql",
+      "query_src": "string",
+      "query": "ANALYZE",
       "id": "import_ready",
       "depends_on": [
         "create_bestand_table",
@@ -365,7 +365,7 @@
             "type": "TIMESTAMP"
           },
           {
-            "name": "geometrie",
+            "name": "__geometrie",
             "type": "GEOMETRY"
           },
           {
@@ -414,12 +414,67 @@
       "id": "create_indexes_kot"
     },
     {
+      "type": "execute_sql",
+      "description": "Create zrt_kot_wip table",
+      "id": "preselect_zrt_kot_generate",
+      "query_src": "file",
+      "query": "data/sql/brk/preselect.zrt_kot_wip.sql",
+      "depends_on": [
+        "create_indexes_kot"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Copy zrt_kot_wip table to zrt_kot",
+      "id": "preselect_zrt_kot",
+      "query_src": "file",
+      "query": "data/sql/brk/preselect.zrt_kot.sql",
+      "depends_on": [
+        "preselect_zrt_kot_generate"
+      ],
+      "table_name": "brk_prep.zrt_kot"
+    },
+    {
+      "type": "create_table",
+      "description": "Create zrt_asg table",
+      "id": "preselect_zrt_asg",
+      "query_src": "file",
+      "query": "data/sql/brk/preselect.zrt_asg.sql",
+      "depends_on": [
+        "preselect_zrt_kot"
+      ],
+      "table_name": "brk_prep.zrt_asg"
+    },
+    {
+      "type": "import_csv",
+      "source": "https://developer.kadaster.nl/schemas/waardelijsten/AardZakelijkRecht/AardZakelijkRecht.csv",
+      "destination": "brk_prep.aardzakelijkrecht_waardelijst_import",
+      "id": "import_aardzakelijkrecht_waardelijst",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Populate AZT with AKR codes",
+      "id": "populate_aardzakelijkrecht_waardelijst",
+      "table_name": "brk_prep.aardzakelijkrecht_waardelijst",
+      "depends_on": [
+        "import_aardzakelijkrecht_waardelijst",
+        "clone_source"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/select.aardzakelijkrecht_waardelijst.sql"
+    },
+    {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
       "id": "select_zrt",
       "depends_on": [
-        "create_indexes_kot"
+        "preselect_zrt_kot",
+        "preselect_zrt_asg",
+        "populate_aardzakelijkrecht_waardelijst"
       ],
       "query": "data/sql/brk/select.zakelijk_recht.sql",
       "query_src": "file",
@@ -565,22 +620,12 @@
       "id": "create_indexes_zrt"
     },
     {
-      "type": "execute_sql",
-      "description": "Populate ZRT table with KOT references",
-      "id": "populate_zrt",
-      "depends_on": [
-        "create_indexes_zrt"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/zrt.add_kot.sql"
-    },
-    {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
       "id": "select_tng",
       "depends_on": [
-        "populate_zrt"
+        "create_indexes_zrt"
       ],
       "query": "data/sql/brk/select.tenaamstelling.sql",
       "query_src": "file",
@@ -696,7 +741,8 @@
       "ignore_missing": true,
       "id": "select_art",
       "depends_on": [
-        "create_indexes_tng"
+        "create_indexes_tng",
+        "import_ready"
       ],
       "query": "data/sql/brk/select.aantekening_recht.sql",
       "query_src": "file",
@@ -776,7 +822,8 @@
       "ignore_missing": true,
       "id": "select_akt",
       "depends_on": [
-        "create_indexes_kot"
+        "create_indexes_kot",
+        "import_ready"
       ],
       "query": "data/sql/brk/select.aantekening_kadastraal_object.sql",
       "query_src": "file",
@@ -1133,7 +1180,7 @@
       "ignore_missing": true,
       "id": "select_sdl",
       "depends_on": [
-        "populate_zrt",
+        "create_indexes_zrt",
         "create_indexes_akt",
         "create_indexes_art"
       ],
@@ -1347,40 +1394,10 @@
     },
     {
       "type": "execute_sql",
-      "description": "Create references between ZRT's on betrokken_bij and ontstaan_uit",
-      "id": "create_zrt_references",
-      "depends_on": [
-        "populate_zrt"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/zrt.reference_ontstaan_uit_betrokken_bij.sql"
-    },
-    {
-      "type": "import_csv",
-      "source": "https://developer.kadaster.nl/schemas/waardelijsten/AardZakelijkRecht/AardZakelijkRecht.csv",
-      "destination": "brk_prep.aardzakelijkrecht_waardelijst",
-      "id": "import_aardzakelijkrecht_waardelijst",
-      "depends_on": [
-        "clear_schemas"
-      ]
-    },
-    {
-      "type": "execute_sql",
-      "description": "Populate AZT with AKR codes",
-      "id": "populate_aardzakelijkrecht_waardelijst",
-      "depends_on": [
-        "import_aardzakelijkrecht_waardelijst",
-        "clone_source"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/azt.populate_akrcodes.sql"
-    },
-    {
-      "type": "execute_sql",
       "description": "Populate KOT with relatie_g_perceel",
       "id": "populate_relatie_g_perceel",
       "depends_on": [
-        "populate_zrt",
+        "create_indexes_zrt",
         "create_indexes_kot"
       ],
       "query_src": "file",
@@ -1407,7 +1424,17 @@
         "import_verblijfsobjecten_geometrie"
       ],
       "query_src": "file",
-      "query": "data/sql/brk/kot.update_a_geometrie.sql"
+      "query": "data/sql/brk/preselect.kot_geo.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Finalise KOT table",
+      "id": "finalise_kot",
+      "depends_on": [
+        "update_geometrie_appartementsrechten"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/finalise.kadastraal_object.sql"
     },
     {
       "type": "execute_sql",

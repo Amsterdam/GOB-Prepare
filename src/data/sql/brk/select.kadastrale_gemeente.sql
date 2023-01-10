@@ -15,12 +15,12 @@ from (
                          ST_UnaryUnion(ST_Collect(gc1.geometrie)) as geometrie
                   from (
                            select kad_gemeente ->> 'omschrijving' as identificatie,
-                                  (ST_DumpRings(geometrie)).path  as nrings,
-                                  (ST_DumpRings(geometrie)).geom  as geometrie,
+                                  (ST_DumpRings(__geometrie)).path  as nrings,
+                                  (ST_DumpRings(__geometrie)).geom  as geometrie,
                                   brg_gemeente ->> 'omschrijving' as ligt_in_gemeente
                            from brk_prep.kadastraal_object
                            where index_letter = 'G'
-                             and ST_IsValid(geometrie)
+                             and ST_IsValid(__geometrie)
                              and modification is null
                              and status_code <> 'H'
                        ) gc1
