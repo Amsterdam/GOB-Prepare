@@ -15,7 +15,7 @@ BEGIN
     LOOP
         -- Undouble g_perceel
         UPDATE brk2_prep.kadastraal_object kot
-        SET is_ontstaan_uit_g_perceel=new_relations.new_relation
+        SET is_ontstaan_uit_brk_g_perceel=new_relations.new_relation
         FROM (SELECT id,
                      volgnummer,
                      array_to_json(
@@ -29,8 +29,8 @@ BEGIN
                            kot.volgnummer,
                            gperc ->> 'kot_identificatie' AS kot_identificatie
                     FROM brk2_prep.kadastraal_object kot
-                             JOIN jsonb_array_elements(kot.is_ontstaan_uit_g_perceel) gperc ON TRUE
-                    WHERE kot.is_ontstaan_uit_g_perceel IS NOT NULL
+                             JOIN jsonb_array_elements(kot.is_ontstaan_uit_brk_g_perceel) gperc ON TRUE
+                    WHERE kot.is_ontstaan_uit_brk_g_perceel IS NOT NULL
                       AND kot.id >= current_id
                       AND kot.id < (current_id + batch_size)
                     GROUP BY kot.id, kot.volgnummer, gperc ->> 'kot_identificatie') q
@@ -43,7 +43,7 @@ BEGIN
 
         -- Undouble ontstaan_uit_kadastraalobject
         UPDATE brk2_prep.kadastraal_object kot
-        SET is_ontstaan_uit_kadastraalobject=new_relations.new_relation
+        SET is_ontstaan_uit_brk_kadastraalobject=new_relations.new_relation
         FROM (SELECT id,
                      volgnummer,
                      array_to_json(
@@ -57,8 +57,8 @@ BEGIN
                            kot.volgnummer,
                            gperc ->> 'kot_identificatie' AS kot_identificatie
                     FROM brk2_prep.kadastraal_object kot
-                             JOIN jsonb_array_elements(kot.is_ontstaan_uit_kadastraalobject) gperc ON TRUE
-                    WHERE kot.is_ontstaan_uit_kadastraalobject IS NOT NULL
+                             JOIN jsonb_array_elements(kot.is_ontstaan_uit_brk_kadastraalobject) gperc ON TRUE
+                    WHERE kot.is_ontstaan_uit_brk_kadastraalobject IS NOT NULL
                       AND kot.id >= current_id
                       AND kot.id < (current_id + batch_size)
                     GROUP BY kot.id, kot.volgnummer, gperc ->> 'kot_identificatie') q

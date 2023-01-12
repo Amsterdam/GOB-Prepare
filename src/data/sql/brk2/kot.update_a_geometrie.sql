@@ -15,7 +15,7 @@ SELECT kot1.id                  AS id,
        kot1.volgnummer          AS volgnummer,
        ST_Union(kot2.geometrie) AS g_poly
 FROM brk2_prep.kadastraal_object kot1
-         JOIN JSONB_ARRAY_ELEMENTS(kot1.is_ontstaan_uit_g_perceel) AS g_perceel
+         JOIN JSONB_ARRAY_ELEMENTS(kot1.is_ontstaan_uit_brk_g_perceel) AS g_perceel
               ON kot1.is_ontstaan_uit_g_perceel IS NOT NULL
                   AND g_perceel ->> 'kot_id' IS NOT NULL
          JOIN brk2_prep.kadastraal_object kot2
@@ -24,8 +24,8 @@ FROM brk2_prep.kadastraal_object kot1
                   AND kot2._expiration_date IS NULL
 WHERE kot1.indexletter = 'A'
   AND kot1._expiration_date IS NULL
-  AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
-  AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
+  AND kot1.aangeduid_door_brk_kadastralesectie = kot2.aangeduid_door_brk_kadastralesectie
+  AND kot1.aangeduid_door_kadastralegemeentecode_brk_code = kot2.aangeduid_door_brk_kadastralegemeentecode_code
 GROUP BY kot1.id, kot1.volgnummer;
 
 -- Create index on new table and analyze
@@ -41,7 +41,7 @@ WITH
            kot.volgnummer AS volgnummer,
            vbo.geometrie AS geometrie
         FROM brk2_prep.kadastraal_object kot
-        JOIN jsonb_array_elements(kot.heeft_een_relatie_met_verblijfsobject) AS adres
+        JOIN jsonb_array_elements(kot.heeft_een_relatie_met_bag_verblijfsobject) AS adres
             ON kot.heeft_een_relatie_met_verblijfsobject IS NOT NULL
             AND adres->>'bag_id' IS NOT NULL
         JOIN bag_brk2.verblijfsobjecten_geometrie vbo

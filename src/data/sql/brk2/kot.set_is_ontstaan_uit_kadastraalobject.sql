@@ -1,5 +1,5 @@
 UPDATE brk2_prep.kadastraal_object kot
-SET is_ontstaan_uit_kadastraalobject=q.ontstaan_uit_kadastraalobject
+SET is_ontstaan_uit_brk_kadastraalobject=q.ontstaan_uit_kadastraalobject
 FROM (SELECT kot.id,
              kot.volgnummer,
              array_to_json(
