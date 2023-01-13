@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION brk2_undouble_g_perceel_relations() RETURNS integer AS
 $$
-    -- Removes duplicate relations from is_ontstaan_uit_g_perceel and is_ontstaan_uit_kadastraalobject columns.
+    -- Removes duplicate relations from is_ontstaan_uit_brk_g_perceel and is_ontstaan_uit_brk_kadastraalobject columns.
 -- JSON objects in those columns contain (id, volgnummer, identificatie) combinations because they are
 -- needed in kot.update_a_geometrie.sql. We remove the id and volgnummer attributes from the JSON and undouble
 -- the resulting list of objects with only the 'identificatie' attribute.
@@ -15,7 +15,7 @@ BEGIN
     LOOP
         -- Undouble g_perceel
         UPDATE brk2_prep.kadastraal_object kot
-        SET is_ontstaan_uit_g_perceel=new_relations.new_relation
+        SET is_ontstaan_uit_brk_g_perceel=new_relations.new_relation
         FROM (SELECT id,
                      volgnummer,
                      array_to_json(
@@ -29,8 +29,8 @@ BEGIN
                            kot.volgnummer,
                            gperc ->> 'kot_identificatie' AS kot_identificatie
                     FROM brk2_prep.kadastraal_object kot
-                             JOIN jsonb_array_elements(kot.is_ontstaan_uit_g_perceel) gperc ON TRUE
-                    WHERE kot.is_ontstaan_uit_g_perceel IS NOT NULL
+                             JOIN jsonb_array_elements(kot.is_ontstaan_uit_brk_g_perceel) gperc ON TRUE
+                    WHERE kot.is_ontstaan_uit_brk_g_perceel IS NOT NULL
                       AND kot.id >= current_id
                       AND kot.id < (current_id + batch_size)
                     GROUP BY kot.id, kot.volgnummer, gperc ->> 'kot_identificatie') q
@@ -43,7 +43,7 @@ BEGIN
 
         -- Undouble ontstaan_uit_kadastraalobject
         UPDATE brk2_prep.kadastraal_object kot
-        SET is_ontstaan_uit_kadastraalobject=new_relations.new_relation
+        SET is_ontstaan_uit_brk_kadastraalobject=new_relations.new_relation
         FROM (SELECT id,
                      volgnummer,
                      array_to_json(
@@ -57,8 +57,8 @@ BEGIN
                            kot.volgnummer,
                            gperc ->> 'kot_identificatie' AS kot_identificatie
                     FROM brk2_prep.kadastraal_object kot
-                             JOIN jsonb_array_elements(kot.is_ontstaan_uit_kadastraalobject) gperc ON TRUE
-                    WHERE kot.is_ontstaan_uit_kadastraalobject IS NOT NULL
+                             JOIN jsonb_array_elements(kot.is_ontstaan_uit_brk_kadastraalobject) gperc ON TRUE
+                    WHERE kot.is_ontstaan_uit_brk_kadastraalobject IS NOT NULL
                       AND kot.id >= current_id
                       AND kot.id < (current_id + batch_size)
                     GROUP BY kot.id, kot.volgnummer, gperc ->> 'kot_identificatie') q

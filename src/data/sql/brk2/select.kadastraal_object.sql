@@ -6,13 +6,13 @@ SELECT kot.identificatie                    AS identificatie,
        LPAD(kot.index_nummer::text, 4, '0') AS kadastrale_aanduiding,
        kot.akrkadastralegemeentecode || kot.sectie || LPAD(kot.perceelnummer::text, 5, '0') ||
        kot.index_letter                     AS __kadastrale_aanduiding_minus_index_nummer,
-       LPAD(brg.cbscode::text, 4, '0')      AS aangeduid_door_gemeente_code,
-       brg.bgmnaam                          AS aangeduid_door_gemeente_omschrijving,
-       kge.code                             AS aangeduid_door_kadastralegemeente_code,
-       kge.omschrijving                     AS aangeduid_door_kadastralegemeente_omschrijving,
-       kot.akrkadastralegemeentecode_code   AS aangeduid_door_kadastralegemeentecode_code,
-       kot.akrkadastralegemeentecode        AS aangeduid_door_kadastralegemeentecode_omschrijving,
-       kot.sectie                           AS aangeduid_door_kadastralesectie,
+       LPAD(brg.cbscode::text, 4, '0')      AS aangeduid_door_brk_gemeente_code,
+       brg.bgmnaam                          AS aangeduid_door_brk_gemeente_omschrijving,
+       kge.code                             AS aangeduid_door_brk_kadastralegemeente_code,
+       kge.omschrijving                     AS aangeduid_door_brk_kadastralegemeente_omschrijving,
+       kot.akrkadastralegemeentecode_code   AS aangeduid_door_brk_kadastralegemeentecode_code,
+       kot.akrkadastralegemeentecode        AS aangeduid_door_brk_kadastralegemeentecode_omschrijving,
+       kot.sectie                           AS aangeduid_door_brk_kadastralesectie,
        kot.perceelnummer                    AS perceelnummer,
        kot.index_letter                     AS indexletter,
        kot.index_nummer                     AS indexnummer,
@@ -34,8 +34,8 @@ SELECT kot.identificatie                    AS identificatie,
        kot.hoofdsplitsing_identificatie     AS hoofdsplitsing_identificatie,
        kot.afwijking_lijst_rechthebbenden   AS afwijking_lijst_rechthebbenden,
        CASE
-           WHEN kot.soortgrootte_code IN ('2', '5', '6', '7', '8', '9', '10', '11', '12') THEN TRUE
-           ELSE FALSE
+           WHEN kot.soortgrootte_code IN ('2', '5', '6', '7', '8', '9', '10', '11', '12') THEN 'J'
+           ELSE 'N'
            END                              AS indicatie_voorlopige_kadastrale_grens,
        kot.geometrie                        AS geometrie,                       -- later vullen voor A-percelen
        prc.geometrie                        AS plaatscoordinaten,
@@ -59,9 +59,9 @@ SELECT kot.identificatie                    AS identificatie,
                 CASE kot.status_code
                     WHEN 'H' THEN kot.creation
                     END)                    AS _expiration_date,
-       NULL::jsonb                          AS is_ontstaan_uit_g_perceel,       -- later vullen
-       adr.vot_adressen                     AS heeft_een_relatie_met_verblijfsobject,
-       NULL::jsonb                          AS is_ontstaan_uit_kadastraalobject -- later vullen
+       NULL::jsonb                          AS is_ontstaan_uit_brk_g_perceel,       -- later vullen
+       adr.vot_adressen                     AS heeft_een_relatie_met_bag_verblijfsobject,
+       NULL::jsonb                          AS is_ontstaan_uit_brk_kadastraalobject -- later vullen
 FROM brk2.kadastraal_object kot
          LEFT JOIN brk2.kadastraal_object_percnummer prc
                    ON kot.id = prc.kadastraalobject_id AND kot.volgnummer = prc.kadastraalobject_volgnummer
@@ -92,11 +92,11 @@ FROM brk2.kadastraal_object kot
 CREATE INDEX ON brk2_prep.kadastraal_object (id, volgnummer);
 CREATE INDEX ON brk2_prep.kadastraal_object (identificatie, volgnummer);
 CREATE INDEX ON brk2_prep.kadastraal_object (indexletter);
-CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (is_ontstaan_uit_g_perceel);
-CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (is_ontstaan_uit_kadastraalobject);
-CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (heeft_een_relatie_met_verblijfsobject);
-CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_kadastralesectie);
-CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_kadastralegemeentecode_code);
+CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (is_ontstaan_uit_brk_g_perceel);
+CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (is_ontstaan_uit_brk_kadastraalobject);
+CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (heeft_een_relatie_met_bag_verblijfsobject);
+CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_brk_kadastralesectie);
+CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_brk_kadastralegemeentecode_code);
 CREATE INDEX ON brk2_prep.kadastraal_object (__kadastrale_aanduiding_minus_index_nummer);
 CREATE INDEX ON brk2_prep.kadastraal_object (_expiration_date);
 CREATE INDEX ON brk2_prep.kadastraal_object (id);

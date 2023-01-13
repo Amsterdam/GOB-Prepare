@@ -11,10 +11,10 @@ FROM (SELECT gc2.identificatie,
       FROM (SELECT gc1.identificatie,
                    gc1.is_onderdeel_van_kadastralegemeente,
                    ST_UnaryUnion(ST_Collect(gc1.geometrie)) AS geometrie
-            FROM (SELECT aangeduid_door_kadastralegemeentecode_omschrijving AS identificatie,
-                         (ST_DumpRings(geometrie)).path                     AS nrings,
-                         (ST_DumpRings(geometrie)).geom                     AS geometrie,
-                         aangeduid_door_kadastralegemeente_omschrijving     AS is_onderdeel_van_kadastralegemeente
+            FROM (SELECT aangeduid_door_brk_kadastralegemeentecode_omschrijving AS identificatie,
+                         (ST_DumpRings(geometrie)).path                         AS nrings,
+                         (ST_DumpRings(geometrie)).geom                         AS geometrie,
+                         aangeduid_door_brk_kadastralegemeente_omschrijving     AS is_onderdeel_van_kadastralegemeente
                   FROM brk2_prep.kadastraal_object
                   WHERE indexletter = 'G'
                     AND ST_IsValid(geometrie)
