@@ -16,8 +16,7 @@ SELECT kot1.id                  AS id,
        ST_Union(kot2.geometrie) AS g_poly
 FROM brk2_prep.kadastraal_object kot1
          JOIN JSONB_ARRAY_ELEMENTS(kot1.is_ontstaan_uit_brk_g_perceel) AS g_perceel
-              ON kot1.is_ontstaan_uit_brk_g_perceel IS NOT NULL
-                  AND g_perceel ->> 'kot_id' IS NOT NULL
+             ON p_perceel->>'kot_id' IS NOT NULL
          JOIN brk2_prep.kadastraal_object kot2
               ON kot2.id = (g_perceel ->> 'kot_id')::integer
                   AND kot2.volgnummer = (g_perceel ->> 'kot_volgnummer')::integer
@@ -42,8 +41,7 @@ WITH
            vbo.geometrie AS geometrie
         FROM brk2_prep.kadastraal_object kot
         JOIN jsonb_array_elements(kot.heeft_een_relatie_met_bag_verblijfsobject) AS adres
-            ON kot.heeft_een_relatie_met_bag_verblijfsobject IS NOT NULL
-            AND adres->>'bag_id' IS NOT NULL
+            ON adres->>'bag_id' IS NOT NULL
         JOIN bag_brk2.verblijfsobjecten_geometrie vbo
             ON adres->>'bag_id' = vbo.identificatie
         LEFT JOIN brk2_prep.g_perceel_geo_union kot_g_poly

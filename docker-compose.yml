@@ -6,7 +6,6 @@ services:
     build:
       context: src
       target: development
-    container_name: gobprepare
     environment:
       MESSAGE_BROKER_ADDRESS: rabbitmq
       GOB_SHARED_DIR: /app/shared
@@ -17,13 +16,15 @@ services:
     volumes:
       - gob-volume:/app/shared
       - ./src/gobprepare:/app/gobprepare
+      - ./src/data:/app/data
       - ./src/tests:/app/tests
       - ${GOB_CORE_DIR-../GOB-Core}:/app/GOB-Core
       - ${GOB_CONFIG_DIR-../GOB-Config}:/app/GOB-Config
       - ./message-result:/airflow/xcom
 
   prepare_database:
-    image: amsterdam/postgres11
+    build: ./docker/database
+    platform: linux/x86_64
     ports:
       - "5408:5432"
     container_name: prepare_database
@@ -34,6 +35,7 @@ services:
     volumes:
       - "~/.ssh/datapunt.key:/root/.ssh/datapunt.key"
     shm_size: '1gb'
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
 
 volumes:
   gob-volume:

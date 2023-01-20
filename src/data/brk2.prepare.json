@@ -140,6 +140,38 @@
       ]
     },
     {
+      "type": "execute_sql",
+      "description": "Create zrt_kot_wip table",
+      "id": "preselect_zrt_kot_generate",
+      "query_src": "file",
+      "query": "data/sql/brk2/preselect.zrt_kot_wip.sql",
+      "depends_on": [
+        "select_kot"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Copy zrt_kot_wip table to zrt_kot",
+      "id": "preselect_zrt_kot",
+      "query_src": "file",
+      "query": "data/sql/brk2/preselect.zrt_kot.sql",
+      "depends_on": [
+        "preselect_zrt_kot_generate"
+      ],
+      "table_name": "brk2_prep.zrt_kot"
+    },
+    {
+      "type": "create_table",
+      "description": "Create zrt_asg table",
+      "id": "preselect_zrt_asg",
+      "query_src": "file",
+      "query": "data/sql/brk2/preselect.zrt_asg.sql",
+      "depends_on": [
+        "preselect_zrt_kot"
+      ],
+      "table_name": "brk2_prep.zrt_asg"
+    },
+    {
       "type": "create_table",
       "description": "Select ZRT",
       "table_name": "brk2_prep.zakelijk_recht",
@@ -147,28 +179,9 @@
       "query": "data/sql/brk2/select.zakelijk_recht.sql",
       "id": "select_zrt",
       "depends_on": [
-        "select_kot"
+        "preselect_zrt_kot",
+        "preselect_zrt_asg"
       ]
-    },
-    {
-      "type": "execute_sql",
-      "description": "Populate ZRT table with KOT references",
-      "id": "populate_zrt_with_kot",
-      "depends_on": [
-        "select_zrt"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk2/zrt.add_kot.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Create references between ZRT's on betrokken_bij and ontstaan_uit",
-      "id": "create_zrt_references",
-      "depends_on": [
-        "populate_zrt_with_kot"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk2/zrt.reference_ontstaan_uit_betrokken_bij.sql"
     },
     {
       "type": "execute_sql",
@@ -176,7 +189,7 @@
       "id": "set_is_ontstaan_uit_kadastraalobject",
       "depends_on": [
         "select_kot",
-        "populate_zrt_with_kot"
+        "select_zrt"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/kot.set_is_ontstaan_uit_kadastraalobject.sql"
@@ -187,7 +200,7 @@
       "id": "set_is_ontstaan_uit_g_perceel",
       "depends_on": [
         "select_kot",
-        "populate_zrt_with_kot"
+        "select_zrt"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/kot.set_is_ontstaan_uit_g_perceel.sql"
@@ -213,7 +226,7 @@
         "import_verblijfsobjecten_geometrie"
       ],
       "query_src": "file",
-      "query": "data/sql/brk2/kot.update_a_geometrie.sql"
+      "query": "data/sql/brk2/preselect.kot_geo.sql"
     },
     {
       "type": "execute_sql",
@@ -226,6 +239,16 @@
       "query": "data/sql/brk2/kot.remove_duplicate_ontstaan_uit_relations.sql"
     },
     {
+      "type": "execute_sql",
+      "description": "Finalise KOT table",
+      "id": "finalise_kot",
+      "depends_on": [
+        "remove_duplicate_g_perceel_relations"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk2/finalise.kadastraal_object.sql"
+    },
+    {
       "type": "create_table",
       "description": "Select TNG",
       "table_name": "brk2_prep.tenaamstelling",
@@ -233,7 +256,7 @@
       "query": "data/sql/brk2/select.tenaamstelling.sql",
       "id": "select_tng",
       "depends_on": [
-        "create_zrt_references"
+        "select_zrt"
       ]
     },
     {
@@ -266,7 +289,7 @@
       "depends_on": [
         "select_akt",
         "select_art",
-        "create_zrt_references"
+        "select_zrt"
       ],
       "query": "data/sql/brk2/materialized_view.subject_expiration_date.sql",
       "query_src": "file"
@@ -281,7 +304,7 @@
       "depends_on": [
         "create_view_subject_actueel",
         "select_tng",
-        "create_zrt_references"
+        "select_zrt"
       ]
     },
     {
