@@ -52,7 +52,7 @@ SELECT kot.identificatie                    AS brk_kot_id
                kot.geometrie
            ELSE
                NULL
-    END                                     AS geometrie
+    END                                     AS __geometrie  -- Temporary field. Only contains G-percelen. A 'geometrie' field will be added later in the finalise step.
      , prc.rotatie                          AS perceelnummer_rotatie
      , prc.verschuiving_x                   AS perceelnummer_verschuiving_x
      , prc.verschuiving_y                   AS perceelnummer_verschuiving_y

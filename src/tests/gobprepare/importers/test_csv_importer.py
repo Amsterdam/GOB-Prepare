@@ -178,17 +178,21 @@ class TestSqlCsvImporter(TestCase):
 
         mock_makedirs.assert_called_with('/the_tmp_dir/the/file/on_objectstore/dir', exist_ok=True)
 
-    def test_create_destination_table(self):
+    @patch("gobprepare.importers.csv_importer.create_table_columnar_query")
+    def test_create_destination_table(self, mock_create_table):
         self._setup_importer()
         columns = [
             {"max_length": 20, "name": "col_a"},
             {"max_length": 19, "name": "col_b"},
             {"max_length": 8, "name": "col_c"},
         ]
-        expected_query = f"CREATE TABLE {self.config['destination']} " \
-            f"(col_a VARCHAR(25) NULL,col_b VARCHAR(24) NULL,col_c VARCHAR(13) NULL)"
         self.importer._create_destination_table(columns)
-        self.dst_datastore.execute.assert_called_with(expected_query)
+        mock_create_table.assert_called_with(
+            self.importer._dst_datastore,
+            self.config['destination'],
+            "col_a VARCHAR(25) NULL,col_b VARCHAR(24) NULL,col_c VARCHAR(13) NULL",
+        )
+        self.dst_datastore.execute.assert_called_with(mock_create_table.return_value)
 
     def test_import_data(self):
         self._setup_importer()

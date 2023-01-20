@@ -8,20 +8,21 @@ database.
 
 import datetime
 
+from gobconfig.datastore.config import get_datastore_config
 from gobcore.datastore.factory import DatastoreFactory
 from gobcore.datastore.oracle import OracleDatastore
 from gobcore.datastore.sql import SqlDatastore
-from gobconfig.datastore.config import get_datastore_config
 from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
 from gobcore.message_broker.config import PREPARE
-from gobprepare.cloner.oracle_to_sql import OracleToSqlCloner
+from pydash.arrays import flatten_deep
+
+from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
 from gobprepare.importers.api_importer import SqlAPIImporter
 from gobprepare.importers.csv_importer import SqlCsvImporter
 from gobprepare.selector.datastore_to_postgres import DatastoreToPostgresSelector
 from gobprepare.utils.exceptions import DuplicateTableError
-
-from pydash.arrays import flatten_deep
+from gobprepare.utils.postgres import create_table_columnar_as_query
 
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
@@ -105,7 +106,7 @@ class PrepareClient:
         # Assert that src datastore is set. Dst datastore is always present (would have failed at initialisation otw)
         assert self._src_datastore is not None, "No src datastore set"
 
-        return OracleToSqlCloner(
+        return OracleToPostgresCloner(
             self._src_datastore,
             action['source_schema'],
             self._dst_datastore,
@@ -178,7 +179,7 @@ class PrepareClient:
 
     def action_create_table(self, action: dict):
         query = self._get_query(action)
-        create_query = f"CREATE TABLE {action['table_name']} AS {query}"
+        create_query = create_table_columnar_as_query(self._dst_datastore, action['table_name'], query)
         self._dst_datastore.execute(create_query)
         logger.info(f"Created table '{action['table_name']}'")
 

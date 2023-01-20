@@ -32,17 +32,18 @@ def _oracle_number_to_postgres(length: int = None, precision: int = None, scale:
 
 
 _oracle_postgresql_column_mapping = {
-    'VARCHAR2': lambda l, p, s: f'VARCHAR({l})',
-    'NARCHAR2': lambda l, p, s: f'VARCHAR({l})',
-    'CHAR': lambda l, p, s: f'CHAR({l})',
-    'NCHAR': lambda l, p, s: f'CHAR({l})',
-    'DATE': lambda l, p, s: 'TIMESTAMP(0)',
-    'TIMESTAMP WITH LOCAL TIME ZONE': lambda l, p, s: 'TIMESTAMPTZ',
-    'CLOB': lambda l, p, s: 'TEXT',
-    'NCLOB': lambda l, p, s: 'TEXT',
-    'BLOB': lambda l, p, s: 'BYTEA',
+    # functions receive three parameters: length, precision, scale
+    'VARCHAR2': lambda length, *_: f'VARCHAR({length})',
+    'NARCHAR2': lambda length, *_: f'VARCHAR({length})',
+    'CHAR': lambda length, *_: f'CHAR({length})',
+    'NCHAR': lambda length, *_: f'CHAR({length})',
+    'DATE': lambda *_: 'TIMESTAMP(0)',
+    'TIMESTAMP WITH LOCAL TIME ZONE': lambda *_: 'TIMESTAMPTZ',
+    'CLOB': lambda *_: 'TEXT',
+    'NCLOB': lambda *_: 'TEXT',
+    'BLOB': lambda *_: 'BYTEA',
     'NUMBER': _oracle_number_to_postgres,
-    'SDO_GEOMETRY': lambda l, p, s: 'GEOMETRY',
+    'SDO_GEOMETRY': lambda *_: 'GEOMETRY',
 }
 
 

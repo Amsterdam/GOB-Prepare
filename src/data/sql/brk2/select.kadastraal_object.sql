@@ -37,7 +37,7 @@ SELECT kot.identificatie                    AS identificatie,
            WHEN kot.soortgrootte_code IN ('2', '5', '6', '7', '8', '9', '10', '11', '12') THEN 'J'
            ELSE 'N'
            END                              AS indicatie_voorlopige_kadastrale_grens,
-       kot.geometrie                        AS geometrie,                       -- later vullen voor A-percelen
+       kot.geometrie                        AS __geometrie,  -- Temporary field. Only contains G-percelen. A 'geometrie' field will be added later in the finalise step.
        prc.geometrie                        AS plaatscoordinaten,
        prc.rotatie                          AS perceelnummer_rotatie,
        prc.verschuiving_x                   AS perceelnummer_verschuiving_x,
@@ -92,14 +92,14 @@ FROM brk2.kadastraal_object kot
 CREATE INDEX ON brk2_prep.kadastraal_object (id, volgnummer);
 CREATE INDEX ON brk2_prep.kadastraal_object (identificatie, volgnummer);
 CREATE INDEX ON brk2_prep.kadastraal_object (indexletter);
-CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (is_ontstaan_uit_brk_g_perceel);
-CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (is_ontstaan_uit_brk_kadastraalobject);
-CREATE INDEX ON brk2_prep.kadastraal_object USING GIN (heeft_een_relatie_met_bag_verblijfsobject);
+CREATE INDEX ON brk2_prep.kadastraal_object ((is_ontstaan_uit_brk_g_perceel->>'kot_id'), (is_ontstaan_uit_brk_g_perceel->>'kot_volgnummer'));
+CREATE INDEX ON brk2_prep.kadastraal_object ((is_ontstaan_uit_brk_g_perceel->>'kot_id'));
+CREATE INDEX ON brk2_prep.kadastraal_object ((is_ontstaan_uit_brk_g_perceel->>'kot_volgnummer'));
+CREATE INDEX ON brk2_prep.kadastraal_object ((heeft_een_relatie_met_bag_verblijfsobject->>'bag_id'));
 CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_brk_kadastralesectie);
 CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_brk_kadastralegemeentecode_code);
 CREATE INDEX ON brk2_prep.kadastraal_object (__kadastrale_aanduiding_minus_index_nummer);
 CREATE INDEX ON brk2_prep.kadastraal_object (_expiration_date);
 CREATE INDEX ON brk2_prep.kadastraal_object (id);
-CREATE INDEX ON brk2_prep.kadastraal_object USING gist (geometrie);
 CREATE INDEX ON brk2_prep.kadastraal_object (hoofdsplitsing_identificatie);
 CREATE INDEX ON brk2_prep.kadastraal_object (id, volgnummer, __kadastrale_aanduiding_minus_index_nummer);

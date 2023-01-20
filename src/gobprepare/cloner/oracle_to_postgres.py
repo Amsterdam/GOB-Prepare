@@ -13,10 +13,12 @@ from gobcore.exceptions import GOBException
 from gobcore.logging.logger import logger
 from gobprepare.cloner.mapping.oracle_to_postgres import get_postgres_column_definition
 from gobcore.datastore.oracle import OracleDatastore
-from gobcore.datastore.sql import SqlDatastore
+from gobcore.datastore.postgres import PostgresDatastore
+
+from gobprepare.utils.postgres import create_table_columnar_query
 
 
-class OracleToSqlCloner():
+class OracleToPostgresCloner():
     READ_BATCH_SIZE = 100000
     WRITE_BATCH_SIZE = 100000
 
@@ -25,18 +27,18 @@ class OracleToSqlCloner():
     _include_tables = []
     _id_columns = {}
 
-    def __init__(self, oracle_store: OracleDatastore, src_schema: str, sql_store: SqlDatastore,
+    def __init__(self, oracle_store: OracleDatastore, src_schema: str, postgres_store: PostgresDatastore,
                  dst_schema: str, config: dict):
         """
         :param oracle_store:
         :param src_schema:
-        :param sql_store:
+        :param postgres_store:
         :param dst_schema:
         :param config:
         """
         self._src_datastore = oracle_store
         self._src_schema = src_schema
-        self._dst_datastore = sql_store
+        self._dst_datastore = postgres_store
         self._dst_schema = dst_schema
 
         if config is not None:
@@ -127,7 +129,7 @@ class OracleToSqlCloner():
         table_name, table_columns = table_definition
         # Create column definitions
         columns = ','.join([f"{cname} {ctype} NULL" for cname, ctype in table_columns])
-        create_query = f"CREATE TABLE {self._dst_schema}.{table_name} ({columns})"
+        create_query = create_table_columnar_query(self._dst_datastore, f"{self._dst_schema}.{table_name}", columns)
 
         self._dst_datastore.drop_table(f"{self._dst_schema}.{table_name}")
         self._dst_datastore.execute(create_query)

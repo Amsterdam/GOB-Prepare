@@ -14,6 +14,8 @@ from gobcore.datastore.factory import DatastoreFactory
 from gobcore.datastore.objectstore import ObjectDatastore
 from gobconfig.datastore.config import get_datastore_config
 
+from gobprepare.utils.postgres import create_table_columnar_query
+
 
 class SqlCsvImporter():
     """
@@ -115,7 +117,7 @@ class SqlCsvImporter():
 
         # This works for Postgres and probably for most SQL databases
         columndefs = ",".join([f"{col['name']} VARCHAR({col['max_length'] + 5}) NULL" for col in columns])
-        query = f"CREATE TABLE {self._destination} ({columndefs})"
+        query = create_table_columnar_query(self._dst_datastore, self._destination, columndefs)
         self._dst_datastore.execute(query)
 
     def _import_data(self, data: list):
