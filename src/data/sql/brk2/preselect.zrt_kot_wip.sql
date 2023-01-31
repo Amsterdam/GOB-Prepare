@@ -28,7 +28,41 @@ DECLARE
     max_iter integer := 20;
     iter_cnt integer := 0;
 BEGIN
+    CREATE TEMPORARY TABLE isbelastmet
+    (
+        id                int,
+        kot_id            int,
+        volgnummer        int,
+        kot_identificatie varchar,
+        toestandsdatum    timestamp,
+        begin_geldigheid  timestamp,
+        eind_geldigheid   timestamp,
+        _expiration_date  timestamp,
+        datum_actueel_tot timestamp
+    );
+
     LOOP
+        INSERT INTO isbelastmet
+        SELECT zrtbelastmet.id,
+               zrtkot.__rust_op_kot_id         AS kot_id,
+               zrtkot.__rust_op_kot_volgnummer AS volgnummer,
+               kot.identificatie               AS kot_identificatie,
+               kot.toestandsdatum,
+               kot.begin_geldigheid,
+               kot.eind_geldigheid,
+               kot._expiration_date,
+               kot.datum_actueel_tot
+        FROM brk2.zakelijkrecht_isbelastmet bel
+                 LEFT JOIN brk2_prep.zrt_kot_wip zrtkot
+                           ON zrtkot.id = zakelijkrecht_id
+                 LEFT JOIN brk2_prep.zrt_kot_wip zrtbelastmet
+                           ON zrtbelastmet.id = bel.isbelastmet_id
+                 LEFT JOIN brk2_prep.kadastraal_object kot
+                           ON kot.id = zrtkot.__rust_op_kot_id
+                               AND kot.volgnummer = zrtkot.__rust_op_kot_volgnummer
+        WHERE zrtkot.__rust_op_kot_id IS NOT NULL
+          AND zrtbelastmet.__rust_op_kot_volgnummer IS NULL;
+
         UPDATE brk2_prep.zrt_kot_wip zrt
         SET __rust_op_kot_id=kot_id,
             __rust_op_kot_volgnummer=v.volgnummer,
@@ -39,40 +73,14 @@ BEGIN
             eind_geldigheid=v.eind_geldigheid,
             _expiration_date=v._expiration_date,
             datum_actueel_tot=v.datum_actueel_tot
-        FROM (SELECT zrtbelastmet.id,
-                     zrtkot.__rust_op_kot_id         AS kot_id,
-                     zrtkot.__rust_op_kot_volgnummer AS volgnummer,
-                     kot.identificatie               AS kot_identificatie,
-                     kot.toestandsdatum,
-                     kot.begin_geldigheid,
-                     kot.eind_geldigheid,
-                     kot._expiration_date,
-                     kot.datum_actueel_tot
-              FROM brk2.zakelijkrecht_isbelastmet bel
-                       LEFT JOIN brk2_prep.zrt_kot_wip zrtkot
-                                 ON zrtkot.id = zakelijkrecht_id
-                       LEFT JOIN brk2_prep.zrt_kot_wip zrtbelastmet
-                                 ON zrtbelastmet.id = bel.isbelastmet_id
-                       LEFT JOIN brk2_prep.kadastraal_object kot
-                                 ON kot.id = zrtkot.__rust_op_kot_id
-                                     AND kot.volgnummer = zrtkot.__rust_op_kot_volgnummer
-              WHERE zrtkot.__rust_op_kot_id IS NOT NULL
-                AND zrtbelastmet.__rust_op_kot_volgnummer IS NULL) AS v(
-                                                                        id,
-                                                                        kot_id,
-                                                                        volgnummer,
-                                                                        kot_identificatie,
-                                                                        toestandsdatum,
-                                                                        begin_geldigheid,
-                                                                        eind_geldigheid,
-                                                                        _expiration_date,
-                                                                        datum_actueel_tot
-            )
+        FROM isbelastmet v
         WHERE v.id = zrt.id;
 
         GET DIAGNOSTICS lastres = ROW_COUNT;
         total := total + lastres;
         iter_cnt := iter_cnt + 1;
+
+        TRUNCATE isbelastmet;
 
         EXIT WHEN lastres = 0 OR iter_cnt > max_iter;
     END LOOP;
