@@ -315,7 +315,7 @@
       "query": "data/sql/brk2/select.kadastrale_sectie.sql",
       "id": "select_kse",
       "depends_on": [
-        "select_kot"
+        "finalise_kot"
       ]
     },
     {
@@ -326,7 +326,7 @@
       "query": "data/sql/brk2/select.kadastrale_gemeente.sql",
       "id": "select_kge",
       "depends_on": [
-        "select_kot"
+        "finalise_kot"
       ]
     },
     {
@@ -337,7 +337,7 @@
       "query": "data/sql/brk2/select.kadastrale_gemeentecode.sql",
       "id": "select_kce",
       "depends_on": [
-        "select_kot"
+        "finalise_kot"
       ]
     },
     {
