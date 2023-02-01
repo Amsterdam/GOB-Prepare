@@ -184,15 +184,16 @@
       ]
     },
     {
-      "type": "execute_sql",
-      "description": "KOT - Set is_ontstaan_uit_kadastraalobject",
+      "type": "create_table",
+      "description": "KOT - is_ontstaan_uit_kadastraalobject",
+      "table_name": "brk2_prep.kot_ontstaan_uit_kot",
       "id": "set_is_ontstaan_uit_kadastraalobject",
       "depends_on": [
         "select_kot",
         "select_zrt"
       ],
       "query_src": "file",
-      "query": "data/sql/brk2/kot.set_is_ontstaan_uit_kadastraalobject.sql"
+      "query": "data/sql/brk2/preselect.kot.is_ontstaan_uit_kadastraalobject.sql"
     },
     {
       "type": "execute_sql",
@@ -233,7 +234,8 @@
       "description": "Remove duplicate g-perceel relations",
       "id": "remove_duplicate_g_perceel_relations",
       "depends_on": [
-        "update_geometrie_appartementsrechten"
+        "update_geometrie_appartementsrechten",
+        "set_is_ontstaan_uit_kadastraalobject"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/kot.remove_duplicate_ontstaan_uit_relations.sql"
