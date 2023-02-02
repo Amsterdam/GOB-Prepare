@@ -90,9 +90,6 @@ FROM brk2.kadastraal_object kot
 CREATE INDEX ON brk2_prep.kadastraal_object (id, volgnummer);
 CREATE INDEX ON brk2_prep.kadastraal_object (identificatie, volgnummer);
 CREATE INDEX ON brk2_prep.kadastraal_object (indexletter);
-CREATE INDEX ON brk2_prep.kadastraal_object ((is_ontstaan_uit_brk_g_perceel->>'kot_id'), (is_ontstaan_uit_brk_g_perceel->>'kot_volgnummer'));
-CREATE INDEX ON brk2_prep.kadastraal_object ((is_ontstaan_uit_brk_g_perceel->>'kot_id'));
-CREATE INDEX ON brk2_prep.kadastraal_object ((is_ontstaan_uit_brk_g_perceel->>'kot_volgnummer'));
 CREATE INDEX ON brk2_prep.kadastraal_object ((heeft_een_relatie_met_bag_verblijfsobject->>'bag_id'));
 CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_brk_kadastralesectie);
 CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_brk_kadastralegemeentecode_code);

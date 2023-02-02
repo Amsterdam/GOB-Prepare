@@ -16,3 +16,8 @@ FROM brk2_prep.kadastraal_object kot
                  zrt.__rust_op_kot_volgnummer = kot2.volgnummer
 WHERE kot.indexletter = 'A'
 GROUP BY kot.id, kot.volgnummer;
+
+CREATE INDEX ON brk2_prep.kot_ontstaan_uit_g_perceel ((is_ontstaan_uit_brk_g_perceel->>'kot_id'), (is_ontstaan_uit_brk_g_perceel->>'kot_volgnummer'));
+CREATE INDEX ON brk2_prep.kot_ontstaan_uit_g_perceel ((is_ontstaan_uit_brk_g_perceel->>'kot_id'));
+CREATE INDEX ON brk2_prep.kot_ontstaan_uit_g_perceel ((is_ontstaan_uit_brk_g_perceel->>'kot_volgnummer'));
+CREATE INDEX ON brk2_prep.kot_ontstaan_uit_g_perceel (kot_id, kot_volgnummer);
