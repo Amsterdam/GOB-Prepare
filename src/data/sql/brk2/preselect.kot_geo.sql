@@ -11,11 +11,13 @@ ANALYZE bag_brk2.verblijfsobjecten_geometrie;
 
 -- Create table with union of geometries of related G-percelen for all ACTUAL A-percelen
 CREATE TABLE brk2_prep.g_perceel_geo_union AS
-SELECT kot1.id                  AS id,
-       kot1.volgnummer          AS volgnummer,
+SELECT kot1.id                    AS id,
+       kot1.volgnummer            AS volgnummer,
        ST_Union(kot2.__geometrie) AS g_poly
 FROM brk2_prep.kadastraal_object kot1
-         JOIN JSONB_ARRAY_ELEMENTS(kot1.is_ontstaan_uit_g_perceel) AS g_perceel
+         JOIN brk2_prep.kot_ontstaan_uit_g_perceel AS kot_g_perc
+              ON kot1.id = kot_g_perc.kot_id AND kot1.volgnummer = kot_g_perc.kot_volgnummer
+         JOIN JSONB_ARRAY_ELEMENTS(kot_g_perc.is_ontstaan_uit_brk_g_perceel) AS g_perceel
               ON g_perceel ->> 'kot_id' IS NOT NULL
          JOIN brk2_prep.kadastraal_object kot2
               ON kot2.id = (g_perceel ->> 'kot_id')::integer
@@ -35,7 +37,7 @@ ANALYZE brk2_prep.g_perceel_geo_union;
 CREATE TABLE brk2_prep.kot_geo AS
 SELECT id,
        volgnummer,
-       __geometrie as geometrie,
+       __geometrie AS geometrie,
        _expiration_date,
        indexletter,
        heeft_een_relatie_met_verblijfsobject,
