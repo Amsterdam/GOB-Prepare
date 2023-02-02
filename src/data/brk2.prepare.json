@@ -198,7 +198,6 @@
     {
       "type": "execute_sql",
       "description": "KOT - Set is_ontstaan_uit_g_perceel",
-      "table_name": "brk2_prep.kot_ontstaan_uit_g_perceel",
       "id": "set_is_ontstaan_uit_g_perceel",
       "depends_on": [
         "select_kot",
