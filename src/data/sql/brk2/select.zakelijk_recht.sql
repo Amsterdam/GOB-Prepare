@@ -103,3 +103,4 @@ FROM brk2.zakelijkrecht zrt
 
 CREATE INDEX ON brk2_prep.zakelijk_recht (__id);
 CREATE INDEX ON brk2_prep.zakelijk_recht (__rust_op_kot_id, __rust_op_kot_volgnummer);
+CREATE INDEX ON brk2_prep.zakelijk_recht (betrokken_bij_appartementsrechtsplitsing_vve);

@@ -59,7 +59,6 @@ SELECT kot.identificatie                    AS identificatie,
                 CASE kot.status_code
                     WHEN 'H' THEN kot.creation
                     END)                    AS _expiration_date,
-       NULL::jsonb                          AS is_ontstaan_uit_brk_g_perceel,       -- later vullen
        adr.vot_adressen                     AS heeft_een_relatie_met_bag_verblijfsobject
 FROM brk2.kadastraal_object kot
          LEFT JOIN brk2.kadastraal_object_percnummer prc
