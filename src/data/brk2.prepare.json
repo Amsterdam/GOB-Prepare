@@ -184,33 +184,35 @@
       ]
     },
     {
-      "type": "execute_sql",
-      "description": "KOT - Set is_ontstaan_uit_kadastraalobject",
+      "type": "create_table",
+      "description": "KOT - is_ontstaan_uit_kadastraalobject",
+      "table_name": "brk2_prep.kot_ontstaan_uit_kot",
       "id": "set_is_ontstaan_uit_kadastraalobject",
       "depends_on": [
         "select_kot",
         "select_zrt"
       ],
       "query_src": "file",
-      "query": "data/sql/brk2/kot.set_is_ontstaan_uit_kadastraalobject.sql"
+      "query": "data/sql/brk2/preselect.kot.is_ontstaan_uit_kadastraalobject.sql"
     },
     {
       "type": "execute_sql",
       "description": "KOT - Set is_ontstaan_uit_g_perceel",
+      "table_name": "brk2_prep.kot_ontstaan_uit_g_perceel",
       "id": "set_is_ontstaan_uit_g_perceel",
       "depends_on": [
         "select_kot",
         "select_zrt"
       ],
       "query_src": "file",
-      "query": "data/sql/brk2/kot.set_is_ontstaan_uit_g_perceel.sql"
+      "query": "data/sql/brk2/preselect.kot.is_ontstaan_uit_g_perceel.sql"
     },
     {
       "type": "import_api",
       "description": "Import BAG geometrie van verblijfsobjecten",
       "id": "import_verblijfsobjecten_geometrie",
       "depends_on": [
-        "set_is_ontstaan_uit_g_perceel"
+        "clear_schemas"
       ],
       "query_src": "file",
       "query": "data/api/bag/verblijfsobjecten_geometrie_import.graphql",
@@ -223,7 +225,8 @@
       "description": "Generate geometrie voor actuele appartementsrechten",
       "id": "update_geometrie_appartementsrechten",
       "depends_on": [
-        "import_verblijfsobjecten_geometrie"
+        "import_verblijfsobjecten_geometrie",
+        "set_is_ontstaan_uit_g_perceel"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/preselect.kot_geo.sql"
@@ -236,14 +239,15 @@
         "update_geometrie_appartementsrechten"
       ],
       "query_src": "file",
-      "query": "data/sql/brk2/kot.remove_duplicate_ontstaan_uit_relations.sql"
+      "query": "data/sql/brk2/kot.is_ontstaan_uit_g_perceel.unduplicate.sql"
     },
     {
       "type": "execute_sql",
       "description": "Finalise KOT table",
       "id": "finalise_kot",
       "depends_on": [
-        "remove_duplicate_g_perceel_relations"
+        "remove_duplicate_g_perceel_relations",
+        "set_is_ontstaan_uit_kadastraalobject"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/finalise.kadastraal_object.sql"
