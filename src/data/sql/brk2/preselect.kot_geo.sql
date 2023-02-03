@@ -25,8 +25,8 @@ FROM brk2_prep.kadastraal_object kot1
                   AND kot2._expiration_date IS NULL
 WHERE kot1.indexletter = 'A'
   AND kot1._expiration_date IS NULL
-  AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
-  AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
+  AND kot1.aangeduid_door_brk_kadastralesectie = kot2.aangeduid_door_brk_kadastralesectie
+  AND kot1.aangeduid_door_brk_kadastralegemeentecode_code = kot2.aangeduid_door_brk_kadastralegemeentecode_code
 GROUP BY kot1.id, kot1.volgnummer;
 
 -- Create index on new table and analyze
@@ -40,7 +40,7 @@ SELECT id,
        __geometrie AS geometrie,
        _expiration_date,
        indexletter,
-       heeft_een_relatie_met_verblijfsobject,
+       heeft_een_relatie_met_bag_verblijfsobject,
        __kadastrale_aanduiding_minus_index_nummer
 FROM brk2_prep.kadastraal_object;
 CREATE INDEX ON brk2_prep.kot_geo (id, volgnummer);
@@ -53,7 +53,7 @@ WITH vbo_kot_geometrie AS (SELECT DISTINCT ON (kot.id) kot.id         AS id,
                                                        kot.volgnummer AS volgnummer,
                                                        vbo.geometrie  AS geometrie
                            FROM brk2_prep.kot_geo kot
-                                    JOIN JSONB_ARRAY_ELEMENTS(kot.heeft_een_relatie_met_verblijfsobject) AS adres
+                                    JOIN JSONB_ARRAY_ELEMENTS(kot.heeft_een_relatie_met_bag_verblijfsobject) AS adres
                                          ON adres ->> 'bag_id' IS NOT NULL
                                     JOIN bag_brk2.verblijfsobjecten_geometrie vbo
                                          ON adres ->> 'bag_id' = vbo.identificatie
