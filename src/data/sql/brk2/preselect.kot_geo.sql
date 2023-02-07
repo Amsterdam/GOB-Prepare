@@ -10,6 +10,8 @@ ANALYZE brk2_prep.kadastraal_object;
 ANALYZE bag_brk2.verblijfsobjecten_geometrie;
 
 -- Create table with union of geometries of related G-percelen for all ACTUAL A-percelen
+-- Disable parallel workers for now. Appears to be some weird bug in Postgis
+SET max_parallel_workers_per_gather = 0;
 CREATE TABLE brk2_prep.g_perceel_geo_union AS
 SELECT kot1.id                    AS id,
        kot1.volgnummer            AS volgnummer,
@@ -28,6 +30,7 @@ WHERE kot1.indexletter = 'A'
   AND kot1.aangeduid_door_brk_kadastralesectie = kot2.aangeduid_door_brk_kadastralesectie
   AND kot1.aangeduid_door_brk_kadastralegemeentecode_code = kot2.aangeduid_door_brk_kadastralegemeentecode_code
 GROUP BY kot1.id, kot1.volgnummer;
+SET max_parallel_workers_per_gather = 5;
 
 -- Create index on new table and analyze
 CREATE INDEX ON brk2_prep.g_perceel_geo_union (id, volgnummer);
@@ -44,7 +47,7 @@ SELECT id,
        __kadastrale_aanduiding_minus_index_nummer
 FROM brk2_prep.kadastraal_object;
 CREATE INDEX ON brk2_prep.kot_geo (id, volgnummer);
-CREATE INDEX ON brk2_prep.kot_geo (geometrie);
+CREATE INDEX ON brk2_prep.kot_geo USING gist (geometrie);
 CREATE INDEX ON brk2_prep.kot_geo (_expiration_date);
 
 -- 1. Set geometry for A-percelen based on related verblijfsobject. If A-perceel is in g_poly table, check if VOT
