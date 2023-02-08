@@ -11,7 +11,8 @@
 -- In this query we set all direct parent <-> child relation
 
 -- Analyze database first.
-ANALYZE;
+ANALYZE brk_prep.kadastraal_object;
+ANALYZE brk_prep.zakelijk_recht;
 
 CREATE TEMPORARY TABLE kot_ontstaan_uit AS
 SELECT kot.nrn_kot_id,
