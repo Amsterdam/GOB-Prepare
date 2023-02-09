@@ -8,8 +8,8 @@ SELECT kot_id,
                ARRAY_AGG(
                        JSON_BUILD_OBJECT(
                                'kot_identificatie', kot_identificatie
-                           )
-                   ) ORDER BY kot_identificatie
+                           ) ORDER BY kot_identificatie
+                   )
            )::jsonb AS is_ontstaan_uit_brk_g_perceel
 FROM (SELECT kot.kot_id,
              kot.kot_volgnummer,
