@@ -6,7 +6,6 @@
 --  AND kot1.aangeduid_door_kadastralesectie = kot2.aangeduid_door_kadastralesectie
 --  AND kot1.aangeduid_door_kadastralegemeentecode_code = kot2.aangeduid_door_kadastralegemeentecode_code
 --  was added to filter out G-percelen that are not in the same aangeduid_door_kadastralesectie.
-ANALYZE brk2_prep.kadastraal_object;
 ANALYZE bag_brk2.verblijfsobjecten_geometrie;
 
 -- Create table with union of geometries of related G-percelen for all ACTUAL A-percelen
@@ -46,6 +45,9 @@ SELECT id,
        heeft_een_relatie_met_bag_verblijfsobject,
        __kadastrale_aanduiding_minus_index_nummer
 FROM brk2_prep.kadastraal_object;
+
+ANALYZE brk2_prep.kot_geo;
+
 CREATE INDEX ON brk2_prep.kot_geo (id, volgnummer);
 CREATE INDEX ON brk2_prep.kot_geo USING gist (geometrie);
 CREATE INDEX ON brk2_prep.kot_geo (_expiration_date);
