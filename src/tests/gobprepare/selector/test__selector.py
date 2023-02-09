@@ -27,11 +27,13 @@ class TestSelector(TestCase):
                 ],
             },
         }
-        self.selector = Selector("src_store", "dst_store", self.config)
+        self.src_datastore = MagicMock()
+        self.dst_datastore = MagicMock()
+        self.selector = Selector(self.src_datastore, self.dst_datastore, self.config)
 
     def test_init(self):
-        self.assertEqual("src_store", self.selector._src_datastore)
-        self.assertEqual("dst_store", self.selector._dst_datastore)
+        self.assertEqual(self.src_datastore, self.selector._src_datastore)
+        self.assertEqual(self.dst_datastore, self.selector._dst_datastore)
         self.assertEqual(self.config, self.selector._config)
         self.assertEqual("\n".join(self.config['query']), self.selector.query)
 
@@ -94,6 +96,7 @@ class TestSelector(TestCase):
         self.assertEqual(result_cnt, result)
         self.selector._create_destination_table.assert_has_calls([call(destination_table)])
         self.assertEqual(5, self.selector._write_rows.call_count)
+        self.selector._dst_datastore.execute.assert_called_with("ANALYZE dst.table")
         mock_logger.info.assert_called_once()
 
     @patch("gobprepare.selector._selector.logger")

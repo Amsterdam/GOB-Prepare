@@ -183,9 +183,9 @@
     },
     {
       "type": "execute_sql",
-      "description": "Analyze database and finish import",
+      "description": "Finish import",
       "query_src": "string",
-      "query": "ANALYZE",
+      "query": "SELECT 1",
       "id": "import_ready",
       "depends_on": [
         "create_bestand_table",

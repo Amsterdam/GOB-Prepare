@@ -63,6 +63,7 @@ class Selector:
             total_cnt += result_rows
 
             if result_rows < self.WRITE_BATCH_SIZE:
+                self._dst_datastore.execute(f"ANALYZE {name}")
                 logger.info(f"Written {total_cnt:,} rows to destination table {name}")
                 return total_cnt
 

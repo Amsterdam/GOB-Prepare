@@ -1,5 +1,4 @@
 -- Analyze database first.
-ANALYZE brk_prep.kadastraal_object;
 ANALYZE bag.verblijfsobjecten_geometrie;
 
 --  This SQL statement updates the geometrie for kadastraal_object of type 'A'
