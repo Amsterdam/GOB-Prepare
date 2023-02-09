@@ -251,7 +251,10 @@ class TestPrepareClient(TestCase):
             "schema.table_name",
             "select * from laladiela"
         )
-        prepare_client._dst_datastore.execute.assert_called_with(mock_create_table.return_value)
+        prepare_client._dst_datastore.execute.assert_has_calls([
+            call(mock_create_table.return_value),
+            call("ANALYZE schema.table_name")
+        ])
         mock_logger.info.assert_called_with("Created table 'schema.table_name'")
 
     @patch("gobprepare.prepare_client.SqlAPIImporter", autospec=True)

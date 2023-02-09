@@ -283,6 +283,7 @@ class TestOracleToPostgresCloner(TestCase):
             [('colA', 'int'), ('colB', 'varchar'), ('colC', 'varchar')]
         )
         self.cloner._list_to_chunks.assert_called_with('list of ids', self.cloner.READ_BATCH_SIZE)
+        self.cloner._dst_datastore.execute.assert_called_with(f"ANALYZE {self.dst_schema}.tableName")
 
     @patch("gobprepare.cloner.oracle_to_postgres.logger")
     def test_copy_table_data_chunk_minmax(self, mock_logger):

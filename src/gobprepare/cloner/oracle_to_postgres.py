@@ -296,8 +296,13 @@ class OracleToPostgresCloner():
                                 table_name
                             )
                             )
+        # Analyze newly inserted data
+        dst_table = f"{self._dst_schema}.{table_name}"
+        self._dst_datastore.execute(f"ANALYZE {dst_table}")
+
         # We're done
-        logger.info(f"Written {row_cnt} rows to destination table {full_table_name}")
+        logger.info(f"Written {row_cnt} rows to destination table {dst_table}")
+
         return row_cnt
 
     def _insert_rows(self, table_definition: Tuple[str, List], row_data: List[Dict]) -> None:
