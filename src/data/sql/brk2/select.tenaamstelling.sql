@@ -32,7 +32,7 @@ FROM brk2.tenaamstelling tng
          LEFT JOIN brk2.c_samenwerkingsverband s ON s.code = tng.verkregen_namens_code
          LEFT JOIN brk2.c_burgerlijkestaat b ON b.code = tng.burgerlijkestaat_code
          LEFT JOIN (SELECT g.tenaamstelling_id,
-                           JSON_AGG(JSONB_BUILD_OBJECT(
+                           JSONB_AGG(JSONB_BUILD_OBJECT(
                                    'bronwaarde', stukdeel_identificatie
                                )) isgebaseerd_op
                     FROM brk2.tenaamstelling_isgebaseerdop g
