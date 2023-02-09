@@ -181,6 +181,8 @@ class PrepareClient:
         query = self._get_query(action)
         create_query = create_table_columnar_as_query(self._dst_datastore, action['table_name'], query)
         self._dst_datastore.execute(create_query)
+        self._dst_datastore.execute(f"ANALYZE {action['table_name']}")
+
         logger.info(f"Created table '{action['table_name']}'")
 
     def action_import_api(self, action: dict):
