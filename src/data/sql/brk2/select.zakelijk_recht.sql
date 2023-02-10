@@ -57,9 +57,9 @@ FROM brk2.zakelijkrecht zrt
                     GROUP BY ztt.zakelijkrecht_id) ztt ON ztt.zakelijkrecht_id = zrt.id
          LEFT JOIN brk2.c_aardzakelijkrecht a ON zrt.aardzakelijkrecht_code = a.code
          LEFT JOIN brk2_prep.zrt_kot zrt_kot
-                   ON zrt.id = zrt_kot.id AND zrt.rust_op_kadastraalobj_volgnr = zrt_kot.volgnummer
+                   ON zrt.id = zrt_kot.id
          LEFT JOIN brk2_prep.zrt_asg zrt_asg
-                   ON zrt.id = zrt_asg.id AND zrt.rust_op_kadastraalobj_volgnr = zrt_asg.volgnummer
+                   ON zrt.id = zrt_asg.id
          LEFT JOIN brk2.zakelijkrecht_onderzoek zok ON zok.zakelijkrecht_id = zrt.id
          LEFT JOIN brk2.inonderzoek iok ON iok.identificatie = zok.onderzoek_identificatie
          LEFT JOIN brk2.c_authentiekgegeven agn ON agn.code = iok.authentiekgegeven_code
