@@ -3,7 +3,6 @@ WITH asg_codes(code, omschrijving) AS (VALUES (1, 'HoofdSplitsing'),
                                               (3, 'SplitsingAfkoopErfpacht'))
 SELECT zrt.identificatie,
        zrt.id,
-       zrt.rust_op_kadastraalobj_volgnr AS volgnummer,
        zrt_kot.begin_geldigheid         AS begin_geldigheid,
        asg1.id                          AS __betrokken_bij_asg_id,
        asg2.id                          AS __ontstaan_uit_asg_id,
