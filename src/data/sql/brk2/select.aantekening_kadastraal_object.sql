@@ -22,7 +22,6 @@ FROM brk2.aantekening atg
     -- https://dev.azure.com/CloudCompetenceCenter/Datateam%20Basis%20en%20Kernregistraties/_workitems/edit/17723
          JOIN (SELECT * FROM brk2.import_aardaantekening aag WHERE aag.type != 'Aantekening PB') aag
               ON atg.aardaantekening_code = aag.code
-         LEFT JOIN brk2.aantekening_betrokkenpersoon abp ON abp.aantekening_id = atg.id
          LEFT JOIN brk2_prep.kadastraal_object kot
                    ON kot.id = koa.kadastraalobject_id AND
                       kot.volgnummer = koa.kadastraalobject_volgnummer
