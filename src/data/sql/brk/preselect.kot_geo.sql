@@ -10,13 +10,16 @@ ANALYZE bag.verblijfsobjecten_geometrie;
 --  AND kot1.kad_gemeentecode = kot2.kad_gemeentecode
 --  was added to filter out G-percelen that are not in the same sectie.
 
+-- Disable parallel query execution, there appears to be some bug in Postgis.
+SET max_parallel_workers_per_gather = 0;
 CREATE TABLE brk_prep.g_perceel_geo_union AS
-SELECT kot1.nrn_kot_id          AS nrn_kot_id,
-       kot1.nrn_kot_volgnr      AS nrn_kot_volgnr,
+SELECT kot1.nrn_kot_id            AS nrn_kot_id,
+       kot1.nrn_kot_volgnr        AS nrn_kot_volgnr,
        ST_Union(kot2.__geometrie) AS g_poly
 FROM brk_prep.kadastraal_object kot1
-         JOIN JSONB_ARRAY_ELEMENTS(kot1.relatie_g_perceel) AS g_perceel
-              ON kot1.relatie_g_perceel <> 'null'
+         JOIN brk_prep.kot_ontstaan_uit_g_perceel kot_g_perc USING (nrn_kot_id, nrn_kot_volgnr)
+         JOIN JSONB_ARRAY_ELEMENTS(kot_g_perc.relatie_g_perceel) AS g_perceel
+              ON kot_g_perc.relatie_g_perceel IS NOT NULL
                   AND g_perceel ->> 'nrn_kot_id' IS NOT NULL
          JOIN brk_prep.kadastraal_object kot2
               ON kot2.nrn_kot_id = (g_perceel ->> 'nrn_kot_id')::integer
@@ -26,8 +29,11 @@ WHERE kot1.index_letter = 'A'
   AND kot1.expiration_date IS NULL
   AND kot1.sectie = kot2.sectie
   AND kot1.kad_gemeentecode = kot2.kad_gemeentecode
-GROUP BY kot1.nrn_kot_id, kot1.nrn_kot_volgnr
-;
+GROUP BY kot1.nrn_kot_id, kot1.nrn_kot_volgnr;
+SET max_parallel_workers_per_gather = 5;
+
+CREATE INDEX ON brk_prep.g_perceel_geo_union (nrn_kot_id, nrn_kot_volgnr);
+ANALYZE brk_prep.g_perceel_geo_union;
 
 -- Work from separate table
 CREATE TABLE brk_prep.kot_geo AS
@@ -42,6 +48,8 @@ SELECT nrn_kot_id,
        sectie,
        relatie_g_perceel
 FROM brk_prep.kadastraal_object;
+
+ANALYZE brk_prep.kot_geo;
 
 CREATE INDEX ON brk_prep.kot_geo (nrn_kot_id, nrn_kot_volgnr);
 CREATE INDEX ON brk_prep.kot_geo (geometrie);
