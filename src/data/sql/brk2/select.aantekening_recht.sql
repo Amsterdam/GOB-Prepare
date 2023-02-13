@@ -27,7 +27,6 @@ FROM brk2.aantekening atg
                FROM brk2.tenaamstelling_aantekening art
                         JOIN brk2_prep.tenaamstelling tng ON art.tenaamstelling_id = tng.neuron_id
                GROUP BY art.aantekening_identificatie) art ON art.aantekening_identificatie = atg.identificatie
-         LEFT JOIN brk2.aantekening_betrokkenpersoon abp ON abp.aantekening_id = atg.id
          LEFT JOIN brk2.c_aardaantekening aag ON atg.aardaantekening_code = aag.code
          LEFT JOIN (SELECT abn.aantekening_id,
                            JSONB_AGG(
