@@ -1294,6 +1294,92 @@
       }
     },
     {
+      "type": "create_table",
+      "description": "KOT - is_ontstaan_uit_kadastraalobject",
+      "table_name": "brk_prep.kot_ontstaan_uit_kot",
+      "id": "set_is_ontstaan_uit_kadastraalobject",
+      "depends_on": [
+        "create_indexes_zrt",
+        "create_indexes_kot"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/preselect.kot.is_ontstaan_uit_kadastraalobject.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "KOT - Set is_ontstaan_uit_g_perceel",
+      "id": "set_is_ontstaan_uit_g_perceel",
+      "depends_on": [
+        "set_is_ontstaan_uit_kadastraalobject"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/preselect.kot.is_ontstaan_uit_g_perceel.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Populate A-percelen with relatie_g_perceel",
+      "id": "populate_relatie_g_perceel",
+      "depends_on": [
+        "set_is_ontstaan_uit_g_perceel"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/kot.add_relatie_g_perceel_to_a_percelen.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Unduplicate ontstaan_uit_kot relations",
+      "id": "unduplicate_ontstaan_uit_kot",
+      "depends_on": [
+        "populate_relatie_g_perceel"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/kot_ontstaan_uit_kot.unduplicate.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Unduplicate ontstaan_uit_g_perceel relations",
+      "id": "unduplicate_ontstaan_uit_g_perceel",
+      "depends_on": [
+        "populate_relatie_g_perceel"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/kot_ontstaan_uit_g_perceel.unduplicate.sql"
+    },
+    {
+      "type": "import_api",
+      "description": "Import BAG geometrie van verblijfsobjecten",
+      "id": "import_verblijfsobjecten_geometrie",
+      "depends_on": [
+        "unduplicate_ontstaan_uit_g_perceel"
+      ],
+      "query_src": "file",
+      "query": "data/api/bag/verblijfsobjecten_geometrie_import.graphql",
+      "meta_type": "bag_verblijfsobjectenRootObjectType",
+      "schema": "bag",
+      "destination": "verblijfsobjecten_geometrie"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Generate geometrie voor actuele appartementsrechten",
+      "id": "update_geometrie_appartementsrechten",
+      "depends_on": [
+        "import_verblijfsobjecten_geometrie"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/preselect.kot_geo.sql"
+    },
+    {
+      "type": "execute_sql",
+      "description": "Finalise KOT table",
+      "id": "finalise_kot",
+      "depends_on": [
+        "unduplicate_ontstaan_uit_kot",
+        "update_geometrie_appartementsrechten"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/finalise.kadastraal_object.sql"
+    },
+    {
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
@@ -1383,92 +1469,6 @@
           }
         ]
       }
-    },
-    {
-      "type": "create_table",
-      "description": "KOT - is_ontstaan_uit_kadastraalobject",
-      "table_name": "brk_prep.kot_ontstaan_uit_kot",
-      "id": "set_is_ontstaan_uit_kadastraalobject",
-      "depends_on": [
-        "create_indexes_zrt",
-        "create_indexes_kot"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/preselect.kot.is_ontstaan_uit_kadastraalobject.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "KOT - Set is_ontstaan_uit_g_perceel",
-      "id": "set_is_ontstaan_uit_g_perceel",
-      "depends_on": [
-        "set_is_ontstaan_uit_kadastraalobject"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/preselect.kot.is_ontstaan_uit_g_perceel.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Populate A-percelen with relatie_g_perceel",
-      "id": "populate_relatie_g_perceel",
-      "depends_on": [
-        "set_is_ontstaan_uit_g_perceel"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/kot.add_relatie_g_perceel_to_a_percelen.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Unduplicate ontstaan_uit_kot relations",
-      "id": "unduplicate_ontstaan_uit_kot",
-      "depends_on": [
-        "populate_relatie_g_perceel"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/kot_ontstaan_uit_kot.unduplicate.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Unduplicate ontstaan_uit_g_perceel relations",
-      "id": "unduplicate_ontstaan_uit_g_perceel",
-      "depends_on": [
-        "populate_relatie_g_perceel"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/kot_ontstaan_uit_g_perceel.unduplicate.sql"
-    },
-    {
-      "type": "import_api",
-      "description": "Import BAG geometrie van verblijfsobjecten",
-      "id": "import_verblijfsobjecten_geometrie",
-      "depends_on": [
-        "unduplicate_ontstaan_uit_g_perceel"
-      ],
-      "query_src": "file",
-      "query": "data/api/bag/verblijfsobjecten_geometrie_import.graphql",
-      "meta_type": "bag_verblijfsobjectenRootObjectType",
-      "schema": "bag",
-      "destination": "verblijfsobjecten_geometrie"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Generate geometrie voor actuele appartementsrechten",
-      "id": "update_geometrie_appartementsrechten",
-      "depends_on": [
-        "import_verblijfsobjecten_geometrie"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/preselect.kot_geo.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Finalise KOT table",
-      "id": "finalise_kot",
-      "depends_on": [
-        "unduplicate_ontstaan_uit_kot",
-        "update_geometrie_appartementsrechten"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk/finalise.kadastraal_object.sql"
     },
     {
       "type": "execute_sql",
