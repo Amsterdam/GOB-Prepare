@@ -1,9 +1,8 @@
 SELECT zrt.*,
        betrokken_bij.betrokken_bij,
-       betrokken_bij.max_zrt_begindatum,
-       ontstaan_uit.ontstaan_uit       AS max_ontstaan_uit_begindatum,
-       ontstaan_uit,
-       ontstaan_uit.max_zrt_begindatum AS max_betrokken_bij_begindatum
+       betrokken_bij.max_zrt_begindatum AS max_betrokken_bij_begindatum,
+       ontstaan_uit.ontstaan_uit,
+       ontstaan_uit.max_zrt_begindatum AS max_ontstaan_uit_begindatum
 FROM brk_prep.zakelijk_recht_1 zrt
          LEFT JOIN (SELECT ARRAY_TO_JSON(ARRAY_AGG(JSON_BUILD_OBJECT('zrt_identificatie', identificatie)
                                                    ORDER BY identificatie)) betrokken_bij,
