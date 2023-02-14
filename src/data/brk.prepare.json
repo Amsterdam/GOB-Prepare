@@ -588,6 +588,7 @@
     {
       "type": "create_table",
       "description": "Select ZRT",
+      "table_name": "brk_prep.zakelijk_recht",
       "id": "select_zrt",
       "depends_on": [
         "preselect_zrt"
