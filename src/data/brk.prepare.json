@@ -462,16 +462,16 @@
       "type": "select",
       "source": "dst",
       "ignore_missing": true,
-      "id": "select_zrt",
+      "id": "preselect_zrt",
       "depends_on": [
         "preselect_zrt_kot",
         "preselect_zrt_asg",
         "populate_aardzakelijkrecht_waardelijst"
       ],
-      "query": "data/sql/brk/select.zakelijk_recht.sql",
+      "query": "data/sql/brk/preselect.zakelijk_recht.sql",
       "query_src": "file",
       "destination_table": {
-        "name": "brk_prep.zakelijk_recht",
+        "name": "brk_prep.zakelijk_recht_1",
         "create": true,
         "columns": [
           {
@@ -511,20 +511,12 @@
             "type": "INT"
           },
           {
-            "name": "ontstaan_uit",
-            "type": "JSONB"
-          },
-          {
             "name": "betrokken_bij_ref",
             "type": "VARCHAR(240)"
           },
           {
             "name": "betrokken_bij_asg_id",
             "type": "INT"
-          },
-          {
-            "name": "betrokken_bij",
-            "type": "JSONB"
           },
           {
             "name": "isbeperkt_tot",
@@ -589,17 +581,19 @@
           {
             "name": "modification",
             "type": "TIMESTAMP"
-          },
-          {
-            "name": "max_ontstaan_uit_begindatum",
-            "type": "TIMESTAMP"
-          },
-          {
-            "name": "max_betrokken_bij_begindatum",
-            "type": "TIMESTAMP"
           }
         ]
       }
+    },
+    {
+      "type": "create_table",
+      "description": "Select ZRT",
+      "id": "select_zrt",
+      "depends_on": [
+        "preselect_zrt"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk/select.zakelijk_recht.sql"
     },
     {
       "type": "execute_sql",
