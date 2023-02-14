@@ -34,3 +34,7 @@ FROM brk.zakelijkrecht zrt
          LEFT JOIN brk.c_appartementsrechtsplitstype ase1 ON (ase1.code = asg1.app_rechtsplitstype_code)
          LEFT JOIN brk.c_appartementsrechtsplitstype ase2 ON (ase2.code = asg2.app_rechtsplitstype_code)
 ;
+
+CREATE INDEX on brk_prep.zrt_asg(betrokken_bij_asg_id);
+CREATE INDEX on brk_prep.zrt_asg(ontstaan_uit_asg_id);
+CREATE INDEX ON brk_prep.zrt_asg(id, rust_op_kadastraalobj_volgnr);
