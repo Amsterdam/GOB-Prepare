@@ -47,12 +47,13 @@ SELECT nrn_kot_id,
        kad_gemeentecode,
        sectie,
        relatie_g_perceel
-FROM brk_prep.kadastraal_object;
+FROM brk_prep.kadastraal_object
+LEFT JOIN brk_prep.kot_ontstaan_uit_g_perceel USING (nrn_kot_id, nrn_kot_volgnr);
 
 ANALYZE brk_prep.kot_geo;
 
 CREATE INDEX ON brk_prep.kot_geo (nrn_kot_id, nrn_kot_volgnr);
-CREATE INDEX ON brk_prep.kot_geo (geometrie);
+CREATE INDEX ON brk_prep.kot_geo USING GIST (geometrie);
 CREATE INDEX ON brk_prep.kot_geo (expiration_date);
 CREATE INDEX ON brk_prep.kot_geo (kadastrale_aanduiding);
 
