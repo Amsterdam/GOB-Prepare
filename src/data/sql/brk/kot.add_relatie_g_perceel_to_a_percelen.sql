@@ -12,6 +12,9 @@
 
 -- Set relatie_g_perceel for all other A-percelen.
 -- Inherit all items in 'relatie_g_perceel' of parent objects.
+CREATE INDEX ON brk_prep.kot_ontstaan_uit_g_perceel (nrn_kot_id, nrn_kot_volgnr);
+CREATE INDEX ON brk_prep.kot_ontstaan_uit_kot (nrn_kot_id, nrn_kot_volgnr);
+
 CREATE OR REPLACE FUNCTION kot_derive_g_percelen() RETURNS integer AS
 $$
 DECLARE
