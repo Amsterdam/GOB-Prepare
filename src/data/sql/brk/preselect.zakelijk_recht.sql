@@ -45,8 +45,6 @@ FROM brk.zakelijkrecht zrt
                                              ON zrt2.id = zit.zakelijkrecht_id) sq
                     GROUP BY zrt_id) bel ON bel.zrt_id = zrt.id
          LEFT JOIN brk_prep.aardzakelijkrecht_waardelijst azt ON zrt.aardzakelijkrecht_code = azt.code
-         LEFT JOIN brk_prep.zrt_kot zrt_kot ON zrt.rust_op_kadastraalobject_id = zrt_kot.rust_op_kadastraalobject_id
-    AND zrt.rust_op_kadastraalobj_volgnr = zrt_kot.rust_op_kadastraalobj_volgnr
+         LEFT JOIN brk_prep.zrt_kot zrt_kot ON zrt.id = zrt_kot.id
          LEFT JOIN brk_prep.zrt_asg zrt_asg ON zrt.id = zrt_asg.id
-    AND zrt.rust_op_kadastraalobj_volgnr = zrt_asg.rust_op_kadastraalobj_volgnr
 ;
