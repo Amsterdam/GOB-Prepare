@@ -15,8 +15,8 @@ SELECT zrt.id
      , zrt_asg.nrn_asg_id
      , zrt_asg.asg_einddatum
      , zrt_asg.asg_actueel
-     , zrt.rust_op_kadastraalobject_id
-     , zrt.rust_op_kadastraalobj_volgnr
+     , zrt_kot.rust_op_kadastraalobject_id
+     , zrt_kot.rust_op_kadastraalobj_volgnr
      , zrt_kot.kadastraal_object_id
      , zrt_kot.zrt_einddatum
      , zrt_kot.zrt_begindatum
