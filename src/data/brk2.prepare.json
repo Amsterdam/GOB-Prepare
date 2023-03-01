@@ -128,15 +128,26 @@
     },
     {
       "type": "create_table",
+      "description": "Select kot_geldigheid",
+      "table_name": "brk2_prep.kot_geldigheid",
+      "query_src": "file",
+      "query": "data/sql/brk2/preselect.kot.geldigheid.sql",
+      "id": "select_kot_geldigheid",
+      "depends_on": [
+        "clone_source",
+        "import_burgerlijke_gemeentes",
+        "create_baghulptabel"
+      ]
+    },
+    {
+      "type": "create_table",
       "description": "Select KOT",
       "table_name": "brk2_prep.kadastraal_object",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastraal_object.sql",
       "id": "select_kot",
       "depends_on": [
-        "clone_source",
-        "import_burgerlijke_gemeentes",
-        "create_baghulptabel"
+        "select_kot_geldigheid"
       ]
     },
     {
