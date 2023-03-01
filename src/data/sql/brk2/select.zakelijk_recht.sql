@@ -49,6 +49,10 @@ SELECT zrt_kot.volgnummer                                       AS volgnummer,
        betrokken_bij.__max_betrokken_bij_begindatum             AS __max_betrokken_bij_begindatum,
        ontstaan_uit.__max_ontstaan_uit_begindatum               AS __max_ontstaan_uit_begindatum
 FROM brk2.zakelijkrecht zrt
+         JOIN brk2_prep.zrt_kot zrt_kot -- INNER JOIN so that we only import ZRT's with KOT's with status 'B'
+              ON zrt.id = zrt_kot.id
+         LEFT JOIN brk2_prep.zrt_asg zrt_asg
+                   ON zrt.id = zrt_asg.id
          LEFT JOIN (SELECT ztt.zakelijkrecht_id,
                            JSONB_AGG(JSONB_BUILD_OBJECT('bronwaarde', tng.identificatie)
                                      ORDER BY tng.identificatie) AS is_beperkt_tot
@@ -56,10 +60,6 @@ FROM brk2.zakelijkrecht zrt
                              JOIN brk2.tenaamstelling tng ON tng.id = ztt.isbeperkttot_id
                     GROUP BY ztt.zakelijkrecht_id) ztt ON ztt.zakelijkrecht_id = zrt.id
          LEFT JOIN brk2.c_aardzakelijkrecht a ON zrt.aardzakelijkrecht_code = a.code
-         LEFT JOIN brk2_prep.zrt_kot zrt_kot
-                   ON zrt.id = zrt_kot.id
-         LEFT JOIN brk2_prep.zrt_asg zrt_asg
-                   ON zrt.id = zrt_asg.id
          LEFT JOIN brk2.zakelijkrecht_onderzoek zok ON zok.zakelijkrecht_id = zrt.id
          LEFT JOIN brk2.inonderzoek iok ON iok.identificatie = zok.onderzoek_identificatie
          LEFT JOIN brk2.c_authentiekgegeven agn ON agn.code = iok.authentiekgegeven_code
