@@ -24,7 +24,7 @@ SELECT kot.identificatie                    AS identificatie,
        cod.omschrijving                     AS soort_cultuur_onbebouwd_omschrijving,
        kot.cultuurcodebebouwd_code          AS soort_cultuur_bebouwd_code,
        ccb.omschrijving                     AS soort_cultuur_bebouwd_omschrijving,
-       kot.status_code                      AS status,
+       kot.status_code                      AS __status,
        kot.referentie                       AS referentie,
        kot.oudst_digitaal_bekend            AS oudst_digitaal_bekend,
        kot.mutatie_id                       AS mutatie_id,
@@ -37,7 +37,7 @@ SELECT kot.identificatie                    AS identificatie,
            WHEN kot.soortgrootte_code IN ('2', '5', '6', '7', '8', '9', '10', '11', '12') THEN 'J'
            ELSE 'N'
            END                              AS indicatie_voorlopige_kadastrale_grens,
-       kot.geometrie                        AS __geometrie,  -- Temporary field. Only contains G-percelen. A 'geometrie' field will be added later in the finalise step.
+       kot.geometrie                        AS __geometrie, -- Temporary field. Only contains G-percelen. A 'geometrie' field will be added later in the finalise step.
        prc.geometrie                        AS plaatscoordinaten,
        prc.rotatie                          AS perceelnummer_rotatie,
        prc.verschuiving_x                   AS perceelnummer_verschuiving_x,
@@ -48,19 +48,14 @@ SELECT kot.identificatie                    AS identificatie,
        kot.koopjaar                         AS koopjaar,
        kot.indicatiemeerobjecten            AS indicatie_meer_objecten,
        kot.toestandsdatum                   AS toestandsdatum,
-       kot.creation                         AS begin_geldigheid,
-       kot.modification                     AS eind_geldigheid,
+       ghd.begin_geldigheid                 AS begin_geldigheid,
+       ghd.eind_geldigheid                  AS eind_geldigheid,
+       ghd.eind_geldigheid                  AS datum_actueel_tot,
+       ghd.eind_geldigheid                  AS _expiration_date,
        kok.omschrijving                     AS in_onderzoek,
-       COALESCE(kot.modification,
-                CASE kot.status_code
-                    WHEN 'H' THEN kot.creation
-                    END)                    AS datum_actueel_tot,
-       COALESCE(kot.modification,
-                CASE kot.status_code
-                    WHEN 'H' THEN kot.creation
-                    END)                    AS _expiration_date,
        adr.vot_adressen                     AS heeft_een_relatie_met_bag_verblijfsobject
 FROM brk2.kadastraal_object kot
+         JOIN brk2_prep.kot_geldigheid ghd ON ghd.id = kot.id AND ghd.volgnummer = kot.volgnummer
          LEFT JOIN brk2.kadastraal_object_percnummer prc
                    ON kot.id = prc.kadastraalobject_id AND kot.volgnummer = prc.kadastraalobject_volgnummer
          LEFT JOIN brk2.kadastraal_object_bijpijling bij
@@ -90,7 +85,7 @@ FROM brk2.kadastraal_object kot
 CREATE INDEX ON brk2_prep.kadastraal_object (id, volgnummer);
 CREATE INDEX ON brk2_prep.kadastraal_object (identificatie, volgnummer);
 CREATE INDEX ON brk2_prep.kadastraal_object (indexletter);
-CREATE INDEX ON brk2_prep.kadastraal_object ((heeft_een_relatie_met_bag_verblijfsobject->>'bag_id'));
+CREATE INDEX ON brk2_prep.kadastraal_object ((heeft_een_relatie_met_bag_verblijfsobject ->> 'bag_id'));
 CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_brk_kadastralesectie);
 CREATE INDEX ON brk2_prep.kadastraal_object (aangeduid_door_brk_kadastralegemeentecode_code);
 CREATE INDEX ON brk2_prep.kadastraal_object (__kadastrale_aanduiding_minus_index_nummer);

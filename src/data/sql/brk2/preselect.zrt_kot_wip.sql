@@ -9,7 +9,8 @@ SELECT zrt.identificatie,
        kot.eind_geldigheid              AS eind_geldigheid,
        kot.toestandsdatum               AS toestandsdatum,
        kot.datum_actueel_tot            AS datum_actueel_tot,
-       kot._expiration_date             AS _expiration_date
+       kot._expiration_date             AS _expiration_date,
+       kot.__status                     AS __kot_status
 FROM brk2.zakelijkrecht zrt
          LEFT JOIN brk2_prep.kadastraal_object kot
                    ON zrt.rust_op_kadastraalobject_id = kot.id AND zrt.rust_op_kadastraalobj_volgnr = kot.volgnummer;
@@ -38,7 +39,8 @@ BEGIN
         begin_geldigheid  timestamp,
         eind_geldigheid   timestamp,
         _expiration_date  timestamp,
-        datum_actueel_tot timestamp
+        datum_actueel_tot timestamp,
+        __kot_status varchar
     );
 
     LOOP
@@ -51,7 +53,8 @@ BEGIN
                kot.begin_geldigheid,
                kot.eind_geldigheid,
                kot._expiration_date,
-               kot.datum_actueel_tot
+               kot.datum_actueel_tot,
+               kot.__status AS __kot_status
         FROM brk2.zakelijkrecht_isbelastmet bel
                  LEFT JOIN brk2_prep.zrt_kot_wip zrtkot
                            ON zrtkot.id = zakelijkrecht_id
@@ -72,7 +75,8 @@ BEGIN
             begin_geldigheid=v.begin_geldigheid,
             eind_geldigheid=v.eind_geldigheid,
             _expiration_date=v._expiration_date,
-            datum_actueel_tot=v.datum_actueel_tot
+            datum_actueel_tot=v.datum_actueel_tot,
+            __kot_status=v.__kot_status
         FROM isbelastmet v
         WHERE v.id = zrt.id;
 
