@@ -27,7 +27,7 @@ SELECT tng.identificatie                                               AS identi
        g.isgebaseerd_op                                                AS is_gebaseerd_op_brk_stukdeel,
        zrt.toestandsdatum                                              AS toestandsdatum
 FROM brk2.tenaamstelling tng
-         LEFT JOIN brk2_prep.zakelijk_recht zrt ON tng.vanrecht_id = zrt.__id
+         JOIN brk2_prep.zakelijk_recht zrt ON tng.vanrecht_id = zrt.__id
          LEFT JOIN brk2.gezamenlijk_aandeel ga ON tng.geldtvoordeel_identificatie = ga.identificatie
          LEFT JOIN brk2.c_samenwerkingsverband s ON s.code = tng.verkregen_namens_code
          LEFT JOIN brk2.c_burgerlijkestaat b ON b.code = tng.burgerlijkestaat_code
