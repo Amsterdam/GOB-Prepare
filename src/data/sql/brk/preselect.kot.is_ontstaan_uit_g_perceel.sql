@@ -14,7 +14,7 @@ SELECT kot.nrn_kot_id,
 FROM brk_prep.kot_ontstaan_uit_kot kot
          LEFT JOIN JSONB_ARRAY_ELEMENTS(kot.ontstaan_uit_kadastraalobject) json_elms(obj)
                    ON TRUE
-         LEFT JOIN brk_prep.kadastraal_object ontst_uit_kot
+         JOIN brk_prep.kadastraal_object ontst_uit_kot
                    ON ontst_uit_kot.nrn_kot_id = (json_elms.obj ->> 'nrn_kot_id')::integer
                        AND ontst_uit_kot.nrn_kot_volgnr = (json_elms.obj ->> 'kot_volgnummer')::integer
 WHERE ontst_uit_kot.index_letter = 'G'
