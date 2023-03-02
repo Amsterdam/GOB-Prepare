@@ -18,6 +18,6 @@ WITH akr_codes(aard_code, akr_code) AS (VALUES ('1', 'BK'),
                                                ('24', 'BPG'))
 SELECT
     azt.*,
-    c.akr_code as akr_code
+    c.akr_code as akrcode
 FROM brk_prep.aardzakelijkrecht_waardelijst_import azt
 LEFT JOIN akr_codes c ON c.aard_code = azt.code
