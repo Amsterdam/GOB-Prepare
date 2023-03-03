@@ -40,7 +40,7 @@ BEGIN
         eind_geldigheid   timestamp,
         _expiration_date  timestamp,
         datum_actueel_tot timestamp,
-        __kot_status varchar
+        __kot_status      varchar
     );
 
     LOOP
@@ -54,7 +54,7 @@ BEGIN
                kot.eind_geldigheid,
                kot._expiration_date,
                kot.datum_actueel_tot,
-               kot.__status AS __kot_status
+               kot.__status                    AS __kot_status
         FROM brk2.zakelijkrecht_isbelastmet bel
                  LEFT JOIN brk2_prep.zrt_kot_wip zrtkot
                            ON zrtkot.id = zakelijkrecht_id
@@ -92,3 +92,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 SELECT add_kot_to_zrt_brk2();
+
+ALTER TABLE brk2_prep.zrt_kot_wip
+    RENAME TO zrt_kot_wip_all;
+
+CREATE TABLE brk2_prep.zrt_kot_wip AS
+SELECT *
+FROM brk2_prep.zrt_kot_wip_all
+WHERE __kot_status = 'B';
+DROP TABLE brk2_prep.zrt_kot_wip_all;
