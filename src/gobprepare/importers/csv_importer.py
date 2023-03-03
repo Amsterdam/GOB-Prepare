@@ -8,7 +8,6 @@ from urllib.error import HTTPError
 
 from gobcore.exceptions import GOBException
 
-from gobprepare.config import CONTAINER_BASE
 from gobcore.datastore.sql import SqlDatastore
 from gobcore.datastore.factory import DatastoreFactory
 from gobcore.datastore.objectstore import ObjectDatastore
