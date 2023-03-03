@@ -285,6 +285,14 @@
       "depends_on": [
         "clear_schemas"
       ]
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "brp": "brp_prepared"
+      },
+      "depends_on": "*"
     }
   ]
 }
