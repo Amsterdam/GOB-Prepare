@@ -65,7 +65,7 @@ BEGIN
                                      AND ontst_uit_kot.nrn_kot_volgnr = (json_elms.obj ->> 'kot_volgnummer')::integer
                        LEFT JOIN JSONB_ARRAY_ELEMENTS(ontst_uit_kot.relatie_g_perceel) json_gperc_elms(obj)
                                  ON TRUE
-                       LEFT JOIN kot_g_percelen gperceel
+                       JOIN brk_prep.kadastraal_object gperceel
                                  ON gperceel.nrn_kot_id = (json_gperc_elms.obj ->> 'nrn_kot_id')::integer
                                      AND gperceel.nrn_kot_volgnr = (json_gperc_elms.obj ->> 'kot_volgnummer')::integer
               WHERE ontst_uit_kot.relatie_g_perceel IS NOT NULL
