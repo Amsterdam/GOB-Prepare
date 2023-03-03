@@ -185,12 +185,14 @@ class TestSqlCsvImporter(TestCase):
             {"max_length": 20, "name": "col_a"},
             {"max_length": 19, "name": "col_b"},
             {"max_length": 8, "name": "col_c"},
+            {"max_length": 8, "name": "col with SpAceS"},
         ]
         self.importer._create_destination_table(columns)
         mock_create_table.assert_called_with(
             self.importer._dst_datastore,
             self.config['destination'],
-            "col_a VARCHAR(25) NULL,col_b VARCHAR(24) NULL,col_c VARCHAR(13) NULL",
+            '"col_a" VARCHAR(25) NULL,"col_b" VARCHAR(24) NULL,'
+            '"col_c" VARCHAR(13) NULL,"col with SpAceS" VARCHAR(13) NULL',
         )
         self.dst_datastore.execute.assert_called_with(mock_create_table.return_value)
 
@@ -240,6 +242,7 @@ class TestSqlCsvImporterLoad(TestCase):
         mock_connection = MagicMock()
         mock_connection.get_object.return_value = [{}, 'the object data']
         mock_factory.get_datastore.return_value = MagicMock(spec=ObjectDatastore)
+        mock_factory.get_datastore.return_value.container_name = CONTAINER_BASE
         mock_factory.get_datastore.return_value.connection = mock_connection
         mock_factory.get_datastore.return_value.query.return_value = iter([{'name': 'file/location/on/objectstore.ext'}])
 
