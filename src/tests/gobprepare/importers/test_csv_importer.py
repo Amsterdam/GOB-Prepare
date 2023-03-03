@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from pandas.errors import ParserError
 from urllib.error import HTTPError
 from gobcore.exceptions import GOBException
-from gobprepare.importers.csv_importer import SqlCsvImporter, CONTAINER_BASE, ObjectDatastore
+from gobprepare.importers.csv_importer import SqlCsvImporter, ObjectDatastore
 
 
 @patch("gobprepare.importers.csv_importer.SqlCsvImporter._load_from_objectstore", MagicMock())
@@ -242,14 +242,14 @@ class TestSqlCsvImporterLoad(TestCase):
         mock_connection = MagicMock()
         mock_connection.get_object.return_value = [{}, 'the object data']
         mock_factory.get_datastore.return_value = MagicMock(spec=ObjectDatastore)
-        mock_factory.get_datastore.return_value.container_name = CONTAINER_BASE
+        mock_factory.get_datastore.return_value.container_name = "my container base"
         mock_factory.get_datastore.return_value.connection = mock_connection
         mock_factory.get_datastore.return_value.query.return_value = iter([{'name': 'file/location/on/objectstore.ext'}])
 
         importer = SqlCsvImporter(dst_datastore, config)
         importer._tmp_filename = MagicMock()
 
-        mock_connection.get_object.assert_called_with(CONTAINER_BASE, 'file/location/on/objectstore.ext')
+        mock_connection.get_object.assert_called_with("my container base", 'file/location/on/objectstore.ext')
         mock_get_config.assert_called_with('TheObjectstore')
         mock_factory.get_datastore.assert_called_with(mock_get_config.return_value, config['read_config'])
 
