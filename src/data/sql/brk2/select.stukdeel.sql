@@ -53,7 +53,7 @@ FROM brk2.stukdeel sdl
                                                         tng.neuron_id)
                                      ORDER BY tng.identificatie, tng.neuron_id)                                   AS tng_ids
                     FROM brk2.tenaamstelling_isgebaseerdop tip
-                             LEFT JOIN brk2_prep.tenaamstelling tng ON tng.neuron_id = tip.tenaamstelling_id
+                             JOIN brk2_prep.tenaamstelling tng ON tng.neuron_id = tip.tenaamstelling_id
                     GROUP BY tip.stukdeel_identificatie) tng ON sdl.identificatie = tng.stukdeel_identificatie
          LEFT JOIN (SELECT q.stukdeel_identificatie,
                            JSONB_AGG(JSONB_BUILD_OBJECT('art_identificatie', q.identificatie, 'art_neuron_id',
