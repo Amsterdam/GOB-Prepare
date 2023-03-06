@@ -23,7 +23,6 @@ FROM brk2_prep.kadastraal_object kot1
          JOIN brk2_prep.kadastraal_object kot2
               ON kot2.id = (g_perceel ->> 'kot_id')::integer
                   AND kot2.volgnummer = (g_perceel ->> 'kot_volgnummer')::integer
-                  AND kot2._expiration_date IS NULL
 WHERE kot1.indexletter = 'A'
   AND kot1._expiration_date IS NULL
   AND kot1.aangeduid_door_brk_kadastralesectie = kot2.aangeduid_door_brk_kadastralesectie
