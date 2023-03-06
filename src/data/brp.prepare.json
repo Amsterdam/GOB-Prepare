@@ -1,0 +1,298 @@
+{
+  "version": "0.1",
+  "name": "BRP",
+  "catalogue": "brp",
+  "destination": {
+    "application": "GOBPrepare"
+  },
+  "actions": [
+    {
+      "type": "clear",
+      "schemas": [
+        "brp",
+        "brp_prep"
+      ],
+      "id": "clear_schemas"
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSALDU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.adres_elders",
+      "id": "import_adres_elders",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSHUWU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.huwelijk",
+      "id": "import_huwelijk",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSC55U00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.huwelijk_c55",
+      "id": "import_huwelijk_c55",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSPRSU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.personen",
+      "id": "import_personen",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSOVLU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.overlijden",
+      "id": "import_overlijden",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSVWSU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.verwijsgegevens",
+      "id": "import_verwijsgegevens",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSKINU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.kindgegevens",
+      "id": "import_kindgegevens",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSAHIU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.adres_historie",
+      "id": "import_adres_historie",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSC58U00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.adres_historie_c58",
+      "id": "import_adres_historie_c58",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSNATU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.nationaliteiten",
+      "id": "import_nationaliteiten",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSVBTU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.verblijfstitel",
+      "id": "import_verblijfstitel",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSC60U00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.verblijfstitel_c60",
+      "id": "import_verblijfstitel_c60",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSGEZU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.gezagsverhouding",
+      "id": "import_gezagsverhouding",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSC61U00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.gezagsverhouding_c61",
+      "id": "import_gezagsverhouding_c61",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSRSDU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.reisdocumenten",
+      "id": "import_reisdocumenten",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSTABT00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.codetabellen_1",
+      "id": "import_codetabellen_1",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSTBXT00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.codetabellen_2",
+      "id": "import_codetabellen_2",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "brp": "brp_prepared"
+      },
+      "depends_on": "*"
+    }
+  ]
+}
