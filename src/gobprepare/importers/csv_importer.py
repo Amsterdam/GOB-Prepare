@@ -8,7 +8,6 @@ from urllib.error import HTTPError
 
 from gobcore.exceptions import GOBException
 
-from gobprepare.config import CONTAINER_BASE
 from gobcore.datastore.sql import SqlDatastore
 from gobcore.datastore.factory import DatastoreFactory
 from gobcore.datastore.objectstore import ObjectDatastore
@@ -102,7 +101,7 @@ class SqlCsvImporter():
             raise GOBException(f"File not found on Objectstore: {read_config['file_filter']}")
 
         new_location = self._tmp_filename(obj_info['name'])
-        obj = objectstore.connection.get_object(CONTAINER_BASE, obj_info['name'])[1]
+        obj = objectstore.connection.get_object(objectstore.container_name, obj_info['name'])[1]
 
         with open(new_location, 'wb') as fp:
             fp.write(obj)
@@ -116,7 +115,7 @@ class SqlCsvImporter():
         """
 
         # This works for Postgres and probably for most SQL databases
-        columndefs = ",".join([f"{col['name']} VARCHAR({col['max_length'] + 5}) NULL" for col in columns])
+        columndefs = ",".join([f"\"{col['name']}\" VARCHAR({col['max_length'] + 5}) NULL" for col in columns])
         query = create_table_columnar_query(self._dst_datastore, self._destination, columndefs)
         self._dst_datastore.execute(query)
 
