@@ -34,9 +34,7 @@ SELECT sdl.id                                                            AS id,
                 akt.max_akt_expiration_date IS NULL OR art.max_art_expiration_date IS NULL THEN NULL
            ELSE
                GREATEST(tng.max_tng_eind_geldigheid, zrt.max_zrt_eind_geldigheid, akt.max_akt_expiration_date,
-                        art.max_art_expiration_date) END                 AS _expiration_date,
-       LEAST(tng.min_tng_begin_geldigheid, zrt.min_zrt_begin_geldigheid) AS begin_geldigheid,
-       tng.max_tng_begin_geldigheid                                      AS __max_tng_begin_geldigheid
+                        art.max_art_expiration_date) END                 AS _expiration_date
 FROM brk2.stukdeel sdl
          LEFT JOIN brk2.stuk stk ON sdl.stuk_identificatie = stk.identificatie
          LEFT JOIN brk2.c_aardstukdeel asl ON sdl.aardstukdeel_code = asl.code
