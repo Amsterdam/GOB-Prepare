@@ -48,4 +48,4 @@ FROM brk2.tenaamstelling tng
                     WHERE atg.aardaantekening_code = '21'
                     GROUP BY tag.tenaamstelling_id) art ON tng.id = art.tenaamstelling_id
          LEFT JOIN brk2.aantekening atg ON atg.id = art.id
-WHERE NOT (tng.identificatie = 'NL.IMKAD.Tenaamstelling.AKR2.100000010664394' AND zrt.volgnummer = 1) OR tng.id = 94136;
+WHERE NOT (tng.identificatie = 'NL.IMKAD.Tenaamstelling.AKR2.100000010664394' AND zrt.volgnummer = 1);
