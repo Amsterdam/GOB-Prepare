@@ -6,8 +6,8 @@ SELECT kot.identificatie                    AS identificatie,
        LPAD(kot.index_nummer::text, 4, '0') AS kadastrale_aanduiding,
        kot.akrkadastralegemeentecode || kot.sectie || LPAD(kot.perceelnummer::text, 5, '0') ||
        kot.index_letter                     AS __kadastrale_aanduiding_minus_index_nummer,
-       LPAD(brg.cbscode::text, 4, '0')      AS aangeduid_door_brk_gemeente_code,
-       brg.bgmnaam                          AS aangeduid_door_brk_gemeente_omschrijving,
+       LPAD(brg."CBSCode"::text, 4, '0')    AS aangeduid_door_brk_gemeente_code,
+       brg."BGMNaam"                        AS aangeduid_door_brk_gemeente_omschrijving,
        kge.code                             AS aangeduid_door_brk_kadastralegemeente_code,
        kge.omschrijving                     AS aangeduid_door_brk_kadastralegemeente_omschrijving,
        kot.akrkadastralegemeentecode_code   AS aangeduid_door_brk_kadastralegemeentecode_code,
@@ -16,7 +16,7 @@ SELECT kot.identificatie                    AS identificatie,
        kot.perceelnummer                    AS perceelnummer,
        kot.index_letter                     AS indexletter,
        kot.index_nummer                     AS indexnummer,
-       brg.bgmnaam                          AS _gemeente,
+       brg."BGMNaam"                        AS _gemeente,
        kot.soortgrootte_code                AS soort_grootte_code,
        sge.omschrijving                     AS soort_grootte_omschrijving,
        kot.kadgrootte                       AS grootte,
@@ -62,10 +62,10 @@ FROM brk2.kadastraal_object kot
                    ON kot.id = bij.kadastraalobject_id AND kot.volgnummer = bij.kadastraalobject_volgnummer
          LEFT JOIN brk2.c_kadastralegemeente kge
                    ON kot.kadastralegemeente_code = kge.code
-         LEFT JOIN (SELECT cbscode, bgmnaam, kadgemnaam
+         LEFT JOIN (SELECT "CBSCode", "BGMNaam", "KadGemNaam"
                     FROM brk2.import_burgerlijke_gemeentes
-                    GROUP BY cbscode, bgmnaam, kadgemnaam) brg
-                   ON kge.omschrijving = brg.kadgemnaam
+                    GROUP BY "CBSCode", "BGMNaam", "KadGemNaam") brg
+                   ON kge.omschrijving = brg."KadGemNaam"
          LEFT JOIN brk2.c_soortgrootte sge
                    ON kot.soortgrootte_code = sge.code
          LEFT JOIN brk2.c_cultuurcodeonbebouwd cod
