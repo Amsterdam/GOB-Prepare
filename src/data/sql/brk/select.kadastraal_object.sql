@@ -2,15 +2,15 @@ SELECT kot.identificatie                    AS brk_kot_id
      , kot.id                               AS nrn_kot_id
      , kot.id                               AS source_id
      , kot.volgnummer                       AS nrn_kot_volgnr
-     , json_build_object(
+     , JSON_BUILD_OBJECT(
         'code', kot.kadastralegemeente_code,
         'omschrijving', kge.omschrijving
     )                                       AS kad_gemeente
-     , json_build_object(
-        'code', LPAD(brg.cbscode::text, 4, '0'),
-        'omschrijving', brg.bgmnaam
+     , JSON_BUILD_OBJECT(
+        'code', LPAD(brg."CBSCode"::text, 4, '0'),
+        'omschrijving', brg."BGMNaam"
     )                                       AS brg_gemeente
-     , json_build_object(
+     , JSON_BUILD_OBJECT(
         'code', kot.akrkadastralegemeentecode_code,
         'omschrijving', ake.omschrijving
     )                                       AS kad_gemeentecode
@@ -31,7 +31,7 @@ SELECT kot.identificatie                    AS brk_kot_id
      , cod.omschrijving                     AS cultuurcodeonbebouwd_oms
      , ccb.cultuurbebouwd                   AS cultuurcodebebouwd
      , kot.status_code                      AS status_code
-     , coalesce(vkg.vkgrens, 'N')           AS ind_voorlopige_kadgrens -- Replaced 'Definitieve grens' with 'N'
+     , COALESCE(vkg.vkgrens, 'N')           AS ind_voorlopige_kadgrens -- Replaced 'Definitieve grens' with 'N'
      , kok.omschrijving                     AS inonderzoek
      , kot.toestandsdatum                   AS toestandsdatum
      , kot.creation                         AS creation
@@ -43,7 +43,7 @@ SELECT kot.identificatie                    AS brk_kot_id
                (CASE kot.status_code
                     WHEN 'H' THEN kot.creation
                     ELSE NULL END) END      AS expiration_date
-     , kot.modification                     as einddatum
+     , kot.modification                     AS einddatum
      --     Wanneer het een A-perceel betreft
      --     DAN geometrie afleiden uit of meer grondpercelen
      --      in GOB later in het proces--
@@ -52,14 +52,14 @@ SELECT kot.identificatie                    AS brk_kot_id
                kot.geometrie
            ELSE
                NULL
-    END                                     AS __geometrie  -- Temporary field. Only contains G-percelen. A 'geometrie' field will be added later in the finalise step.
+    END                                     AS __geometrie             -- Temporary field. Only contains G-percelen. A 'geometrie' field will be added later in the finalise step.
      , prc.rotatie                          AS perceelnummer_rotatie
      , prc.verschuiving_x                   AS perceelnummer_verschuiving_x
      , prc.verschuiving_y                   AS perceelnummer_verschuiving_y
      , prc.geometrie                        AS perceelnummer_geometrie
      , bij.geometrie                        AS bijpijling_geometrie
-     , adr.adressen                         as adressen
-     , brg.bgmnaam                          as brg_gemeente_oms
+     , adr.adressen                         AS adressen
+     , brg."BGMNaam"                        AS brg_gemeente_oms
 --
 FROM brk.kadastraal_object kot
          LEFT JOIN brk.c_akrkadastralegemeentecode ake
@@ -76,10 +76,10 @@ FROM brk.kadastraal_object kot
 --Cultuurcode bebouwd, kunnen er meer per kadastraal object zijn
          LEFT JOIN (SELECT kas.kot_id                                                               AS nrn_kot_id
                          , kas.kot_volgnr                                                           AS nrn_kot_volgnr
-                         , array_to_json(array_agg(json_build_object( -- POSTGRES Changed to JSON
+                         , ARRAY_TO_JSON(ARRAY_AGG(JSON_BUILD_OBJECT( -- POSTGRES Changed to JSON
                                                            'code', kas.cult_beb_code,
                                                            'omschrijving', kas.cult_beb
-                                                       ) ORDER BY kas.cult_beb_code, kas.cult_beb)) as cultuurbebouwd
+                                                       ) ORDER BY kas.cult_beb_code, kas.cult_beb)) AS cultuurbebouwd
                     FROM (SELECT kasi.kadastraalobject_id         AS kot_id
                                , kasi.kadastraalobject_volgnummer AS kot_volgnr
                                , cbd.omschrijving                 AS cult_beb
@@ -105,7 +105,8 @@ FROM brk.kadastraal_object kot
                     FROM brk.aantekening_kadastraalobject akt
                        , brk.aantekening atg
                     WHERE atg.id = akt.aantekening_id
-                      AND (date_trunc('day', einddatum) <= date_trunc('day', NOW()) or -- POSTGRES: replaced trunc(einddatum) with date_trunc('day', einddatum) and trunc(SYSDATE) with date_trun('day', NOW())
+                      AND (DATE_TRUNC('day', einddatum) <=
+                           DATE_TRUNC('day', NOW()) OR -- POSTGRES: replaced trunc(einddatum) with date_trunc('day', einddatum) and trunc(SYSDATE) with date_trun('day', NOW())
                            einddatum IS NULL)
                       AND aardaantekening_code IN ('270', '271')
                       --ontdubbel voorlopige grenzen per kadastraal object en cyclus (diva 2.30.8)
@@ -117,7 +118,8 @@ FROM brk.kadastraal_object kot
                            FROM brk.aantekening_kadastraalobject akt
                               , brk.aantekening atg
                            WHERE atg.id = akt.aantekening_id
-                             AND (date_trunc('day', einddatum) <= date_trunc('day', NOW()) OR -- POSTGRES: replaced trunc(einddatum) with date_trunc('day', einddatum) and trunc(SYSDATE) with date_trun('day', NOW())
+                             AND (DATE_TRUNC('day', einddatum) <=
+                                  DATE_TRUNC('day', NOW()) OR -- POSTGRES: replaced trunc(einddatum) with date_trunc('day', einddatum) and trunc(SYSDATE) with date_trun('day', NOW())
                                   einddatum IS NULL)
                              AND aardaantekening_code IN
                                  ('270', '271')
@@ -128,9 +130,9 @@ FROM brk.kadastraal_object kot
                          ON (kot.id = prc.id AND kot.volgnummer = prc.volgnummer)
          LEFT OUTER JOIN brk.bijpijling bij
                          ON (kot.id = bij.id AND kot.volgnummer = bij.volgnummer)
-         left outer join brk.baghulptabel adr
-                         on adr.kadastraalobject_id = kot.id and adr.kadastraalobject_volgnummer = kot.volgnummer
-         left join (select cbscode, bgmnaam, kadgemnaam
-                    from brk.import_burgerlijke_gemeentes
-                    group by cbscode, bgmnaam, kadgemnaam) brg
-                   on (kge.omschrijving = brg.kadgemnaam);
+         LEFT OUTER JOIN brk.baghulptabel adr
+                         ON adr.kadastraalobject_id = kot.id AND adr.kadastraalobject_volgnummer = kot.volgnummer
+         LEFT JOIN (SELECT "CBSCode", "BGMNaam", "KadGemNaam"
+                    FROM brk.import_burgerlijke_gemeentes
+                    GROUP BY "CBSCode", "BGMNaam", "KadGemNaam") brg
+                   ON (kge.omschrijving = brg."KadGemNaam");
