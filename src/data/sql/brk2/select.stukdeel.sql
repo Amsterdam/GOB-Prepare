@@ -34,9 +34,7 @@ SELECT sdl.id                                                               AS i
                 akt.max_akt_expiration_date IS NULL OR art.max_art_expiration_date IS NULL THEN NULL
            ELSE
                GREATEST(tng.max_tng_eind_geldigheid, zrt.max_zrt_eind_geldigheid, akt.max_akt_expiration_date,
-                        art.max_art_expiration_date) END                 AS _expiration_date,
-       LEAST(tng.min_tng_begin_geldigheid, zrt.min_zrt_begin_geldigheid) AS begin_geldigheid,
-       tng.max_tng_begin_geldigheid                                      AS __max_tng_begin_geldigheid
+                        art.max_art_expiration_date) END                 AS _expiration_date
 FROM brk2.stukdeel sdl
          LEFT JOIN brk2.stuk stk ON sdl.stuk_identificatie = stk.identificatie
          LEFT JOIN brk2.c_aardstukdeel asl ON sdl.aardstukdeel_code = asl.code
@@ -53,7 +51,7 @@ FROM brk2.stukdeel sdl
                                                         tng.neuron_id)
                                      ORDER BY tng.identificatie, tng.neuron_id)                                   AS tng_ids
                     FROM brk2.tenaamstelling_isgebaseerdop tip
-                             LEFT JOIN brk2_prep.tenaamstelling tng ON tng.neuron_id = tip.tenaamstelling_id
+                             JOIN brk2_prep.tenaamstelling tng ON tng.neuron_id = tip.tenaamstelling_id
                     GROUP BY tip.stukdeel_identificatie) tng ON sdl.identificatie = tng.stukdeel_identificatie
          LEFT JOIN (SELECT q.stukdeel_identificatie,
                            JSONB_AGG(JSONB_BUILD_OBJECT('art_identificatie', q.identificatie, 'art_neuron_id',
