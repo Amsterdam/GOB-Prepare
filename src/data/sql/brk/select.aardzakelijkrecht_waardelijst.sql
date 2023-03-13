@@ -20,4 +20,4 @@ SELECT
     azt.*,
     c.akr_code as akrcode
 FROM brk_prep.aardzakelijkrecht_waardelijst_import azt
-LEFT JOIN akr_codes c ON c.aard_code = azt.code
+LEFT JOIN akr_codes c ON c.aard_code = azt."Code"
