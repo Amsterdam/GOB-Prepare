@@ -1,7 +1,7 @@
 SELECT zrt.id
      , zrt.identificatie
      , zrt.aardzakelijkrecht_code
-     , azt.waarde                       AS aardzakelijkrecht_oms
+     , azt."Waarde"                     AS aardzakelijkrecht_oms
      , azt.akrcode                      AS aardzakelijkrecht_akr_code
      , blm.is_belast_met                AS is_belast_met
      , bel.belast                       AS belast
