@@ -44,7 +44,7 @@ FROM brk.zakelijkrecht zrt
                                    LEFT JOIN brk.zakelijkrecht zrt2
                                              ON zrt2.id = zit.zakelijkrecht_id) sq
                     GROUP BY zrt_id) bel ON bel.zrt_id = zrt.id
-         LEFT JOIN brk_prep.aardzakelijkrecht_waardelijst azt ON zrt.aardzakelijkrecht_code = azt.code
+         LEFT JOIN brk_prep.aardzakelijkrecht_waardelijst azt ON zrt.aardzakelijkrecht_code = azt."Code"
          LEFT JOIN brk_prep.zrt_kot zrt_kot ON zrt.id = zrt_kot.id
          LEFT JOIN brk_prep.zrt_asg zrt_asg ON zrt.id = zrt_asg.id
 ;
