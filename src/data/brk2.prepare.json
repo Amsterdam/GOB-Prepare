@@ -90,6 +90,20 @@
       ]
     },
     {
+      "type": "import_csv",
+      "objectstore": "Basisinformatie",
+      "read_config": {
+        "file_filter": "brk/Gemeentegrenzen_GML/gemeentes_2013_2022_incl_Weesp.csv",
+        "container": "acceptatie"
+      },
+      "separator": ",",
+      "destination": "brk2_prep.import_gemeentes_2013_2022",
+      "id": "import_gemeentes_csv",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
       "type": "execute_sql",
       "description": "Create materialized view Baghulptabel",
       "query_src": "file",
