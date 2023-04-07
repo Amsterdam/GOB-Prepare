@@ -2,10 +2,13 @@ import requests
 
 
 class APIException(IOError):
+    """API Exception."""
+
     pass
 
 
 def post_stream(url, json, **kwargs):
+    """Post query to GraphQL Streaming API."""
     result = requests.post(url, stream=True, json=json, **kwargs)
 
     try:

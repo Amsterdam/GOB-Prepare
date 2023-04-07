@@ -1,19 +1,19 @@
-"""Mapping
+"""Mapping.
 
-Reads a mapping from a file
-
+Read a mapping from a file.
 """
+
+
 import json
 import os
 
 from gobcore.exceptions import GOBException
 
-
-DATASET_DIR = os.path.join(os.path.dirname(__file__), '../data/')
+DATASET_DIR = os.path.join(os.path.dirname(__file__), "../data/")
 
 
 def _build_prepare_definitions_locations_mapping():
-    """Builds prepare definitions locations mapping based on json files present in DATASET_DIR
+    """Build prepare definitions locations mapping based on JSON files present in DATASET_DIR.
 
     :return:
     """
@@ -21,10 +21,10 @@ def _build_prepare_definitions_locations_mapping():
 
     for file in os.listdir(DATASET_DIR):
         filepath = DATASET_DIR + file
-        if os.path.isfile(filepath) and file.endswith('.json') and not file.startswith('_'):
+        if os.path.isfile(filepath) and file.endswith(".json") and not file.startswith("_"):
             try:
                 mapping = get_mapping(filepath)
-                catalogue = mapping['catalogue']
+                catalogue = mapping["catalogue"]
             except (KeyError, json.decoder.JSONDecodeError):
                 raise GOBException(f"Dataset file {filepath} invalid")
             result[catalogue] = filepath
@@ -32,6 +32,7 @@ def _build_prepare_definitions_locations_mapping():
 
 
 def get_prepare_definition_file_location(catalogue: str):
+    """Return the catalog prepare definitions mapping."""
     try:
         return prepare_definition_locations_mapping[catalogue]
     except KeyError:
@@ -39,8 +40,7 @@ def get_prepare_definition_file_location(catalogue: str):
 
 
 def get_mapping(input_name):
-    """
-    Read a mapping from a file
+    """Read a mapping from a file.
 
     :param input_name: name of the file that contains the mapping
     :return: an object that contains the mapping
