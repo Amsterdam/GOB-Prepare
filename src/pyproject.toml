@@ -82,6 +82,7 @@ warn_return_any = true
 # Disable import checks for non typed packages
 [[tool.mypy.overrides]]
 module = [
+    "psycopg2.extras",
     "requests",
 ]
 ignore_missing_imports = true
