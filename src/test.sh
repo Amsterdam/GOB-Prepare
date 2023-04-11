@@ -3,14 +3,55 @@
 set -u # crash on missing env
 set -e # stop on any error
 
-# Coverage 6: coverage run --data-file=/tmp/.coveragerc …
-export COVERAGE_FILE=/tmp/.coverage
+echo() {
+   builtin echo -e "$@"
+}
 
-echo "Running style checks"
-flake8
+export COVERAGE_FILE="/tmp/.coverage"
 
-echo "Running unit tests"
-coverage run --source=./gobprepare -m pytest tests/
+# Uncomment files to pass through checks
+FILES=(
+  "gobprepare/cloner/mapping/__init__.py"
+#  "gobprepare/cloner/mapping/oracle_to_postgres.py"
+  "gobprepare/cloner/__init__.py"
+#  "gobprepare/cloner/oracle_to_postgres.py"
+#  "gobprepare/selector/_selector.py"
+  "gobprepare/selector/__init__.py"
+#  "gobprepare/selector/_from_datastore.py"
+#  "gobprepare/selector/_to_postgres.py"
+#  "gobprepare/selector/datastore_to_postgres.py"
+  "gobprepare/config.py"
+  "gobprepare/importers/__init__.py"
+#  "gobprepare/importers/api_importer.py"
+#  "gobprepare/importers/csv_importer.py"
+  "gobprepare/__init__.py"
+  "gobprepare/utils/graphql.py"
+  "gobprepare/utils/__init__.py"
+  "gobprepare/utils/postgres.py"
+  "gobprepare/utils/exceptions.py"
+  "gobprepare/utils/sql.py"
+  "gobprepare/utils/requests.py"
+  "gobprepare/mapping.py"
+#  "gobprepare/prepare_client.py"
+#  "gobprepare/__main__.py"
+)
+
+echo "Running mypy"
+mypy "${FILES[@]}"
+
+echo "\nRunning unit tests"
+coverage run --source=gobprepare -m pytest
 
 echo "Coverage report"
-coverage report --show-missing --fail-under=100
+coverage report --fail-under=100
+
+echo "\nCheck if Black finds potential reformat fixes"
+black --check --diff "${FILES[@]}"
+
+echo "\nCheck for potential import sort"
+isort --check --diff --src-path=gobprepare "${FILES[@]}"
+
+echo "\nRunning Flake8 style checks"
+flake8 "${FILES[@]}"
+
+echo "\nChecks complete"
