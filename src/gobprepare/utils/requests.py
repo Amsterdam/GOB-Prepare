@@ -1,3 +1,5 @@
+from typing import Iterator
+
 import requests
 
 
@@ -7,7 +9,7 @@ class APIException(IOError):
     pass
 
 
-def post_stream(url, json, **kwargs):
+def post_stream(url: str, json: dict[str, str], **kwargs) -> Iterator[bytes]:
     """Post query to GraphQL Streaming API."""
     result = requests.post(url, stream=True, json=json, **kwargs)
 
@@ -15,4 +17,4 @@ def post_stream(url, json, **kwargs):
         result.raise_for_status()
     except requests.exceptions.RequestException:
         raise APIException(f"Request failed due to API exception, response code {result.status_code}")
-    return result.iter_lines()
+    return result.iter_lines()  # type: ignore[no-any-return]

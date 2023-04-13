@@ -33,6 +33,7 @@ FILES=(
   "gobprepare/utils/exceptions.py"
   "gobprepare/utils/sql.py"
   "gobprepare/utils/requests.py"
+  "gobprepare/utils/typing.py"
   "gobprepare/mapping.py"
 #  "gobprepare/prepare_client.py"
   "gobprepare/typing.py"
