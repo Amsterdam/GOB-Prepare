@@ -82,6 +82,8 @@ warn_return_any = true
 # Disable import checks for non typed packages
 [[tool.mypy.overrides]]
 module = [
+    "pandas",
+    "pandas.errors",
     "psycopg2.extras",
     "requests",
 ]

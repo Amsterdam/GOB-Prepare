@@ -1,7 +1,7 @@
 """GOB Prepare typing."""
 
 
-from typing import Any, TypedDict
+from typing import Any, Literal, TypedDict
 
 
 class PrepareMapping(TypedDict):
@@ -21,3 +21,11 @@ class ActionCommonConfig(TypedDict):
 
     depends_on: list[str]
     id: str
+
+
+class SQLBaseConfig(ActionCommonConfig):
+    """SQL action base configuration."""
+
+    description: str
+    query_src: Literal["file", "string"]
+    query: str
