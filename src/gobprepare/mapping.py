@@ -9,10 +9,12 @@ import os
 
 from gobcore.exceptions import GOBException
 
+from gobprepare.typing import PrepareMapping
+
 DATASET_DIR = os.path.join(os.path.dirname(__file__), "../data/")
 
 
-def _build_prepare_definitions_locations_mapping():
+def _build_prepare_definitions_locations_mapping() -> dict[str, str]:
     """Build prepare definitions locations mapping based on JSON files present in DATASET_DIR.
 
     :return:
@@ -31,7 +33,7 @@ def _build_prepare_definitions_locations_mapping():
     return result
 
 
-def get_prepare_definition_file_location(catalogue: str):
+def get_prepare_definition_file_location(catalogue: str) -> str:
     """Return the catalog prepare definitions mapping."""
     try:
         return prepare_definition_locations_mapping[catalogue]
@@ -39,14 +41,15 @@ def get_prepare_definition_file_location(catalogue: str):
         raise GOBException(f"No prepare definition found for catalogue {catalogue}")
 
 
-def get_mapping(input_name):
+def get_mapping(input_name: str) -> PrepareMapping:
     """Read a mapping from a file.
 
     :param input_name: name of the file that contains the mapping
     :return: an object that contains the mapping
     """
     with open(input_name) as file:
-        return json.load(file)
+        mapping: PrepareMapping = json.load(file)
+        return mapping
 
 
 prepare_definition_locations_mapping = _build_prepare_definitions_locations_mapping()

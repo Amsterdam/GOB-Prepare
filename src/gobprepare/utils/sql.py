@@ -1,6 +1,10 @@
 """SQL constants."""
 
 
+from collections.abc import Iterable
+
+from gobprepare.utils.typing import MetaField
+
 SQL_TYPE_CONVERSIONS = {
     "String": "character varying",
     "DateTime": "timestamp without time zone",
@@ -11,7 +15,7 @@ SQL_TYPE_CONVERSIONS = {
 SQL_QUOTATION_MARK = "'"
 
 
-def _quote(name):
+def _quote(name: str) -> str:
     """Quote all SQL identifiers (schema, table, column names).
 
     To prevent weird errors with SQL keywords accidentally being used in identifiers.
@@ -26,7 +30,7 @@ def _quote(name):
     return f"{QUOTE_CHAR}{name}{QUOTE_CHAR}"
 
 
-def _create_field(name, type, description):
+def _create_field(name: str, type: str, description: str) -> dict[str, str]:
     """Create a database field.
 
     :param name:
@@ -37,7 +41,13 @@ def _create_field(name, type, description):
     return {"name": _quote(name), "type": SQL_TYPE_CONVERSIONS[type], "description": description}
 
 
-def get_create_table_sql(schema, table_name, description, meta_fields, field_names):
+def get_create_table_sql(
+    schema: str,
+    table_name: str,
+    description: str,
+    meta_fields: dict[str, MetaField],
+    field_names: Iterable[str],
+) -> str:
     """Return a SQL statement to create a table in a schema.
 
     The table fields are constructed from GraphQL meta fields
@@ -77,6 +87,6 @@ COMMENT ON TABLE  {table_name} IS {SQL_QUOTATION_MARK}{description}{SQL_QUOTATIO
 """
 
 
-def get_full_table_name(schema, table_name):
+def get_full_table_name(schema: str, table_name: str) -> str:
     """Return full table name."""
     return f"{_quote(schema)}.{_quote(table_name)}"
