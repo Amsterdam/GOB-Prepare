@@ -1,7 +1,6 @@
 SELECT kot.identificatie                    AS identificatie,
        kot.volgnummer                       AS volgnummer,
        kot.id                               AS id,
-       NULL                                 AS registratiedatum,
        kot.akrkadastralegemeentecode || kot.sectie || LPAD(kot.perceelnummer::text, 5, '0') || kot.index_letter ||
        LPAD(kot.index_nummer::text, 4, '0') AS kadastrale_aanduiding,
        kot.akrkadastralegemeentecode || kot.sectie || LPAD(kot.perceelnummer::text, 5, '0') ||
