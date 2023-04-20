@@ -1,7 +1,6 @@
 SELECT atg.identificatie                                               AS identificatie,
        atg.id                                                          AS __neuron_id,
        koa.kadastraalobject_volgnummer                                 AS volgnummer,
-       NULL                                                            AS registratiedatum,
        kot.begin_geldigheid                                            AS begin_geldigheid,
        kot.eind_geldigheid                                             AS eind_geldigheid,
        atg.einddatum_recht                                             AS einddatum_recht,
