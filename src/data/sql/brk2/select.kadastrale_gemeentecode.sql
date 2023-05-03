@@ -5,7 +5,7 @@
 SELECT gc3.identificatie,
        ST_Union(gc3.geometrie)                 AS geometrie,
        gc3.is_onderdeel_van_kadastralegemeente AS is_onderdeel_van_brk_kadastrale_gemeente,
-       gc3.code                                AS is_onderdeel_van_brk_kadastrale_gemeente_code
+       gc3.code                                AS code
 FROM (SELECT gc2.identificatie,
              ST_MakePolygon(ST_ExteriorRing((ST_Dump(gc2.geometrie)).geom)) AS geometrie,
              gc2.is_onderdeel_van_kadastralegemeente,

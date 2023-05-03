@@ -5,7 +5,7 @@
 SELECT gc3.identificatie       AS identificatie,
        ST_Union(gc3.geometrie) AS geometrie,
        gc3.ligt_in_gemeente    AS ligt_in_brk_gemeente,
-       gc3.code                AS ligt_in_brk_gemeente_code
+       gc3.code                AS code
 FROM (SELECT gc2.identificatie,
              ST_MakePolygon(ST_ExteriorRing((ST_Dump(gc2.geometrie)).geom)) AS geometrie,
              gc2.ligt_in_gemeente,
