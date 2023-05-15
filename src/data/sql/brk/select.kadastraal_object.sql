@@ -70,7 +70,11 @@ FROM brk.kadastraal_object kot
                    ON (kot.cultuurcodeonbebouwd_code = cod.code)
          LEFT JOIN brk.c_soortgrootte sge
                    ON (kot.soortgrootte_code = sge.code)
-         LEFT JOIN brk.kadastraalobject_onderzoek kok
+         LEFT JOIN (SELECT kadastraalobject_id,
+                           kadastraalobject_volgnummer,
+                           STRING_AGG(omschrijving, ',' ORDER BY omschrijving) omschrijving
+                    FROM brk.kadastraalobject_onderzoek
+                    GROUP BY kadastraalobject_id, kadastraalobject_volgnummer) kok
                    ON (kot.id = kok.kadastraalobject_id AND
                        kot.volgnummer = kok.kadastraalobject_volgnummer)
 --Cultuurcode bebouwd, kunnen er meer per kadastraal object zijn
