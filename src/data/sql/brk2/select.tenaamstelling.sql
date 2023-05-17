@@ -8,7 +8,7 @@ SELECT tng.identificatie                                               AS identi
        zrt.volgnummer                                                  AS volgnummer,
        tng.tennamevan_identificatie                                    AS van_brk_kadastraalsubject,
        zrt.begin_geldigheid                                            AS begin_geldigheid,
-       zrt.eind_geldigheid                                             AS eind_geldigheid,
+       LEAST(zrt._expiration_date, atg.einddatum, atg.einddatum_recht) AS eind_geldigheid,
        LEAST(zrt._expiration_date, atg.einddatum, atg.einddatum_recht) AS datum_actueel_tot,
        LEAST(zrt._expiration_date, atg.einddatum, atg.einddatum_recht) AS _expiration_date,
        tng.aandeel_teller                                              AS aandeel_teller,
