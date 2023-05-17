@@ -2,7 +2,7 @@ SELECT atg.identificatie                                               AS identi
        atg.id                                                          AS __neuron_id,
        koa.kadastraalobject_volgnummer                                 AS volgnummer,
        kot.begin_geldigheid                                            AS begin_geldigheid,
-       kot.eind_geldigheid                                             AS eind_geldigheid,
+       LEAST(kot._expiration_date, atg.einddatum, atg.einddatum_recht) AS eind_geldigheid,
        atg.einddatum_recht                                             AS einddatum_recht,
        atg.aardaantekening_code                                        AS aard_code,
        aag.omschrijving                                                AS aard_omschrijving,
