@@ -1,8 +1,10 @@
+import http.client
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
+from urllib.error import HTTPError
 
 from pandas.errors import ParserError
-from urllib.error import HTTPError
+
 from gobcore.exceptions import GOBException
 from gobprepare.importers.csv_importer import SqlCsvImporter, ObjectDatastore
 
@@ -147,7 +149,6 @@ class TestSqlCsvImporter(TestCase):
         self.assertEqual(expected_result, result)
         mock_read_csv.assert_called_with(self.importer._source, keep_default_na=False, sep=self.importer._separator, encoding='the-encoding', dtype=str)
 
-
     @patch("gobprepare.importers.csv_importer.read_csv")
     def test_load_csv_parser_error(self, mock_read_csv):
         self._setup_importer()
@@ -165,6 +166,10 @@ class TestSqlCsvImporter(TestCase):
         self.importer.WAIT_RETRY = 0
         self.importer._source = 'the source'
 
+        with self.assertRaisesRegex(GOBException, self.importer._source):
+            self.importer._load_csv()
+
+        mock_read_csv.side_effect = http.client.IncompleteRead(partial=b"some bytes object")
         with self.assertRaisesRegex(GOBException, self.importer._source):
             self.importer._load_csv()
 
