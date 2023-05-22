@@ -1,3 +1,4 @@
+SET LOCAL max_parallel_workers_per_gather = 0;
 SELECT aangeduid_door_brk_kadastralesectie                                                           AS identificatie,
        (right(aangeduid_door_brk_kadastralesectie, -5))                                              AS code,
        aangeduid_door_brk_kadastralegemeentecode_omschrijving                                        AS is_onderdeel_van_brk_kadastrale_gemeentecode,

@@ -2,6 +2,7 @@
 -- Collect the polygons and Use ST_UnaryUnion to remove conflicting linestrings
 -- Take the exterior ring
 -- The last union is to create MULTIPOLYGONs from areas with the same identificatie
+SET LOCAL max_parallel_workers_per_gather = 0;
 SELECT gc3.identificatie,
        ST_Union(gc3.geometrie)                 AS geometrie,
        gc3.is_onderdeel_van_kadastralegemeente AS is_onderdeel_van_brk_kadastrale_gemeente,
