@@ -336,9 +336,8 @@
       ]
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select KSE",
-      "table_name": "brk2_prep.kadastrale_sectie",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastrale_sectie.sql",
       "id": "select_kse",
@@ -347,9 +346,8 @@
       ]
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select KGE",
-      "table_name": "brk2_prep.kadastrale_gemeente",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastrale_gemeente.sql",
       "id": "select_kge",
@@ -358,9 +356,8 @@
       ]
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select KCE",
-      "table_name": "brk2_prep.kadastrale_gemeentecode",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastrale_gemeentecode.sql",
       "id": "select_kce",
