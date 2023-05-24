@@ -23,6 +23,7 @@ resources:
 
 stages:
   - stage: Test
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
     jobs:
       - template: templates/test.yaml@benk-infra
         parameters:
