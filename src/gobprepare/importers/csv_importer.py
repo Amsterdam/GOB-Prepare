@@ -1,3 +1,4 @@
+import http.client
 import os
 import tempfile
 import time
@@ -75,15 +76,16 @@ class SqlCsvImporter:
                 df = read_csv(
                     self._source, keep_default_na=False, sep=self._separator, dtype=str, encoding=self._encoding
                 )
-                break
             except ParserError:
                 raise GOBException(f"Can't parse CSV: {self._source}")
-            except HTTPError:
+            except (HTTPError, http.client.HTTPException):
                 tries += 1
                 if tries >= self.MAX_RETRIES:
                     raise GOBException(f"Problems downloading CSV: {self._source}")
 
                 time.sleep(self.WAIT_RETRY)
+            else:
+                break  # pragma: no cover
 
         return {
             "columns": [
