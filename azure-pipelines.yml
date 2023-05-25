@@ -32,7 +32,7 @@ stages:
   - stage: BuildOnt
     displayName: Build and push develop image to ontwikkel
     dependsOn: Test
-    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/develop') )
+    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/develop'))
     jobs:
       - template: templates/build_image.yaml@benk-infra
         parameters:
@@ -47,7 +47,7 @@ stages:
     dependsOn:
       - Test
       - BuildOnt
-    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/develop') )
+    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/develop'))
     jobs:
       - template: templates/tag_image.yaml@benk-infra
         parameters:
@@ -59,7 +59,7 @@ stages:
   - stage: BuildAcc
     displayName: Build and push develop image to acceptance
     dependsOn: Test
-    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master') )
+    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
     jobs:
       - template: templates/build_image.yaml@benk-infra
         parameters:
