@@ -130,6 +130,20 @@
       ]
     },
     {
+      "type": "import_csv",
+      "objectstore": "Basisinformatie",
+      "read_config": {
+        "file_filter": "^brk/Oude_Nieuwe_ids/Conversietabel_BRK1_2_Identificaties.csv$",
+        "container": "acceptatie"
+      },
+      "separator": ";",
+      "destination": "brk2_prep.import_id_conversion",
+      "id": "import_id_conversion_csv",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
       "type": "create_table",
       "description": "Select meta",
       "table_name": "brk2_prep.meta",
