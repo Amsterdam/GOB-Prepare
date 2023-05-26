@@ -136,7 +136,7 @@
         "file_filter": "^brk/Oude_Nieuwe_ids/Conversietabel_BRK1_2_Identificaties.csv$",
         "container": "acceptatie"
       },
-      "separator": ";",
+      "separator": ",",
       "destination": "brk2_prep.import_id_conversion",
       "id": "import_id_conversion_csv",
       "depends_on": [
