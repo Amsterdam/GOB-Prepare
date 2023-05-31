@@ -137,7 +137,7 @@
         "container": "acceptatie"
       },
       "separator": ",",
-      "destination": "brk2_prep.import_id_conversion",
+      "destination": "brk2_prep.id_conversion",
       "id": "import_id_conversion_csv",
       "depends_on": [
         "clear_schemas"
