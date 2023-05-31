@@ -19,6 +19,7 @@ WITH akr_codes(aard_code, akr_code) AS (VALUES ('1', 'BK'),
 SELECT zrt_kot.volgnummer                                       AS volgnummer,
        zrt.id                                                   AS __id,
        zrt.identificatie                                        AS identificatie,
+       idc.ident_oud                                            AS was_identificatie,
        bel.belast                                               AS belast_zakelijkerechten,
        blm.is_belast_met                                        AS belast_met_zakelijkerechten,
        ontstaan_uit.ontstaan_uit_brk_zakelijke_rechten::jsonb   AS ontstaan_uit_brk_zakelijke_rechten,
@@ -99,6 +100,7 @@ FROM brk2.zakelijkrecht zrt
                           GROUP BY identificatie, zrt_asg.__betrokken_bij_asg_id) q
                     GROUP BY __betrokken_bij_asg_id) ontstaan_uit
                    ON ontstaan_uit.__betrokken_bij_asg_id = zrt_asg.__ontstaan_uit_asg_id
+         LEFT OUTER JOIN brk2_prep.id_conversion idc ON idc.ident_nieuw = zrt.identificatie
 ;
 
 CREATE INDEX ON brk2_prep.zakelijk_recht (__id);

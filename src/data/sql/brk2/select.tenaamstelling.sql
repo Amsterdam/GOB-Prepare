@@ -6,6 +6,7 @@
 SELECT tng.identificatie                                               AS identificatie,
        tng.id                                                          AS neuron_id,
        zrt.volgnummer                                                  AS volgnummer,
+       idc.ident_oud                                                   AS was_identificatie,
        tng.tennamevan_identificatie                                    AS van_brk_kadastraalsubject,
        zrt.begin_geldigheid                                            AS begin_geldigheid,
        LEAST(zrt._expiration_date, atg.einddatum, atg.einddatum_recht) AS eind_geldigheid,
@@ -48,4 +49,5 @@ FROM brk2.tenaamstelling tng
                     WHERE atg.aardaantekening_code = '21'
                     GROUP BY tag.tenaamstelling_id) art ON tng.id = art.tenaamstelling_id
          LEFT JOIN brk2.aantekening atg ON atg.id = art.id
+         LEFT OUTER JOIN brk2_prep.id_conversion idc ON idc.ident_nieuw = tng.identificatie
 WHERE NOT (tng.identificatie = 'NL.IMKAD.Tenaamstelling.AKR2.100000010664394' AND zrt.volgnummer = 1);
