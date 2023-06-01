@@ -1,5 +1,6 @@
 SELECT sdl.id                                                               AS id,
        sdl.identificatie                                                    AS identificatie,
+       idc.ident_oud                                                        AS was_identificatie,
        sdl.aardstukdeel_code                                                AS aard_code,
        asl.omschrijving                                                     AS aard_omschrijving,
        sdl.bedrtransactiesomlev_vlt_code                                    AS bedrag_transactie_valuta,
@@ -102,6 +103,7 @@ FROM brk2.stukdeel sdl
                                    JOIN brk2_prep.zakelijk_recht zrt ON zrt.__ontstaan_uit_asg_id = asg.id
                           GROUP BY asg.stukdeel_identificatie, zrt.identificatie) q
                     GROUP BY q.stukdeel_identificatie) zrt ON sdl.identificatie = zrt.stukdeel_identificatie
+         LEFT OUTER JOIN brk2_prep.id_conversion idc ON idc.ident_nieuw = sdl.identificatie
          JOIN brk2.bestand bsd ON TRUE
 WHERE COALESCE(
                 tng.tng_ids -> 0 -> 'tng_identificatie',

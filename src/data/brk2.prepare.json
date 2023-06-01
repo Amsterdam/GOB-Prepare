@@ -137,7 +137,7 @@
         "container": "acceptatie"
       },
       "separator": ",",
-      "destination": "brk2_prep.import_id_conversion",
+      "destination": "brk2_prep.id_conversion",
       "id": "import_id_conversion_csv",
       "depends_on": [
         "clear_schemas"
@@ -219,7 +219,8 @@
       "id": "select_zrt",
       "depends_on": [
         "preselect_zrt_kot",
-        "preselect_zrt_asg"
+        "preselect_zrt_asg",
+        "import_id_conversion_csv"
       ]
     },
     {
@@ -310,7 +311,8 @@
       "id": "select_akt",
       "depends_on": [
         "select_kot",
-        "import_aardaantekening_csv"
+        "import_aardaantekening_csv",
+        "import_id_conversion_csv"
       ]
     },
     {
