@@ -1,5 +1,6 @@
 SELECT atg.identificatie                                               AS identificatie,
        atg.id                                                          AS __neuron_id,
+       idc.ident_oud                                                   AS was_identificatie,
        koa.kadastraalobject_volgnummer                                 AS volgnummer,
        kot.begin_geldigheid                                            AS begin_geldigheid,
        LEAST(kot._expiration_date, atg.einddatum, atg.einddatum_recht) AS eind_geldigheid,
@@ -32,4 +33,5 @@ FROM brk2.aantekening atg
                                ) AS sjt_identificaties
                     FROM brk2.aantekening_betrokkenpersoon abn
                     GROUP BY abn.aantekening_id) abn ON abn.aantekening_id = atg.id
+         LEFT OUTER JOIN brk2_prep.id_conversion idc ON idc.ident_nieuw = atg.identificatie
 ;
