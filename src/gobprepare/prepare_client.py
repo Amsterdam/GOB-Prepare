@@ -188,7 +188,7 @@ class PrepareClient:
         importer = SqlCsvImporter(self._dst_datastore, action)
 
         rows_imported = importer.import_csv()
-        logger.info(f"Imported {rows_imported} rows from CSV to table {action['destination']}")
+        logger.info(f"Imported {rows_imported:,} rows from CSV to table {action['destination']}")
         return rows_imported
 
     def action_create_table(self, action: CreateTableConfig) -> None:

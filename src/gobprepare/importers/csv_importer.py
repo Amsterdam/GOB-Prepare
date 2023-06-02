@@ -2,7 +2,8 @@ import http.client
 import os
 import tempfile
 import time
-from typing import Optional, TypedDict
+from pathlib import Path
+from typing import Optional, TypedDict, Iterator
 from urllib.error import HTTPError
 
 from gobconfig.datastore.config import get_datastore_config
@@ -10,25 +11,12 @@ from gobcore.datastore.factory import DatastoreFactory
 from gobcore.datastore.objectstore import ObjectDatastore
 from gobcore.datastore.sql import SqlDatastore
 from gobcore.exceptions import GOBException
-from pandas import read_csv
+from pandas import read_csv, NA as pd_NA
+from pandas.io.parsers import TextFileReader
 from pandas.errors import ParserError
 
 from gobprepare.importers.typing import ReadConfig, SqlCsvImporterConfig
 from gobprepare.utils.postgres import create_table_columnar_query
-
-
-class CSVColumn(TypedDict):
-    """CSV column."""
-
-    max_length: int
-    name: str
-
-
-class CSVData(TypedDict):
-    """CSV data."""
-
-    columns: list[CSVColumn]
-    data: list[list[Optional[str]]]
 
 
 class SqlCsvImporter:
@@ -37,16 +25,18 @@ class SqlCsvImporter:
     MAX_RETRIES = 5
     WAIT_RETRY = 2
 
+    CSV_CHUNK_SIZE = 100_000
+
     def __init__(self, dst_datastore: SqlDatastore, config: SqlCsvImporterConfig) -> None:
         """Initialise SqlCsvImporter."""
         self._dst_datastore = dst_datastore
         self._destination = config["destination"]
 
-        if config.get("objectstore"):
-            self._source = self._load_from_objectstore(config["objectstore"], config["read_config"])
-        elif config.get("source"):
-            self._source = config["source"]
-        else:
+        self._read_config: ReadConfig = config.get("read_config")
+        self._objectstore: str = config.get("objectstore")
+        self._source: str = config.get("source")
+
+        if not bool(self._objectstore) ^ bool(self._source):
             raise GOBException("Incomplete config. Expecting key 'objectstore' or 'source'")
 
         # Mapping of CSV columns to database columns (default CSV columns will be used if no alternative supplied)
@@ -54,15 +44,7 @@ class SqlCsvImporter:
         self._separator = config.get("separator", ",")
         self._encoding = config.get("encoding", "utf-8")
 
-    def _is_empty_row(self, row) -> bool:
-        """Return True if pandas row is empty.
-
-        :param row:
-        :return:
-        """
-        return all([True if i is None or not str(i) else False for i in row.tolist()])
-
-    def _load_csv(self) -> CSVData:
+    def _load_csv(self, reader: TextFileReader) -> tuple[list[str], list[tuple[Optional[str]]]]:
         """Load CSV with data.
 
         Download over HTTP if necessary.
@@ -71,11 +53,12 @@ class SqlCsvImporter:
         :return:
         """
         tries = 0
+
         while True:
             try:
-                df = read_csv(
-                    self._source, keep_default_na=False, sep=self._separator, dtype=str, encoding=self._encoding
-                )
+                df = reader.get_chunk(self.CSV_CHUNK_SIZE)
+            except StopIteration:
+                return [], []
             except ParserError:
                 raise GOBException(f"Can't parse CSV: {self._source}")
             except (HTTPError, http.client.HTTPException):
@@ -85,31 +68,23 @@ class SqlCsvImporter:
 
                 time.sleep(self.WAIT_RETRY)
             else:
-                break  # pragma: no cover
+                # Drop empty rows
+                df.dropna(axis="index", how="all", inplace=True)
+                df.replace(to_replace=pd_NA, value=None, inplace=True)
 
-        return {
-            "columns": [
-                {
-                    "max_length": max([len(str(i)) for i in df[col]]),
-                    "name": self._column_names.get(col, col),
-                }
-                for col in df.columns
-            ],
-            # List of lists of values
-            "data": [
-                list(map(lambda x: str(x) if x else None, row.tolist()))
-                for _, row in df.iterrows()
-                if not self._is_empty_row(row)
-            ],
-        }
+                columns = [self._column_names.get(col, col) for col in df]
+                data = [row for row in zip(*[df[col] for col in df])]
 
-    def _tmp_filename(self, filename: str) -> str:
+                return columns, data
+
+    @staticmethod
+    def _tmp_filename(filename: str) -> str:
         new_location = os.path.join(tempfile.gettempdir(), filename)
         os.makedirs(os.path.dirname(new_location), exist_ok=True)
         return new_location
 
-    def _load_from_objectstore(self, objectstore: str, read_config: ReadConfig) -> str:
-        objectstore = DatastoreFactory.get_datastore(get_datastore_config(objectstore), read_config)
+    def _load_from_objectstore(self) -> str:
+        objectstore = DatastoreFactory.get_datastore(get_datastore_config(self._objectstore), self._read_config)
         assert isinstance(objectstore, ObjectDatastore), "Expected Objectstore"
 
         objectstore.connect()
@@ -117,40 +92,81 @@ class SqlCsvImporter:
         try:
             obj_info = next(objectstore.query(None))
         except StopIteration:
-            raise GOBException(f"File not found on Objectstore: {read_config['file_filter']}")
+            raise GOBException(f"File not found on Objectstore: {self._read_config['file_filter']}")
 
-        new_location = self._tmp_filename(obj_info["name"])
-        obj = objectstore.connection.get_object(objectstore.container_name, obj_info["name"])[1]
+        tmp_location = self._tmp_filename(obj_info["name"])
 
-        with open(new_location, "wb") as fp:
-            fp.write(obj)
-        return new_location
+        _, obj = objectstore.connection.get_object(
+            container=objectstore.container_name,
+            obj=obj_info["name"],
+            resp_chunk_size=100_000_000
+        )
 
-    def _create_destination_table(self, columns: list[CSVColumn]) -> None:
+        with open(tmp_location, "wb") as fp:
+            for chunk in obj:
+                fp.write(chunk)
+
+        return tmp_location
+
+    def _create_destination_table(self, columns: list[str]) -> None:
         """Create a destination table.
 
         :param columns:
         :return:
         """
         # This works for Postgres and probably for most SQL databases
-        columndefs = ",".join([f"\"{col['name']}\" VARCHAR({col['max_length'] + 5}) NULL" for col in columns])
+        columndefs = ",".join([f"\"{col}\" TEXT NULL" for col in columns])
         query = create_table_columnar_query(self._dst_datastore, self._destination, columndefs)
         self._dst_datastore.execute(query)
 
-    def _import_data(self, data: list[list[Optional[str]]]) -> None:
+    def _import_data(self, data: list[tuple[Optional[str]]]) -> int:
         """Write CSV data to destination table.
 
         :param data:
         :return:
         """
-        self._dst_datastore.write_rows(self._destination, data)
+        return self._dst_datastore.write_rows(self._destination, data)
+
+    def _import_csv(self) -> int:
+        inserted_rows = 0
+
+        with read_csv(
+            self._source,
+            keep_default_na=False,
+            na_values="",  # only convert empty strings to NaN
+            sep=self._separator,
+            dtype=str,  # force string dtypes
+            encoding=self._encoding,
+            iterator=True
+        ) as reader:
+
+            while True:
+                columns, data = self._load_csv(reader)
+
+                if not data:
+                    break
+                if not inserted_rows:
+                    self._create_destination_table(columns)
+
+                inserted_rows += self._import_data(data)
+
+        if inserted_rows > 0:
+            self._dst_datastore.execute(f"ANALYZE {self._destination}")
+
+        return inserted_rows
 
     def import_csv(self) -> int:
         """Entry method. Return number of inserted rows.
 
         :return:
         """
-        data = self._load_csv()
-        self._create_destination_table(data["columns"])
-        self._import_data(data["data"])
-        return len(data["data"])
+        try:
+            if self._objectstore:
+                self._source = self._load_from_objectstore()
+
+            inserted_rows = self._import_csv()
+        finally:
+            if self._objectstore:
+                Path(self._source).unlink(missing_ok=True)
+
+        return inserted_rows
