@@ -1,9 +1,8 @@
+import contextlib
 import http.client
-import os
 import tempfile
 import time
-from pathlib import Path
-from typing import Optional, TypedDict, Iterator
+from typing import Optional
 from urllib.error import HTTPError
 
 from gobconfig.datastore.config import get_datastore_config
@@ -77,36 +76,29 @@ class SqlCsvImporter:
 
                 return columns, data
 
-    @staticmethod
-    def _tmp_filename(filename: str) -> str:
-        new_location = os.path.join(tempfile.gettempdir(), filename)
-        os.makedirs(os.path.dirname(new_location), exist_ok=True)
-        return new_location
+    @contextlib.contextmanager
+    def _load_from_objectstore(self, datastore: ObjectDatastore):
+        datastore.connect()
 
-    def _load_from_objectstore(self) -> str:
-        objectstore = DatastoreFactory.get_datastore(get_datastore_config(self._objectstore), self._read_config)
-        assert isinstance(objectstore, ObjectDatastore), "Expected Objectstore"
+        obj_info = next(datastore.query(None), None)
 
-        objectstore.connect()
-
-        try:
-            obj_info = next(objectstore.query(None))
-        except StopIteration:
+        if obj_info is None:
             raise GOBException(f"File not found on Objectstore: {self._read_config['file_filter']}")
 
-        tmp_location = self._tmp_filename(obj_info["name"])
-
-        _, obj = objectstore.connection.get_object(
-            container=objectstore.container_name,
+        _, obj = datastore.connection.get_object(
+            container=datastore.container_name,
             obj=obj_info["name"],
             resp_chunk_size=100_000_000
         )
 
-        with open(tmp_location, "wb") as fp:
-            for chunk in obj:
-                fp.write(chunk)
-
-        return tmp_location
+        with tempfile.NamedTemporaryFile(mode="wb", suffix=".csv") as fp:
+            try:
+                for chunk in obj:
+                    fp.write(chunk)
+                print(f"File loaded from objectstore: {obj_info['name']}")
+                yield fp.name
+            finally:
+                datastore.disconnect()
 
     def _create_destination_table(self, columns: list[str]) -> None:
         """Create a destination table.
@@ -127,11 +119,11 @@ class SqlCsvImporter:
         """
         return self._dst_datastore.write_rows(self._destination, data)
 
-    def _import_csv(self) -> int:
+    def _import_csv(self, source_path: str) -> int:
         inserted_rows = 0
 
         with read_csv(
-            self._source,
+            source_path,
             keep_default_na=False,
             na_values="",  # only convert empty strings to NaN
             sep=self._separator,
@@ -160,13 +152,9 @@ class SqlCsvImporter:
 
         :return:
         """
-        try:
-            if self._objectstore:
-                self._source = self._load_from_objectstore()
-
-            inserted_rows = self._import_csv()
-        finally:
-            if self._objectstore:
-                Path(self._source).unlink(missing_ok=True)
-
-        return inserted_rows
+        if self._objectstore:
+            datastore = DatastoreFactory.get_datastore(get_datastore_config(self._objectstore), self._read_config)
+            with self._load_from_objectstore(datastore) as src_file:
+                return self._import_csv(src_file)
+        else:
+            return self._import_csv(self._source)
