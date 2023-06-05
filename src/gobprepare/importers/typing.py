@@ -24,7 +24,7 @@ class ReadConfig(TypedDict):
     file_filter: str
 
 
-class SqlCsvImporterConfig(ActionCommonConfig):
+class SqlCsvImporterConfig(ActionCommonConfig, total=False):
     """SqlCsvImporter action configuration."""
 
     column_names: dict[str, str]
@@ -33,7 +33,7 @@ class SqlCsvImporterConfig(ActionCommonConfig):
     encoding: Literal["utf-8", "iso-8859-1"]
     objectstore: str
     read_config: ReadConfig
-    separator: Literal[";"]
+    separator: Literal[";", ",", "|", "\t"]
     # URL
     source: str
     type: Literal["import_csv"]
