@@ -1,0 +1,117 @@
+{
+    "version": "0.1",
+    "name": "HR",
+    "catalogue": "hr",
+    "source": {
+        "application": "Makelaarssuite"
+    },
+    "destination": {
+        "application": "GOBPrepare"
+    },
+    "actions": [
+        {
+            "type": "clear",
+            "schemas": [
+                "hr",
+                "hr_prep"
+            ],
+            "id": "clear_schemas"
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "handelsregister",
+            "read_config": {
+                "file_filter": "mks-dump/kvkadr.sql.gz"
+            },
+            "destination": "hr_prep.kvk_vestiging",
+            "id": "import_kvk_vestiging",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "handelsregister",
+            "read_config": {
+                "file_filter": "mks-dump/kvkadr.sql.gz"
+            },
+            "destination": "hr_prep.adressen",
+            "id": "import_kvk_vestiging",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "handelsregister",
+            "read_config": {
+                "file_filter": "mks-dump/kvkhdn.sql.gz"
+            },
+            "destination": "hr_prep.handelsnaam",
+            "id": "import_kvk_vestiging",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "handelsregister",
+            "read_config": {
+                "file_filter": "mks-dump/kvkmac.sql.gz"
+            },
+            "destination": "hr_prep.maatschappelijkeactiviteit",
+            "id": "import_kvk_vestiging",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "handelsregister",
+            "read_config": {
+                "file_filter": "mks-dump/kvkprs.sql.gz"
+            },
+            "destination": "hr_prep.TODO",
+            "id": "import_kvk_vestiging",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "handelsregister",
+            "read_config": {
+                "file_filter": "mks-dump/kvkprsash.sql.gz"
+            },
+            "destination": "hr_prep.TODO",
+            "id": "import_kvk_vestiging",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "handelsregister",
+            "read_config": {
+                "file_filter": "mks-dump/kvkves.sql.gz"
+            },
+            "destination": "hr_prep.TODO",
+            "id": "import_kvk_vestiging",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "handelsregister",
+            "read_config": {
+                "file_filter": "mks-dump/kvkveshis.sql.gz"
+            },
+            "destination": "hr_prep.TODO",
+            "id": "import_kvk_vestiging",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        }
+    ]
+}

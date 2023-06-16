@@ -37,3 +37,17 @@ class SqlCsvImporterConfig(ActionCommonConfig, total=False):
     # URL
     source: str
     type: Literal["import_csv"]
+
+class SqlDumpImporterConfig(ActionCommonConfig, total=False):
+    # TODO: check the given param should be SQLBaseConfig or ExecuteSQLConfig or ActionCommonConfig
+    """SqlDumpImporter action configuration."""
+
+    description: str
+    destination: str
+    encoding: Literal["utf-8", "iso-8859-1"]
+    objectstore: str
+    read_config: ReadConfig
+    # separator: Literal[";"]
+    # URL
+    source: str
+    type: Literal["import_sqlDump"]
