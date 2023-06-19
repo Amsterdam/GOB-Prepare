@@ -189,6 +189,16 @@
             "depends_on": [
                 "clear_schemas"
             ]
+        },
+        {
+            "type": "execute_sql",
+            "description": "Create HR vestigingen table",
+            "id": "create_hr_ves",
+            "query_src": "file",
+            "query": "data/sql/hr/create.vestigingen.sql",
+            "depends_on": [
+                "clear_schemas"
+            ]
         }
     ]
 }
