@@ -19,99 +19,143 @@
         },
         {
             "type": "import_dump",
-            "objectstore": "handelsregister",
+            "objectstore": "HandelsregisterObjectstore",
             "read_config": {
-                "file_filter": "mks-dump/kvkadr.sql.gz"
+                "file_filter": "mks-dump/kvkadr.sql.gz",
+                "use_filter": true,
+                "sql_filter_list": [
+                    "GRANT",
+                    "DROP", 
+                    "OWNER",
+                    "search_path",
+                    "REVOKE",
+                    "CREATE TRIGGER",
+                    "CREATE INDEX",
+                    "ADD CONSTRAINT",
+                    "ALTER TABLE",
+                    "PRIMARY KEY ("
+                ],
+                "subs_dict": {
+                    "db_name":  {
+                        "replace": "",
+                        "regex": "gp_[a-zA-Z0-9_]+_cmg_owner\\."
+                    },
+                    "geometry": {
+                        "replace": " geopunt GEOMETRY(Point,28992)",
+                        "regex": "^.*geometry\\(Point.*$"
+                    }
+                }
             },
-            "destination": "hr_prep.kvk_vestiging",
-            "id": "import_kvk_vestiging",
+            "destination": "hr_prep.kvkadrm00",
+            "id": "import_kvkadr_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
-            "objectstore": "handelsregister",
+            "objectstore": "HandelsregisterObjectstore",
             "read_config": {
-                "file_filter": "mks-dump/kvkadr.sql.gz"
+                "file_filter": "mks-dump/kvkveshdn.sql.gz",
+                "use_filter": true,
+                "sql_filter_list": [
+                    "GRANT",
+                    "DROP",
+                    "OWNER",
+                    "search_path",
+                    "REVOKE",
+                    "CREATE TRIGGER",
+                    "CREATE INDEX",
+                    "ADD CONSTRAINT",
+                    "ALTER TABLE",
+                    "PRIMARY KEY ("
+                ]
             },
-            "destination": "hr_prep.adressen",
-            "id": "import_kvk_vestiging",
+            "destination": "hr_prep.kvkveshdnm00",
+            "id": "import_kvkveshdn_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
-            "objectstore": "handelsregister",
+            "objectstore": "HandelsregisterObjectstore",
             "read_config": {
                 "file_filter": "mks-dump/kvkhdn.sql.gz"
             },
-            "destination": "hr_prep.handelsnaam",
-            "id": "import_kvk_vestiging",
+            "destination": "hr_prep.kvkhdnm00",
+            "id": "import_kvkhdn_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
-            "objectstore": "handelsregister",
+            "objectstore": "HandelsregisterObjectstore",
             "read_config": {
                 "file_filter": "mks-dump/kvkmac.sql.gz"
             },
-            "destination": "hr_prep.maatschappelijkeactiviteit",
-            "id": "import_kvk_vestiging",
+            "destination": "hr_prep.kvkmacm00",
+            "id": "import_kvkmac_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
-            "objectstore": "handelsregister",
+            "objectstore": "HandelsregisterObjectstore",
             "read_config": {
                 "file_filter": "mks-dump/kvkprs.sql.gz"
             },
-            "destination": "hr_prep.TODO",
-            "id": "import_kvk_vestiging",
+            "destination": "hr_prep.kvkprsm00",
+            "id": "import_kvkprs_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
-            "objectstore": "handelsregister",
+            "objectstore": "HandelsregisterObjectstore",
             "read_config": {
                 "file_filter": "mks-dump/kvkprsash.sql.gz"
             },
-            "destination": "hr_prep.TODO",
-            "id": "import_kvk_vestiging",
+            "destination": "hr_prep.kvkprsashm00",
+            "id": "import_kvkprsash_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
-            "objectstore": "handelsregister",
+            "objectstore": "HandelsregisterObjectstore",
             "read_config": {
                 "file_filter": "mks-dump/kvkves.sql.gz"
             },
-            "destination": "hr_prep.TODO",
-            "id": "import_kvk_vestiging",
+            "destination": "hr_prep.kvkvesm00",
+            "id": "import_kvkves_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
-            "objectstore": "handelsregister",
+            "objectstore": "HandelsregisterObjectstore",
             "read_config": {
                 "file_filter": "mks-dump/kvkveshis.sql.gz"
             },
-            "destination": "hr_prep.TODO",
+            "destination": "hr_prep.kvkveshism00",
             "id": "import_kvk_vestiging",
             "depends_on": [
                 "clear_schemas"
             ]
+        },
+        {
+            "type": "publish_schemas",
+            "id": "publish_schemas",
+            "publish_schemas": {
+                "brk_prep": "hr_prepared"
+            },
+            "depends_on": "*"
         }
     ]
 }

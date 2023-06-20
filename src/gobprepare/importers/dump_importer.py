@@ -19,8 +19,6 @@ from gobcore.logging.logger import logger
 
 from gobcore.exceptions import GOBException
 
-filter_kvk_list = ['GRANT', 'DROP', 'OWNER', 'search_path', 'REVOKE', 'CREATE TRIGGER', 'CREATE INDEX', 'ADD CONSTRAINT', 'ALTER TABLE', 'PRIMARY KEY (']
-
 @contextlib.contextmanager
 def _load_from_objectstore(datastore: ObjectDatastore) -> Iterator[str]:
     datastore.connect()
@@ -62,13 +60,21 @@ class SqlDumpImporter:
         file_content = decompressed_file.read().decode('utf-8')
         # remove empty and comment lines
         sql_queries = [line for line in file_content.split('\n') if line.strip() and not line.startswith('--')]
+
         # filter out the queries
         for query in sql_queries:
-            if (not any(word in query for word in filter_kvk_list)):
-                query = re.sub(r'^.*geometry\(Point.*$', ' geopunt GEOMETRY(Point,28992)', query)
-                query = re.sub(r'igp_[a-zA-Z0-9_]+_cmg_owner\.', '', query)
-                # Execute query
-                self._dst_datastore.execute(query)
+            if self._read_config.use_filter:
+                if (not any(word in query for word in self._read_config.ql_filter_list)):
+                    subs_dict = self._read_config.subs_dict
+                    for _, value in subs_dict.items():
+                        regex_pattern = value['regex']
+                        replacement = value['replace']
+                        query = re.sub(regex_pattern, replacement, query)
+                        # TODO: Check this regex with the data: '^.*geometry\(Point.*$'
+                        # this regex is defined in hr.prepare.json
+
+            # Execute query
+            self._dst_datastore.execute(query)
 
     def import_dumps(self) -> int:
         """Entry method. Return number of impoted files.
@@ -81,8 +87,8 @@ class SqlDumpImporter:
             if not isinstance(datastore, ObjectDatastore):
                 raise GOBException(f"Expected objectstore, got: {type(datastore)}")
 
-            with _load_from_objectstore(datastore) as src_file:
-                return self._import_dump(src_file)
+            with _load_from_objectstore(datastore) as src_dump_file:
+                return self._import_dump(src_dump_file)
         elif not self._objectstore and self._source:
             return self._import_dump(self._source)
         else:

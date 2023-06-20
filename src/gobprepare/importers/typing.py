@@ -22,6 +22,9 @@ class ReadConfig(TypedDict):
     """Read file configuration."""
 
     file_filter: str
+    use_filter: bool
+    sql_filter_list: list
+    subs_dict: dict
 
 
 class SqlCsvImporterConfig(ActionCommonConfig, total=False):
