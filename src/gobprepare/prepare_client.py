@@ -202,7 +202,7 @@ class PrepareClient:
         importer = SqlDumpImporter(self._dst_datastore, action)
 
         files_imported = importer.import_dumps()
-        logger.info(f"Imported {files_imported} rows from CSV to table {action['destination']}")
+        logger.info(f"Dump {files_imported} successfully imported to table {action['destination']}")
         return files_imported
 
     def action_create_table(self, action: CreateTableConfig) -> None:
@@ -280,8 +280,8 @@ class PrepareClient:
             result["rows_imported"] = self.action_import_csv(cast(SqlCsvImporterConfig, action))
         elif action["type"] == "import_api":
             result["rows_imported"] = self.action_import_api(cast(APIImporterConfig, action))
-        elif action["type"] == "import_sqlDump":
-            result["rows_imported"] = self.action_import_sqlDump(cast(SqlDumpImporterConfig, action))
+        elif action["type"] == "import_dump":
+            result["file_imported"] = self.action_import_sqlDump(cast(SqlDumpImporterConfig, action))
         elif action["type"] == "join_actions":
             # Action only joins dependencies. No further actions necessary
             return None

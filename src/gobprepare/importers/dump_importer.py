@@ -1,13 +1,9 @@
 import contextlib
+from io import StringIO
 import tempfile
-import datetime
 import gzip
-import logging
-import os, shutil
 import re
 import tempfile
-
-from dateutil import parser
 from typing import List, Iterator, Optional
 
 from gobprepare.importers.typing import ReadConfig, SqlDumpImporterConfig
@@ -36,7 +32,7 @@ def _load_from_objectstore(datastore: ObjectDatastore) -> Iterator[str]:
         try:
             for chunk in obj:
                 fp.write(chunk)
-            print(f"File loaded from objectstore: {obj_info['name']}")
+            logger.info(f"File loaded from objectstore: {obj_info['name']}")
             yield fp.name
         finally:
             datastore.disconnect()
@@ -44,49 +40,65 @@ def _load_from_objectstore(datastore: ObjectDatastore) -> Iterator[str]:
 
 class SqlDumpImporter:
     """Import a SQL dump into a SqlDatastore table."""
-    # TODO: 
+
     def __init__(self, dst_datastore: SqlDatastore, config: SqlDumpImporterConfig) -> None:
         """ Initialise SqlDumpImporter """
         self._dst_datastore = dst_datastore
-        self._destination = config["destination"]
+        # self._destination = config["destination"]
         self._encoding = config.get("encoding", "utf-8")
 
         self._read_config: Optional[ReadConfig] = config.get("read_config")
         self._objectstore: Optional[str] = config.get("objectstore")
         self._source: Optional[str] = config.get("source")
 
-    def _import_dump(self, source_path: str) -> None:
+    def _process_queries(self, queries: list) -> None:
+        for query in queries:
+            # remove leading new line '\n\n'
+            query = query.lstrip()
+            # filter out and replace the queries based on the filter and substitution lists
+            if (query and not re.match(self._read_config['filter_list'], query)):
+                if not query.endswith(self._read_config['data_delimiter_regexp']):
+                    query += ';'
+                    for pattern, replacement in self._read_config['substitution'].items():
+                        query = re.sub(pattern, replacement, query)
+
+                if re.match(self._read_config['copy_query_regex'], query):
+                    copy_query = query
+                    continue
+
+                if re.search(self._read_config['data_delimiter_regexp'], query):
+                    data = query.split(self._read_config['data_delimiter_regexp'])
+                    if len(data[0]) != 0:
+                        self._dst_datastore.copy_expert(copy_query, StringIO(data[0]))
+                    continue
+
+                self._dst_datastore.execute(query)
+
+
+    def _import_dump(self, source_path: str) -> str:
         decompressed_file = gzip.GzipFile(source_path, 'r')
         file_content = decompressed_file.read().decode('utf-8')
-        # remove empty and comment lines
-        sql_queries = [line for line in file_content.split('\n') if line.strip() and not line.startswith('--')]
+        logger.info(f'Processing decompressed content of file "{self._read_config["file_filter"].split("/")[1]}"')
 
+        # remove all comments
+        sql_queries = [line for line in re.split(self._read_config['comments_regexp'], file_content) if not line == None and not line.isspace() and line.strip()]
         # filter out the queries
-        for query in sql_queries:
-            if self._read_config.use_filter:
-                if (not any(word in query for word in self._read_config.ql_filter_list)):
-                    subs_dict = self._read_config.subs_dict
-                    for _, value in subs_dict.items():
-                        regex_pattern = value['regex']
-                        replacement = value['replace']
-                        query = re.sub(regex_pattern, replacement, query)
-                        # TODO: Check this regex with the data: '^.*geometry\(Point.*$'
-                        # this regex is defined in hr.prepare.json
-
-            # Execute query
-            self._dst_datastore.execute(query)
+        for query_list in sql_queries:
+            # split on ';' for the sql queries en on '\.' for the data
+            queries = re.split(self._read_config['split_regexp'], query_list)
+            self._process_queries(queries)
+        return self._read_config["file_filter"].split('/')[1]
 
     def import_dumps(self) -> int:
-        """Entry method. Return number of impoted files.
+        """Entry method. Return (processed) gz file name.
 
-        :return:
+        :return: str
         """
         if self._objectstore and not self._source:
             datastore = DatastoreFactory.get_datastore(get_datastore_config(self._objectstore), self._read_config)
 
             if not isinstance(datastore, ObjectDatastore):
                 raise GOBException(f"Expected objectstore, got: {type(datastore)}")
-
             with _load_from_objectstore(datastore) as src_dump_file:
                 return self._import_dump(src_dump_file)
         elif not self._objectstore and self._source:

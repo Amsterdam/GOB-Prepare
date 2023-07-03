@@ -22,10 +22,7 @@ class ReadConfig(TypedDict):
     """Read file configuration."""
 
     file_filter: str
-    use_filter: bool
-    sql_filter_list: list
-    subs_dict: dict
-
+    filter_list: list
 
 class SqlCsvImporterConfig(ActionCommonConfig, total=False):
     """SqlCsvImporter action configuration."""
@@ -50,7 +47,6 @@ class SqlDumpImporterConfig(ActionCommonConfig, total=False):
     encoding: Literal["utf-8", "iso-8859-1"]
     objectstore: str
     read_config: ReadConfig
-    # separator: Literal[";"]
     # URL
     source: str
     type: Literal["import_sqlDump"]
