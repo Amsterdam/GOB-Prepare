@@ -1,10 +1,10 @@
 import contextlib
 from io import StringIO
+import io
 import tempfile
 import gzip
 import re
-import tempfile
-from typing import List, Iterator, Optional
+from typing import Iterator, Optional
 
 from gobprepare.importers.typing import ReadConfig, SqlDumpImporterConfig
 from gobconfig.datastore.config import get_datastore_config
@@ -15,13 +15,13 @@ from gobcore.logging.logger import logger
 
 from gobcore.exceptions import GOBException
 
+
 @contextlib.contextmanager
 def _load_from_objectstore(datastore: ObjectDatastore) -> Iterator[str]:
     datastore.connect()
-
-    obj_info = next(datastore.query(None), None)
-
-    if obj_info is None:
+    try:
+        obj_info = next(datastore.query(None), None)
+    except StopIteration:
         raise GOBException(f"File not found on Objectstore: {datastore.read_config['file_filter']}")
 
     _, obj = datastore.connection.get_object(
@@ -42,54 +42,61 @@ class SqlDumpImporter:
     """Import a SQL dump into a SqlDatastore table."""
 
     def __init__(self, dst_datastore: SqlDatastore, config: SqlDumpImporterConfig) -> None:
-        """ Initialise SqlDumpImporter """
+        """Initialise SqlDumpImporter"""
         self._dst_datastore = dst_datastore
-        # self._destination = config["destination"]
         self._encoding = config.get("encoding", "utf-8")
 
-        self._read_config: Optional[ReadConfig] = config.get("read_config")
+        self._read_config: ReadConfig = config["read_config"]
         self._objectstore: Optional[str] = config.get("objectstore")
         self._source: Optional[str] = config.get("source")
 
-    def _process_queries(self, queries: list) -> None:
+    def _process_queries(self, queries: list[str]) -> None:
+        filter_list_pattern = re.compile(self._read_config["filter_list"])
+        copy_query_pattern = re.compile(self._read_config["copy_query_regex"])
+        data_delimiter_pattern = re.compile(self._read_config["data_delimiter_regexp"])
+
         for query in queries:
             # remove leading new line '\n\n'
             query = query.lstrip()
             # filter out and replace the queries based on the filter and substitution lists
-            if (query and not re.match(self._read_config['filter_list'], query)):
-                if not query.endswith(self._read_config['data_delimiter_regexp']):
-                    query += ';'
-                    for pattern, replacement in self._read_config['substitution'].items():
+            if query and not re.match(filter_list_pattern, query):
+                if not query.endswith(self._read_config["data_delimiter_regexp"]):
+                    query += ";"
+                    for pattern, replacement in self._read_config["substitution"].items():
                         query = re.sub(pattern, replacement, query)
 
-                if re.match(self._read_config['copy_query_regex'], query):
+                if re.match(copy_query_pattern, query):
                     copy_query = query
                     continue
 
-                if re.search(self._read_config['data_delimiter_regexp'], query):
-                    data = query.split(self._read_config['data_delimiter_regexp'])
+                if re.search(data_delimiter_pattern, query):
+                    data = query.split(self._read_config["data_delimiter_regexp"])
                     if len(data[0]) != 0:
                         self._dst_datastore.copy_expert(copy_query, StringIO(data[0]))
                     continue
 
                 self._dst_datastore.execute(query)
 
-
     def _import_dump(self, source_path: str) -> str:
         decompressed_file = gzip.GzipFile(source_path, 'r')
         file_content = decompressed_file.read().decode('utf-8')
-        logger.info(f'Processing decompressed content of file "{self._read_config["file_filter"].split("/")[1]}"')
+        logger.info(f'Processing decompressed content of file "{self._read_config["file_filter"].split("/")[-1]}"')
 
         # remove all comments
-        sql_queries = [line for line in re.split(self._read_config['comments_regexp'], file_content) if not line == None and not line.isspace() and line.strip()]
+        sql_queries = [
+            line
+            for line in re.split(self._read_config["comments_regexp"], file_content)
+            if not line == None and not line.isspace() and line.strip()
+        ]
+        split_pattern = re.compile(self._read_config["split_regexp"])
         # filter out the queries
         for query_list in sql_queries:
             # split on ';' for the sql queries en on '\.' for the data
-            queries = re.split(self._read_config['split_regexp'], query_list)
+            queries = re.split(split_pattern, query_list)
             self._process_queries(queries)
-        return self._read_config["file_filter"].split('/')[1]
+        return self._read_config["file_filter"].split("/")[-1]
 
-    def import_dumps(self) -> int:
+    def import_dumps(self) -> str:
         """Entry method. Return (processed) gz file name.
 
         :return: str

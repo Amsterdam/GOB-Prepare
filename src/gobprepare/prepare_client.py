@@ -192,8 +192,7 @@ class PrepareClient:
         logger.info(f"Imported {rows_imported:,} rows from CSV to table {action['destination']}")
         return rows_imported
 
-    def action_import_sqlDump(self, action: SqlDumpImporterConfig) -> int:
-        # TODO: Check: may be sould return nothing
+    def action_import_sql_dump(self, action: SqlDumpImporterConfig) -> str:
         """Import SQL dump action. Import SQL dump into destination database.
 
         :param action:
@@ -281,7 +280,7 @@ class PrepareClient:
         elif action["type"] == "import_api":
             result["rows_imported"] = self.action_import_api(cast(APIImporterConfig, action))
         elif action["type"] == "import_dump":
-            result["file_imported"] = self.action_import_sqlDump(cast(SqlDumpImporterConfig, action))
+            result["file_imported"] = self.action_import_sql_dump(cast(SqlDumpImporterConfig, action))
         elif action["type"] == "join_actions":
             # Action only joins dependencies. No further actions necessary
             return None

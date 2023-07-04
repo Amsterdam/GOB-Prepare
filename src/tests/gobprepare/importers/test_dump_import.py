@@ -32,6 +32,16 @@ class TestSqlCsvImporter(TestCase):
             "type": "import_dump",
             "read_config": {
                 "file_filter": "http://example.com/somefile.sql.gz",
+                "container": "some_container",
+                "filter_list": "STRING1|STRING2|STRING3|string4",
+                "substitution": {
+                    "pattern_1": "replace_1",
+                    "pattern_2": "replace_2"
+                },
+                "comments_regexp": "some_comments_regexp",
+                "split_regexp": "some_split_regexp",
+                "data_delimiter_regexp": "some_data_delimiter_regexp",
+                "copy_query_regex": "some_copy_query_regex"
             },
             "destination": "schema.table",
             "objectstore": "TheObjectstore"

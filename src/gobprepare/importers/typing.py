@@ -2,8 +2,7 @@
 
 See GOB-Prepare/src/data/*.json
 """
-
-
+from ast import Dict
 from typing import Literal, TypedDict
 
 from gobprepare.typing import ActionCommonConfig, SQLBaseConfig
@@ -22,7 +21,13 @@ class ReadConfig(TypedDict):
     """Read file configuration."""
 
     file_filter: str
-    filter_list: list
+    container: str
+    filter_list: str
+    substitution: dict[str, str]
+    comments_regexp: str
+    split_regexp: str
+    data_delimiter_regexp: str
+    copy_query_regex: str
 
 class SqlCsvImporterConfig(ActionCommonConfig, total=False):
     """SqlCsvImporter action configuration."""
@@ -39,7 +44,6 @@ class SqlCsvImporterConfig(ActionCommonConfig, total=False):
     type: Literal["import_csv"]
 
 class SqlDumpImporterConfig(ActionCommonConfig, total=False):
-    # TODO: check the given param should be SQLBaseConfig or ExecuteSQLConfig or ActionCommonConfig
     """SqlDumpImporter action configuration."""
 
     description: str
@@ -47,6 +51,5 @@ class SqlDumpImporterConfig(ActionCommonConfig, total=False):
     encoding: Literal["utf-8", "iso-8859-1"]
     objectstore: str
     read_config: ReadConfig
-    # URL
     source: str
     type: Literal["import_sqlDump"]
