@@ -54,29 +54,30 @@ CREATE TABLE hr_prep.vestigingen AS
       WHEN ves.emailadres1 IS NULL THEN NULL
       WHEN ves.emailadres2 IS NULL THEN JSONB_BUILD_ARRAY(
         JSONB_BUILD_OBJECT(
-          'email', ves.emailadres1
+          'email_adres', ves.emailadres1
         )
       )
       WHEN ves.emailadres3 IS NULL THEN JSONB_BUILD_ARRAY(
         JSONB_BUILD_OBJECT(
-          'email', ves.emailadres1
+          'email_adres', ves.emailadres1
         ),
         JSONB_BUILD_OBJECT(
-          'email', ves.emailadres2
+          'email_adres', ves.emailadres2
         )
       )
       ELSE JSONB_BUILD_ARRAY(
         JSONB_BUILD_OBJECT(
-          'email', ves.emailadres1
+          'email_adres', ves.emailadres1
         ),
         JSONB_BUILD_OBJECT(
-          'email', ves.emailadres2
+          'email_adres', ves.emailadres2
         ),
         JSONB_BUILD_OBJECT(
-          'email', ves.emailadres3
+          'email_adres', ves.emailadres3
         )
       )
     END                                                                 AS email_adressen,
+
     CASE -- domeinnamen
       WHEN ves.domeinnaam1 IS NULL THEN NULL
       WHEN ves.domeinnaam2 IS NULL THEN JSONB_BUILD_ARRAY(
@@ -106,7 +107,7 @@ CREATE TABLE hr_prep.vestigingen AS
     END                                                                 AS domeinnamen,
 
     NULL                                                                AS is_samengevoegd_met_vestiging,
-    ves.datumuitschrijving::text::date                                  AS datum_afgesloten,
+    NULL::date                                                          AS datum_afgesloten,
     NULL::date                                                          AS datum_samenvoeging,
     ves.naam                                                            AS naam,
     ves.verkortenaam                                                    AS verkorte_naam,
@@ -192,14 +193,9 @@ CREATE TABLE hr_prep.vestigingen AS
     END                                                                 AS activiteiten,
 
     hn.handelsnamen                                                     AS handelsnamen,
-    CASE -- heeft_handelsnaam
-      WHEN hn.handelsnamen IS NULL THEN NULL
-      ELSE mac.kvknummer
-    END                                                                 AS heeft_handelsnaam,
-
     mac.kvknummer                                                       AS is_een_uitoefening_van,
 
-    CASE -- bezoek_locatie adres gegevens (indien volledig_adres aanwezig)
+    CASE -- bezoek_locatie adres gegevens (indien volledig_adres aanwezig voor vesid)
       WHEN bezk.volledigadres IS NULL THEN NULL
       ELSE JSONB_BUILD_OBJECT(
         'afgeschermd', bezk.afgeschermd,
@@ -217,13 +213,26 @@ CREATE TABLE hr_prep.vestigingen AS
         'land_buitenland', bezk.land
       )
     END                                                                 AS bezoek_locatie,
-    -- BAG relaties; nog verfijnen m.b.v. BAG tabellen
-    bezk.identificatieaoa                                               AS bezoek_heeft_nummeraanduiding,
-    bezk.identificatietgo                                               AS bezoek_heeft_verblijfsobject,
-    bezk.identificatietgo                                               AS bezoek_heeft_ligplaats,
-    bezk.identificatietgo                                               AS bezoek_heeft_standplaats,
 
-    CASE -- post_locatie adres gegevens (indien volledig_adres aanwezig)
+    -- BAG relaties; zie bag_nummeraanduidingen, bag_verblijfsobjecten, bag_ligplaatsen, bag_standplaatsen
+    CASE
+      WHEN substring(bezk.identificatieaoa from 5 for 2) = '20' THEN bezk.identificatieaoa
+      ELSE NULL
+    END                                                                 AS bezoek_heeft_nummeraanduiding,
+    CASE
+      WHEN substring(bezk.identificatietgo from 5 for 2) = '01' THEN bezk.identificatietgo
+      ELSE NULL
+    END                                                                 AS bezoek_heeft_verblijfsobject,
+    CASE
+      WHEN substring(bezk.identificatietgo from 5 for 2) = '02' THEN bezk.identificatietgo
+      ELSE NULL
+    END                                                                 AS bezoek_heeft_ligplaats,
+    CASE
+      WHEN substring(bezk.identificatietgo from 5 for 2) = '03' THEN bezk.identificatietgo
+      ELSE NULL
+    END                                                                 AS bezoek_heeft_standplaats,
+
+    CASE -- post_locatie adres gegevens (indien volledig_adres aanwezig voor vesid)
       WHEN post.volledigadres IS NULL THEN NULL
       ELSE JSONB_BUILD_OBJECT(
         'afgeschermd', post.afgeschermd,
@@ -243,11 +252,23 @@ CREATE TABLE hr_prep.vestigingen AS
       )
     END                                                                 AS post_locatie,
 
-    -- BAG relaties; nog verfijnen m.b.v. BAG tabellen
-    post.identificatieaoa                                               AS post_heeft_nummeraanduiding,
-    post.identificatietgo                                               AS post_heeft_verblijfsobject,
-    post.identificatietgo                                               AS post_heeft_ligplaats,
-    post.identificatietgo                                               AS post_heeft_standplaats
+    -- BAG relaties; zie bag_nummeraanduidingen, bag_verblijfsobjecten, bag_ligplaatsen, bag_standplaatsen
+    CASE
+      WHEN substring(post.identificatieaoa from 5 for 2) = '20' THEN post.identificatieaoa
+      ELSE NULL
+    END                                                                 AS post_heeft_nummeraanduiding,
+    CASE
+      WHEN substring(post.identificatietgo from 5 for 2) = '01' THEN post.identificatietgo
+      ELSE NULL
+    END                                                                 AS post_heeft_verblijfsobject,
+    CASE
+      WHEN substring(post.identificatietgo from 5 for 2) = '02' THEN post.identificatietgo
+      ELSE NULL
+    END                                                                 AS post_heeft_ligplaats,
+    CASE
+      WHEN substring(post.identificatietgo from 5 for 2) = '03' THEN post.identificatietgo
+      ELSE NULL
+    END                                                                 AS post_heeft_standplaats
 
   FROM
     hr.kvkvesm00 ves
@@ -258,9 +279,9 @@ CREATE TABLE hr_prep.vestigingen AS
         vesid,
         JSONB_AGG(
           JSONB_BUILD_OBJECT(
-            'handelsnaam', hn.handelsnaam,
             'datum_aanvang', vhn.beginrelatie,
             'datum_einde', vhn.eindrelatie,
+            'handelsnaam', hn.handelsnaam,
             'volgorde', NULL
           )
           ORDER BY
@@ -273,5 +294,5 @@ CREATE TABLE hr_prep.vestigingen AS
         vesid
     ) AS hn USING(vesid)
 
-    LEFT JOIN hr.kvkadrm00 bezk ON ves.vesid = bezk.vesid  AND bezk.typering = 'bezoekLocatie'
-    LEFT JOIN hr.kvkadrm00 post ON ves.vesid = post.vesid  AND post.typering = 'postLocatie'
+    LEFT JOIN hr.kvkadrm00 bezk ON ves.vesid = bezk.vesid AND bezk.typering = 'bezoekLocatie'
+    LEFT JOIN hr.kvkadrm00 post ON ves.vesid = post.vesid AND post.typering = 'postLocatie'
