@@ -14,7 +14,6 @@ from gobcore.logging.logger import logger
 
 from gobcore.exceptions import GOBException
 
-
 @contextlib.contextmanager
 def _load_from_objectstore(datastore: ObjectDatastore) -> Iterator[str]:
     datastore.connect()
@@ -24,14 +23,14 @@ def _load_from_objectstore(datastore: ObjectDatastore) -> Iterator[str]:
         GOBException(f"File not found on Objectstore: {datastore.read_config['file_filter']}")
     else:
         _, obj = datastore.connection.get_object(
-            container=datastore.container_name, obj=obj_info["name"], resp_chunk_size=100_000_000
+            container=datastore.container_name, obj=obj_info["name"], resp_chunk_size=100_000_000 # type: ignore
         )
 
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".gz") as fp:
         try:
             for chunk in obj:
                 fp.write(chunk)
-            logger.info(f"File loaded from objectstore: {obj_info['name']}")
+            logger.info(f"File loaded from objectstore: {obj_info['name']}") # type: ignore
             yield fp.name
         finally:
             datastore.disconnect()
@@ -57,10 +56,10 @@ class SqlDumpImporter:
         return query
 
     def _instert_data(self, copy_query: str, data: str) -> None:
-        # ingnore the data delimiter '\.'
-        data = data.split(self._read_config["data_delimiter_regexp"])
+        # ignore the data delimiter '\.'
+        data_to_insert = data.split(self._read_config["data_delimiter_regexp"])
         if len(data[0]) != 0:
-            self._dst_datastore.copy_expert(copy_query, StringIO(data[0]))
+            self._dst_datastore.copy_expert(copy_query, StringIO(data_to_insert[0]))
 
     def _process_queries(self, queries: list[str]) -> None:
         """Filter out, replace some paramaters and execute the queries
@@ -107,7 +106,7 @@ class SqlDumpImporter:
         sql_queries = list(self._extract_sql_queries(file_content))
 
         split_pattern = re.compile(self._read_config["split_regexp"])
-        # preocess and execute SQL queries
+        # process and execute SQL queries
         for query_list in sql_queries:
             # split on ';' for the sql queries en on '\.' for the data
             queries = re.split(split_pattern, query_list)
