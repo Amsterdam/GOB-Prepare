@@ -1,6 +1,5 @@
 import contextlib
 from io import StringIO
-import io
 import tempfile
 import gzip
 import re
@@ -22,11 +21,11 @@ def _load_from_objectstore(datastore: ObjectDatastore) -> Iterator[str]:
     try:
         obj_info = next(datastore.query(None), None)
     except StopIteration:
-        raise GOBException(f"File not found on Objectstore: {datastore.read_config['file_filter']}")
-
-    _, obj = datastore.connection.get_object(
-        container=datastore.container_name, obj=obj_info["name"], resp_chunk_size=100_000_000
-    )
+        GOBException(f"File not found on Objectstore: {datastore.read_config['file_filter']}")
+    else:
+        _, obj = datastore.connection.get_object(
+            container=datastore.container_name, obj=obj_info["name"], resp_chunk_size=100_000_000
+        )
 
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".gz") as fp:
         try:
@@ -50,7 +49,23 @@ class SqlDumpImporter:
         self._objectstore: Optional[str] = config.get("objectstore")
         self._source: Optional[str] = config.get("source")
 
+    def _substitute_query(self, query: str) -> str:
+        if not query.endswith(self._read_config["data_delimiter_regexp"]):
+            query += ";"
+            for pattern, replacement in self._read_config["substitution"].items():
+                query = re.sub(pattern, replacement, query)
+        return query
+
+    def _instert_data(self, copy_query: str, data: str) -> None:
+        # ingnore the data delimiter '\.'
+        data = data.split(self._read_config["data_delimiter_regexp"])
+        if len(data[0]) != 0:
+            self._dst_datastore.copy_expert(copy_query, StringIO(data[0]))
+
     def _process_queries(self, queries: list[str]) -> None:
+        """Filter out, replace some paramaters and execute the queries
+        :return: None
+        """
         filter_list_pattern = re.compile(self._read_config["filter_list"])
         copy_query_pattern = re.compile(self._read_config["copy_query_regex"])
         data_delimiter_pattern = re.compile(self._read_config["data_delimiter_regexp"])
@@ -58,42 +73,46 @@ class SqlDumpImporter:
         for query in queries:
             # remove leading new line '\n\n'
             query = query.lstrip()
-            # filter out and replace the queries based on the filter and substitution lists
+            # Filter out the queries based on words defined in filter_list and then execute the (eventuele manipulated) queries.
+            # e.g. sql statements like "ALTER TABLE <table> OWNER TO <owner>;", " CREATE TRIGGER..", or "ADD CONSTRAINT ...PRIMARY KEY ..."
             if query and not re.match(filter_list_pattern, query):
-                if not query.endswith(self._read_config["data_delimiter_regexp"]):
-                    query += ";"
-                    for pattern, replacement in self._read_config["substitution"].items():
-                        query = re.sub(pattern, replacement, query)
+                # Replace (if applicable) some params in some SQL queries (not in to insert data).
+                # E.g. change database name to gob schema name "hr", and geometry type (corresponding Postgres geometry type)
+                query = self._substitute_query(query)
 
+                # get copy from stdin query
                 if re.match(copy_query_pattern, query):
                     copy_query = query
                     continue
-
+                # get and insert data
                 if re.search(data_delimiter_pattern, query):
-                    data = query.split(self._read_config["data_delimiter_regexp"])
-                    if len(data[0]) != 0:
-                        self._dst_datastore.copy_expert(copy_query, StringIO(data[0]))
+                    self._instert_data(copy_query, query)
                     continue
 
                 self._dst_datastore.execute(query)
 
-    def _import_dump(self, source_path: str) -> str:
-        decompressed_file = gzip.GzipFile(source_path, 'r')
-        file_content = decompressed_file.read().decode('utf-8')
-        logger.info(f'Processing decompressed content of file "{self._read_config["file_filter"].split("/")[-1]}"')
+    def _extract_sql_queries(self, content):
+        # remove all comments and other non-executable lines (e.g empty lines and None resulting from split() action).
+        lines = re.split(self._read_config["comments_regexp"], content)
+        for line in lines:
+            if line is not None and line.strip():
+                yield line
 
-        # remove all comments
-        sql_queries = [
-            line
-            for line in re.split(self._read_config["comments_regexp"], file_content)
-            if not line == None and not line.isspace() and line.strip()
-        ]
+    def _import_dump(self, source_path: str) -> str:
+        decompressed_file = gzip.GzipFile(source_path, "r")
+        file_content = decompressed_file.read().decode("utf-8")
+        logger.info(f'Processing decompressed content of dump "{self._read_config["file_filter"].split("/")[-1]}"')
+
+        # Extract the SQL queries or statements from the content.
+        sql_queries = list(self._extract_sql_queries(file_content))
+
         split_pattern = re.compile(self._read_config["split_regexp"])
-        # filter out the queries
+        # preocess and execute SQL queries
         for query_list in sql_queries:
             # split on ';' for the sql queries en on '\.' for the data
             queries = re.split(split_pattern, query_list)
             self._process_queries(queries)
+
         return self._read_config["file_filter"].split("/")[-1]
 
     def import_dumps(self) -> str:
@@ -102,7 +121,10 @@ class SqlDumpImporter:
         :return: str
         """
         if self._objectstore and not self._source:
-            datastore = DatastoreFactory.get_datastore(get_datastore_config(self._objectstore), self._read_config)
+            datastore = DatastoreFactory.get_datastore(
+                get_datastore_config(self._objectstore),
+                self._read_config
+            )
 
             if not isinstance(datastore, ObjectDatastore):
                 raise GOBException(f"Expected objectstore, got: {type(datastore)}")
