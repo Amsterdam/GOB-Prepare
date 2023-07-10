@@ -131,6 +131,26 @@
     },
     {
       "type": "import_csv",
+      "source": "https://developer.kadaster.nl/schemas/waardelijsten/AardZakelijkRecht/AardZakelijkRecht.csv",
+      "destination": "brk2_prep.aardzakelijkrecht_waardelijst_import",
+      "id": "import_aardzakelijkrecht_waardelijst",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Populate AZT with AKR codes",
+      "id": "populate_aardzakelijkrecht_waardelijst",
+      "table_name": "brk2_prep.aardzakelijkrecht_waardelijst",
+      "depends_on": [
+        "import_aardzakelijkrecht_waardelijst"
+      ],
+      "query_src": "file",
+      "query": "data/sql/brk2/select.aardzakelijkrecht_waardelijst.sql"
+    },
+    {
+      "type": "import_csv",
       "objectstore": "Basisinformatie",
       "read_config": {
         "file_filter": "^brk/Oude_Nieuwe_ids/Conversietabel_BRK1_2_Identificaties.csv$",
