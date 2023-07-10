@@ -29,6 +29,7 @@ class ReadConfig(TypedDict):
     data_delimiter_regexp: str
     copy_query_regex: str
 
+
 class SqlCsvImporterConfig(ActionCommonConfig, total=False):
     """SqlCsvImporter action configuration."""
 
@@ -42,6 +43,7 @@ class SqlCsvImporterConfig(ActionCommonConfig, total=False):
     # URL
     source: str
     type: Literal["import_csv"]
+
 
 class SqlDumpImporterConfig(ActionCommonConfig, total=False):
     """SqlDumpImporter action configuration."""
