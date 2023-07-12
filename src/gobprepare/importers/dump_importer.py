@@ -104,8 +104,8 @@ class SqlDumpImporter:
                 yield line
 
     def _import_dump(self, source_path: str) -> str:
-        decompressed_file = GzipFile(source_path, "r")
-        file_content = decompressed_file.read().decode("utf-8")
+        with GzipFile(source_path, "r") as fp:
+            file_content = fp.read().decode("utf-8")
         logger.info(f'Processing decompressed content of dump "{self._read_config["file_filter"].split("/")[-1]}"')
 
         sql_queries = self._extract_sql_queries(file_content)
