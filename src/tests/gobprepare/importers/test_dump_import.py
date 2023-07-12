@@ -146,10 +146,10 @@ class TestSqlDumpImporter(TestCase):
         self.assertEqual(result, expected_query)
 
     @patch("gobprepare.importers.dump_importer.StringIO")
-    def test_instert_data(self, mock_io):
+    def test_insert_data(self, mock_io):
         test_data ="value1	value2	value3	value4\nvalue5	value6	value7	value8\n\\.\n"
         self.dst_datastore.copy_from_stdin.return_value = None
-        self.os_importer._instert_data(self.copy_query, test_data)
+        self.os_importer._insert_data(self.copy_query, test_data)
 
         self.dst_datastore.copy_from_stdin.assert_called_with(self.copy_query, mock_io.return_value)
         mock_io.assert_called_with(self.data_input)

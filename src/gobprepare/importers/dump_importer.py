@@ -55,7 +55,7 @@ class SqlDumpImporter:
                 query = re.sub(pattern, replacement, query)
         return query
 
-    def _instert_data(self, copy_query: str, data: str) -> None:
+    def _insert_data(self, copy_query: str, data: str) -> None:
         # ignore the data delimiter '\.'
         data_to_insert = data.split(self._read_config["data_delimiter_regexp"])
         if len(data[0]) != 0:
@@ -90,7 +90,7 @@ class SqlDumpImporter:
                 # extract and insert data using copy_query.
                 if re.search(data_delimiter_pattern, query):
                     data = query
-                    self._instert_data(copy_query, data)
+                    self._insert_data(copy_query, data)
                     continue
 
                 # execute other (regular) queries
