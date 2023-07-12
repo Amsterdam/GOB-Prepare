@@ -1,9 +1,5 @@
-from functools import partial
-from io import StringIO
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
-from urllib.error import HTTPError
-import logging
 import pandas as pd
 from swiftclient import Connection
 
@@ -12,8 +8,6 @@ from gobcore.datastore.postgres import PostgresDatastore
 from gobcore.exceptions import GOBException
 from gobprepare.importers.dump_importer import SqlDumpImporter, ObjectDatastore, _load_from_objectstore
 from gobprepare.importers.typing import SqlDumpImporterConfig
-from gobprepare.utils.requests import retry
-
 
 class TestSqlDumpImporter(TestCase):
     """Test SqlDumpImporter."""
@@ -40,18 +34,17 @@ class TestSqlDumpImporter(TestCase):
             "objectstore": "TheObjectstore"
         }
         self.query = "CREATE TABLE OLD_SCHEMA_NAME.someTable (id numeric(18,0) NOT NULL, name character varying(20))"
+        self.copy_query = "COPY schema.sometable (colomn1, colomn 2, colomn3, colomn4) FROM stdin;"
+        self.data_input = "value1	value2	value3	value4\nvalue5	value6	value7	value8\n"
 
         self.dst_datastore = MagicMock(spec_set=PostgresDatastore)
         self.os_importer = SqlDumpImporter(self.dst_datastore, self.config_objectstore)
 
     def test_init(self):
         assert self.os_importer._dst_datastore == self.dst_datastore
-        # assert self.os_importer._destination == self.config_objectstore["destination"]
         assert self.os_importer._encoding == "utf-8"
         assert self.os_importer._read_config == self.config_objectstore["read_config"]
         assert self.os_importer._objectstore == self.config_objectstore["objectstore"]
-        # TODO: Check the source in de code if it should be geven and what is its value
-        assert self.os_importer._source is None
 
     @patch("gobprepare.importers.dump_importer.logger")
     @patch("gobprepare.importers.dump_importer.tempfile")
@@ -111,8 +104,9 @@ class TestSqlDumpImporter(TestCase):
             self.os_importer.import_dump()
 
         # config exception
-        # with self.assertRaisesRegex(GOBException, "Incomplete config."):
-        #     SqlDumpImporter(self.dst_datastore, {"destination": "dst"}).import_dump()
+        with self.assertRaisesRegex(GOBException, "Incomplete config. Expecting key 'objectstore'"):
+            SqlDumpImporter(self.dst_datastore, {"read_config": {
+                "file_filter": "http://example.com/somefile.sql.gz"}}).import_dump()
 
     @patch("gobprepare.importers.dump_importer.logger")
     @patch("gobprepare.importers.dump_importer.GzipFile")
@@ -128,14 +122,10 @@ class TestSqlDumpImporter(TestCase):
 
         result = self.os_importer._import_dump(file_path)
         self.assertEqual(result, "somefile.sql.gz")
-
         mock_GzipFile.assert_called_with(file_path, 'r')
         mock_logger.info.assert_called_once()
 
     def test_extract_sql_queries(self):
-        #this line is important
-        logging.basicConfig()
-        log = logging.getLogger("LOG")
         dump_with_comment = """
         --
         -- this is a comment line; With extra comment; Schema: igp_pgplup_cmg_owner; Owner: igp_pgplup_cmg_owner
@@ -151,17 +141,31 @@ class TestSqlDumpImporter(TestCase):
 
     def test_perform_query_substituions(self):
         expected_query = "CREATE TABLE NEW_SCHEMA_NAME.someTable (id numeric(18,0) NOT NULL, name character varying(20));"
-        result = self.os_importer._perform_query_substitutions(self.query)
 
+        result = self.os_importer._perform_query_substitutions(self.query)
         self.assertEqual(result, expected_query)
 
-    @patch("gobprepare.importers.dump_importer.PostgresDatastore")
-    def test_instert_data(self, mock_datastore):
-        test_copy_query = "COPY schema.sometable (colomn1, colomn 2, colomn3, colomn4) FROM stdin;"
-        test_data = """value1	value2	value3	value4
-            value5	value6	value7	value8
-            \\.
-            """
-        mock_datastore.copy_from_stdin.return_value = None
-        self.os_importer._instert_data(test_copy_query, test_data)
-        mock_datastore.copy_from_stdin.assert_call_with(test_copy_query, test_data)
+    @patch("gobprepare.importers.dump_importer.StringIO")
+    def test_instert_data(self, mock_io):
+        test_data ="value1	value2	value3	value4\nvalue5	value6	value7	value8\n\\.\n"
+        self.dst_datastore.copy_from_stdin.return_value = None
+        self.os_importer._instert_data(self.copy_query, test_data)
+
+        self.dst_datastore.copy_from_stdin.assert_called_with(self.copy_query, mock_io.return_value)
+        mock_io.assert_called_with(self.data_input)
+
+    @patch("gobprepare.importers.dump_importer.StringIO")
+    def test_process_and_execute_queries(self, mock_io):
+        queries = [
+            "ANALYZE schema.table",
+            "COPY schema.sometable (colomn1, colomn 2, colomn3, colomn4) FROM stdin",
+            "value1	value2	value3	value4\nvalue5	value6	value7	value8\n\\.\n"]
+        other_query = "ANALYZE schema.table;"
+
+        self.dst_datastore.copy_from_stdin.return_value = None
+        self.os_importer._process_and_execute_queries(queries)
+
+        self.dst_datastore.copy_from_stdin.assert_called_with(self.copy_query, mock_io.return_value)
+        mock_io.assert_called_with(self.data_input)
+        self.dst_datastore.copy_from_stdin.assert_called_once()
+        self.dst_datastore.execute.assert_called_with(other_query)

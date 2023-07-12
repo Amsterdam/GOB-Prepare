@@ -2,7 +2,7 @@
 
 See GOB-Prepare/src/data/*.json
 """
-from ast import Dict
+
 from typing import Literal, TypedDict
 
 from gobprepare.typing import ActionCommonConfig, SQLBaseConfig
