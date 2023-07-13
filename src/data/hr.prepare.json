@@ -1,0 +1,194 @@
+{
+    "version": "0.1",
+    "name": "HR",
+    "catalogue": "hr",
+    "destination": {
+        "application": "GOBPrepare"
+    },
+    "actions": [
+        {
+            "type": "clear",
+            "schemas": [
+                "hr",
+                "hr_prep"
+            ],
+            "id": "clear_schemas"
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "HandelsregisterObjectstore",
+            "read_config": {
+                "file_filter": "mks-dump/kvkadr.sql.gz",
+                "container": "handelsregister",
+                "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+                "substitution": {
+                    "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
+                    "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
+                },
+                "comments_regexp": "(?m)^\\s*--.*$|(^\/*.*?\\*\\$)",
+                "split_regexp": ";\\n|^\\.\n'",
+                "data_delimiter_regexp": "\\.\n",
+                "copy_query_regex": "COPY.*FROM stdin;"
+            },
+            "destination": "hr.kvkadrm00",
+            "id": "import_kvkadr_sql",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "HandelsregisterObjectstore",
+            "read_config": {
+                "file_filter": "mks-dump/kvkmac.sql.gz",
+                "container": "handelsregister",
+                "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+                "substitution": {
+                    "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
+                    "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
+                },
+                "comments_regexp": "(?m)^\\s*--.*$|(^\/*.*?\\*\\$)",
+                "split_regexp": ";\\n|^\\.\n'",
+                "data_delimiter_regexp": "\\.\n",
+                "copy_query_regex": "COPY.*FROM stdin;"
+            },
+            "destination": "hr.kvkmacm00",
+            "id": "import_kvkmac_sql",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "HandelsregisterObjectstore",
+            "read_config": {
+                "file_filter": "mks-dump/kvkves.sql.gz",
+                "container": "handelsregister",
+                "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+                "substitution": {
+                    "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
+                    "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
+                },
+                "comments_regexp": "(?m)^\\s*--.*$|(^\/*.*?\\*\\$)",
+                "split_regexp": ";\\n|^\\.\n'",
+                "data_delimiter_regexp": "\\.\n",
+                "copy_query_regex": "COPY.*FROM stdin;"
+            },
+            "destination": "hr.kvvesm00",
+            "id": "import_kvkves_sql",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "HandelsregisterObjectstore",
+            "read_config": {
+                "file_filter": "mks-dump/kvkveshis.sql.gz",
+                "container": "handelsregister",
+                "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+                "substitution": {
+                    "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
+                    "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
+                },
+                "comments_regexp": "(?m)^\\s*--.*$|(^\/*.*?\\*\\$)",
+                "split_regexp": ";\\n|^\\.\n'",
+                "data_delimiter_regexp": "\\.\n",
+                "copy_query_regex": "COPY.*FROM stdin;"
+            },
+            "destination": "hr.kvkveshism00",
+            "id": "import_kvkveshis_sql",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "HandelsregisterObjectstore",
+            "read_config": {
+                "file_filter": "mks-dump/kvkprs.sql.gz",
+                "container": "handelsregister",
+                "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+                "substitution": {
+                    "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
+                    "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
+                },
+                "comments_regexp": "(?m)^\\s*--.*$|(^\/*.*?\\*\\$)",
+                "split_regexp": ";\\n|^\\.\n'",
+                "data_delimiter_regexp": "\\.\n",
+                "copy_query_regex": "COPY.*FROM stdin;"
+            },
+            "destination": "hr.kvkprsm00",
+            "id": "import_kvkprs_sql",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "HandelsregisterObjectstore",
+            "read_config": {
+                "file_filter": "mks-dump/kvkprsash.sql.gz",
+                "container": "handelsregister",
+                "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+                "substitution": {
+                    "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
+                    "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
+                },
+                "comments_regexp": "(?m)^\\s*--.*$|(^\/*.*?\\*\\$)",
+                "split_regexp": ";\\n|^\\.\n'",
+                "data_delimiter_regexp": "\\.\n",
+                "copy_query_regex": "COPY.*FROM stdin;"
+            },
+            "destination": "hr.kvkashm00",
+            "id": "import_kvkash_sql",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "HandelsregisterObjectstore",
+            "read_config": {
+                "file_filter": "mks-dump/kvkbeshdn.sql.gz",
+                "container": "handelsregister",
+                "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+                "substitution": {
+                    "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
+                    "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
+                },
+                "comments_regexp": "(?m)^\\s*--.*$|(^\/*.*?\\*\\$)",
+                "split_regexp": ";\\n|^\\.\n'",
+                "data_delimiter_regexp": "\\.\n",
+                "copy_query_regex": "COPY.*FROM stdin;"
+            },
+            "destination": "hr.kvkbeshdnm00",
+            "id": "import_kvkbeshdn_sql",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        },
+        {
+            "type": "import_dump",
+            "objectstore": "HandelsregisterObjectstore",
+            "read_config": {
+                "file_filter": "mks-dump/kvkhdn.sql.gz",
+                "container": "handelsregister",
+                "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+                "substitution": {
+                    "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
+                    "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
+                },
+                "comments_regexp": "(?m)^\\s*--.*$|(^\/*.*?\\*\\$)",
+                "split_regexp": ";\\n|^\\.\n'",
+                "data_delimiter_regexp": "\\.\n",
+                "copy_query_regex": "COPY.*FROM stdin;"
+            },
+            "destination": "hr.kvkhdnm00",
+            "id": "import_kvkhdn_sql",
+            "depends_on": [
+                "clear_schemas"
+            ]
+        }
+    ]
+}

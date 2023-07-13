@@ -22,7 +22,8 @@ from gobprepare.cloner.oracle_to_postgres import OracleToPostgresCloner
 from gobprepare.cloner.typing import ClonerConfig
 from gobprepare.importers.api_importer import SqlAPIImporter
 from gobprepare.importers.csv_importer import SqlCsvImporter
-from gobprepare.importers.typing import APIImporterConfig, SqlCsvImporterConfig
+from gobprepare.importers.dump_importer import SqlDumpImporter
+from gobprepare.importers.typing import APIImporterConfig, SqlCsvImporterConfig, SqlDumpImporterConfig
 from gobprepare.selector.datastore_to_postgres import DatastoreToPostgresSelector
 from gobprepare.selector.typing import SelectorConfig
 from gobprepare.typing import (
@@ -191,6 +192,18 @@ class PrepareClient:
         logger.info(f"Imported {rows_imported:,} rows from CSV to table {action['destination']}")
         return rows_imported
 
+    def action_import_sql_dump(self, action: SqlDumpImporterConfig) -> str:
+        """Import SQL dump action. Import SQL dump into destination database.
+
+        :param action:
+        :return: number of files imported
+        """
+        importer = SqlDumpImporter(self._dst_datastore, action)
+
+        file_imported = importer.import_dump()
+        logger.info(f"Dump {file_imported} successfully imported to table {action['destination']}")
+        return file_imported
+
     def action_create_table(self, action: CreateTableConfig) -> None:
         """Create destination table."""
         query = self._get_query(action)
@@ -266,6 +279,8 @@ class PrepareClient:
             result["rows_imported"] = self.action_import_csv(cast(SqlCsvImporterConfig, action))
         elif action["type"] == "import_api":
             result["rows_imported"] = self.action_import_api(cast(APIImporterConfig, action))
+        elif action["type"] == "import_dump":
+            result["file_imported"] = self.action_import_sql_dump(cast(SqlDumpImporterConfig, action))
         elif action["type"] == "join_actions":
             # Action only joins dependencies. No further actions necessary
             return None

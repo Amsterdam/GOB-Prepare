@@ -277,6 +277,24 @@ class TestPrepareClient(TestCase):
         mock_importer.assert_called_with(prepare_client._dst_datastore, action, "the_query")
         mock_importer_instance.import_api.assert_called_once()
 
+    @patch("gobprepare.prepare_client.SqlDumpImporter", autospec=True)
+    def test_action_import_sql_dump(self, mock_importer, mock_logger):
+        action = {
+            "action": "import_dump",
+            "destination": "some_table",
+            "somemore": "configuration",
+        }
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.destination["type"] = "postgres"
+        mock_importer_instance = mock_importer.return_value
+        mock_importer_instance.import_dump.return_value = "somefile.sql.gz"
+
+        result = prepare_client.action_import_sql_dump(action)
+        self.assertEqual( "somefile.sql.gz", result)
+
+        mock_importer.assert_called_with(prepare_client._dst_datastore, action)
+        mock_importer_instance.import_dump.assert_called_once()
+
     def test_action_join_actions(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         action = {
@@ -426,6 +444,22 @@ class TestPrepareClient(TestCase):
         self.assertEqual({
             "action": "import_api",
             "rows_imported": 88,
+            "id": "id",
+        }, result)
+
+    def test_run_prepare_action_import_sql_dump(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.action_import_sql_dump = MagicMock(return_value="somefile.sql.gz")
+        action = {
+            "type": "import_dump",
+            "id": "id",
+        }
+
+        result = prepare_client._run_prepare_action(action)
+        prepare_client.action_import_sql_dump.assert_called_with(action)
+        self.assertEqual({
+            "action": "import_dump",
+            "file_imported": "somefile.sql.gz",
             "id": "id",
         }, result)
 
