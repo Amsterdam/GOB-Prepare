@@ -58,7 +58,7 @@ class SqlDumpImporter:
     def _insert_data(self, copy_query: str, data: str) -> None:
         # ignore the data delimiter '\.'
         data_to_insert = data.split(self._read_config["data_delimiter_regexp"])
-        if len(data[0]) != 0:
+        if len(data_to_insert[0]) != 0:
             self._dst_datastore.copy_from_stdin(copy_query, StringIO(data_to_insert[0]))
 
     def _process_and_execute_queries(self, queries: list[str]) -> None:
