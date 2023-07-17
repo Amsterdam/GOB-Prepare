@@ -16,7 +16,9 @@
         },
         {
             "type": "import_dump",
+            "id": "import_kvkadr",
             "objectstore": "HandelsregisterObjectstore",
+            "destination": "hr.kvkadrm00",
             "read_config": {
                 "file_filter": "mks-dump/kvkadr.sql.gz",
                 "container": "handelsregister",
@@ -30,14 +32,13 @@
                 "data_delimiter_regexp": "\\.\n",
                 "copy_query_regex": "COPY.*FROM stdin;"
             },
-            "destination": "hr.kvkadrm00",
-            "id": "import_kvkadr_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
+            "id": "import_kvkmac",
             "objectstore": "HandelsregisterObjectstore",
             "read_config": {
                 "file_filter": "mks-dump/kvkmac.sql.gz",
@@ -53,14 +54,15 @@
                 "copy_query_regex": "COPY.*FROM stdin;"
             },
             "destination": "hr.kvkmacm00",
-            "id": "import_kvkmac_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
+            "id": "import_kvkves",
             "objectstore": "HandelsregisterObjectstore",
+            "destination": "hr.kvvesm00",
             "read_config": {
                 "file_filter": "mks-dump/kvkves.sql.gz",
                 "container": "handelsregister",
@@ -74,15 +76,15 @@
                 "data_delimiter_regexp": "\\.\n",
                 "copy_query_regex": "COPY.*FROM stdin;"
             },
-            "destination": "hr.kvvesm00",
-            "id": "import_kvkves_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
+            "id": "import_kvkveshis",
             "objectstore": "HandelsregisterObjectstore",
+            "destination": "hr.kvkveshism00",
             "read_config": {
                 "file_filter": "mks-dump/kvkveshis.sql.gz",
                 "container": "handelsregister",
@@ -96,15 +98,15 @@
                 "data_delimiter_regexp": "\\.\n",
                 "copy_query_regex": "COPY.*FROM stdin;"
             },
-            "destination": "hr.kvkveshism00",
-            "id": "import_kvkveshis_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
+            "id": "import_kvkprs",
             "objectstore": "HandelsregisterObjectstore",
+            "destination": "hr.kvkprsm00",
             "read_config": {
                 "file_filter": "mks-dump/kvkprs.sql.gz",
                 "container": "handelsregister",
@@ -118,15 +120,15 @@
                 "data_delimiter_regexp": "\\.\n",
                 "copy_query_regex": "COPY.*FROM stdin;"
             },
-            "destination": "hr.kvkprsm00",
-            "id": "import_kvkprs_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
+            "id": "import_kvkash",
             "objectstore": "HandelsregisterObjectstore",
+            "destination": "hr.kvkashm00",
             "read_config": {
                 "file_filter": "mks-dump/kvkprsash.sql.gz",
                 "container": "handelsregister",
@@ -140,14 +142,14 @@
                 "data_delimiter_regexp": "\\.\n",
                 "copy_query_regex": "COPY.*FROM stdin;"
             },
-            "destination": "hr.kvkashm00",
-            "id": "import_kvkash_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
+            "id": "import_kvkbeshdn",
+            "destination": "hr.kvkbeshdnm00",
             "objectstore": "HandelsregisterObjectstore",
             "read_config": {
                 "file_filter": "mks-dump/kvkbeshdn.sql.gz",
@@ -162,14 +164,14 @@
                 "data_delimiter_regexp": "\\.\n",
                 "copy_query_regex": "COPY.*FROM stdin;"
             },
-            "destination": "hr.kvkbeshdnm00",
-            "id": "import_kvkbeshdn_sql",
             "depends_on": [
                 "clear_schemas"
             ]
         },
         {
             "type": "import_dump",
+            "id": "import_kvkhdn",
+            "destination": "hr.kvkhdnm00",
             "objectstore": "HandelsregisterObjectstore",
             "read_config": {
                 "file_filter": "mks-dump/kvkhdn.sql.gz",
@@ -184,8 +186,6 @@
                 "data_delimiter_regexp": "\\.\n",
                 "copy_query_regex": "COPY.*FROM stdin;"
             },
-            "destination": "hr.kvkhdnm00",
-            "id": "import_kvkhdn_sql",
             "depends_on": [
                 "clear_schemas"
             ]
@@ -197,7 +197,12 @@
             "query_src": "file",
             "query": "data/sql/hr/create.vestigingen.sql",
             "depends_on": [
-                "clear_schemas"
+                "clear_schemas",
+                "import_kvkves",
+                "import_kvkveshis",
+                "import_kvkbeshdn",
+                "import_kvkadr",
+                "import_kvkmac"
             ]
         }
     ]
