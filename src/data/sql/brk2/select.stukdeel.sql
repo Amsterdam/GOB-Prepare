@@ -9,6 +9,7 @@ SELECT sdl.id                                                               AS i
        akt.akt_ids                                                          AS is_bron_voor_brk_aantekening_kadastraal_object,
        art.art_ids                                                          AS is_bron_voor_brk_aantekening_recht,
        zrt.zrt_ids                                                          AS is_bron_voor_brk_zakelijk_recht,
+       ec.ec_ids                                                            AS is_bron_voor_brk_erfpachtcanon,
        stk.identificatie                                                    AS stukidentificatie,
        stk.akrportefeuillenr                                                AS portefeuillenummer_akr,
        stk.tijdstip_aanbieding                                              AS tijdstip_aanbieding_stuk,
@@ -103,13 +104,28 @@ FROM brk2.stukdeel sdl
                                    JOIN brk2_prep.zakelijk_recht zrt ON zrt.__ontstaan_uit_asg_id = asg.id
                           GROUP BY asg.stukdeel_identificatie, zrt.identificatie) q
                     GROUP BY q.stukdeel_identificatie) zrt ON sdl.identificatie = zrt.stukdeel_identificatie
+         LEFT JOIN (SELECT q.is_gebaseerd_op_brk_stukdeel_identificatie                       AS stukdeel_identificatie
+                         , JSONB_AGG(JSONB_BUILD_OBJECT('ec_identificatie', q.identificatie)) AS ec_ids
+                         , CASE
+                               WHEN SUM(CASE WHEN q.max_ec_expiration_date IS NULL THEN 0 ELSE 1 END) < 1 THEN NULL
+                               ELSE MAX(q.max_ec_expiration_date) END                         AS max_ec_expiration_date
+                    FROM (SELECT b.is_gebaseerd_op_brk_stukdeel_identificatie,
+                                 b.identificatie,
+                                 CASE
+                                     WHEN SUM(CASE WHEN b.datum_actueel_tot IS NULL THEN 0 ELSE 1 END) < 1 THEN NULL
+                                     ELSE MAX(b.datum_actueel_tot) END AS max_ec_expiration_date
+                          FROM brk2_prep.erfpachtcanon b
+                          GROUP BY b.is_gebaseerd_op_brk_stukdeel_identificatie, b.identificatie) q
+                    GROUP BY q.is_gebaseerd_op_brk_stukdeel_identificatie) ec
+                   ON sdl.identificatie = ec.stukdeel_identificatie
          LEFT OUTER JOIN brk2_prep.id_conversion idc ON idc.ident_nieuw = stk.identificatie
          JOIN brk2.bestand bsd ON TRUE
 WHERE COALESCE(
                 tng.tng_ids -> 0 -> 'tng_identificatie',
                 akt.akt_ids -> 0 -> 'akt_identificatie',
                 art.art_ids -> 0 -> 'art_identificatie',
-                zrt.zrt_ids -> 0 -> 'zrt_identificatie'
+                zrt.zrt_ids -> 0 -> 'zrt_identificatie',
+                ec.ec_ids -> 0 -> 'ec_identificatie'
     ) IS NOT NULL
   -- Exclude NL.IMKAD.Stukdeel.33029100 since it has 287.000 relations
   AND sdl.identificatie <> 'NL.IMKAD.Stukdeel.33029100'
