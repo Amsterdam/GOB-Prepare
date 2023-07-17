@@ -245,6 +245,17 @@
     },
     {
       "type": "create_table",
+      "description": "Select Erfpachtcanon",
+      "table_name": "brk2_prep.erfpachtcanon",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.erfpachtcanon.sql",
+      "id": "select_ec",
+      "depends_on": [
+        "select_zrt"
+      ]
+    },
+    {
+      "type": "create_table",
       "description": "KOT - is_ontstaan_uit_kadastraalobject",
       "table_name": "brk2_prep.kot_ontstaan_uit_kot",
       "id": "set_is_ontstaan_uit_kadastraalobject",
@@ -412,7 +423,8 @@
         "select_art",
         "select_akt",
         "select_tng",
-        "select_zrt"
+        "select_zrt",
+        "select_ec"
       ]
     },
     {
