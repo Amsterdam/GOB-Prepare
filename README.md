@@ -23,7 +23,7 @@ This is because BAG verblijfsobjecten are required for `import_verblijfsobjecten
 
 ```bash
 docker compose build
-docker compose up &
+docker compose up -d
 ```
 
 ## Tests
@@ -49,7 +49,7 @@ source venv/bin/activate
 pip install -r src/requirements.txt
 ```
 
-Or activate the previously created virtual environment
+Or activate the previously created virtual environment:
 
 ```bash
 source venv/bin/activate
@@ -57,7 +57,7 @@ source venv/bin/activate
 
 # Run
 
-Optional: Set environment if GOB-Import should connect to secure data sources:
+Optional: Set environment if GOB-Prepare should connect to secure data sources:
 
 ```bash
 export $(cat .env | xargs)  # Copy from .env.example if missing
@@ -81,6 +81,6 @@ sh test.sh
 
 # Remarks
 
-## Trigger prepare
+## Trigger Prepare
 
-Prepares are triggered by the GOB-Workflow module. See the GOB-Workflow README for more details
+Prepares are triggered by the [GOB-Workflow](https://github.com/Amsterdam/GOB-Workflow) module. See the GOB-Workflow README for more details.

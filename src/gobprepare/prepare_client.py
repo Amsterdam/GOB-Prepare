@@ -201,7 +201,7 @@ class PrepareClient:
         importer = SqlDumpImporter(self._dst_datastore, action)
 
         file_imported = importer.import_dump()
-        logger.info(f"Dump {file_imported} successfully imported to table {action['destination']}")
+        logger.info(f"Dump {file_imported} successfully imported.")
         return file_imported
 
     def action_create_table(self, action: CreateTableConfig) -> None:
