@@ -189,12 +189,24 @@
       "query_src": "file",
       "query": "data/sql/hr/create.vestigingen.sql",
       "depends_on": [
-        "clear_schemas",
         "import_kvkves",
         "import_kvkveshdn",
         "import_kvkhdn",
         "import_kvkadr",
         "import_kvkmac"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create HR maatschappelijkeactiviteiten table",
+      "id": "create_hr_mac",
+      "query_src": "file",
+      "query": "data/sql/hr/create.maatschappelijke_activiteiten.sql",
+      "depends_on": [
+        "import_kvkmac",
+        "import_kvkadr",
+        "import_kvkhdn",
+        "import_kvkves"
       ]
     }
   ]
