@@ -24,12 +24,14 @@ CREATE TABLE hr_prep.nietnatuurlijkpersoon AS
     nnp.rol::varchar                                                    AS rol,
     NULL::date                                                          AS datum_aanvang,
     NULL::date                                                          AS datum_einde,
-    fvv.prsidh                                                          AS heeft_functie_vervulling,
-    fvv.prsidi                                                          AS is_functie_vervulling
+    hfvv.ashid                                                           AS heeft_functie_vervulling,
+    ifvv.ashid                                                           AS is_functie_vervulling
 
   FROM
     hr.kvkprsm00 nnp
-    LEFT JOIN hr.kvkprsashm00 fvv ON nnp.prsid = fvv.prsidi
+    LEFT JOIN hr.kvkprsashm00 hfvv ON nnp.prsid = hfvv.prsidh
+    LEFT JOIN hr.kvkprsashm00 ifvv ON nnp.prsid = ifvv.prsidi
+
   WHERE
     nnp.rsin IS NOT NULL
 
