@@ -24,8 +24,8 @@ CREATE TABLE hr_prep.nietnatuurlijkpersoon AS
     nnp.rol::varchar                                                    AS rol,
     NULL::date                                                          AS datum_aanvang,
     NULL::date                                                          AS datum_einde,
-    hfvv.ashid                                                           AS heeft_functie_vervulling,
-    ifvv.ashid                                                           AS is_functie_vervulling
+    hfvv.ashid                                                          AS heeft_functie_vervulling,
+    ifvv.ashid                                                          AS is_functie_vervulling
 
   FROM
     hr.kvkprsm00 nnp
@@ -34,4 +34,3 @@ CREATE TABLE hr_prep.nietnatuurlijkpersoon AS
 
   WHERE
     nnp.rsin IS NOT NULL
-
