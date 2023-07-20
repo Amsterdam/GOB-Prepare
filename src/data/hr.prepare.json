@@ -121,7 +121,7 @@
     },
     {
       "type": "import_dump",
-      "id": "import_kvkash",
+      "id": "import_kvkprsash",
       "objectstore": "HandelsregisterObjectstore",
       "read_config": {
         "file_filter": "mks-dump/kvkprsash.sql.gz",
@@ -216,7 +216,18 @@
       "query_src": "file",
       "query": "data/sql/hr/create.functievervulling.sql",
       "depends_on": [
-        "import_kvkash"
+        "import_kvkprsash"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create HR nietnatuurlijkpersoon table",
+      "id": "create_hr_nnp",
+      "query_src": "file",
+      "query": "data/sql/hr/create.niet_natuurlijk_persoon.sql",
+      "depends_on": [
+        "import_kvkprs",
+        "import_kvkprsash"
       ]
     }
   ]
