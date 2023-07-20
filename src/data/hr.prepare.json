@@ -208,6 +208,16 @@
         "import_kvkhdn",
         "import_kvkves"
       ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create HR functievervulling table",
+      "id": "create_hr_fvv",
+      "query_src": "file",
+      "query": "data/sql/hr/create.functievervulling.sql",
+      "depends_on": [
+        "import_kvkash"
+      ]
     }
   ]
 }

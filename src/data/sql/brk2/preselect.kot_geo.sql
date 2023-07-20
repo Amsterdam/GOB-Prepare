@@ -108,3 +108,6 @@ WHERE brk2_prep.kot_geo.id = near_a_poly.id
   AND brk2_prep.kot_geo.volgnummer = near_a_poly.volgnummer
   AND brk2_prep.kot_geo.geometrie IS NULL
 ;
+
+-- lots of updates
+VACUUM ANALYZE brk2_prep.kot_geo;
