@@ -229,6 +229,17 @@
         "import_kvkprs",
         "import_kvkprsash"
       ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create HR natuurlijkpersoon. table",
+      "id": "create_hr_nps",
+      "query_src": "file",
+      "query": "data/sql/hr/create.natuurlijkpersoon.sql",
+      "depends_on": [
+        "import_kvkprs",
+        "import_kvkprsash"
+      ]
     }
   ]
 }
