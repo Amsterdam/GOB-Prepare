@@ -21,7 +21,7 @@
       "read_config": {
         "file_filter": "mks-dump/kvkadr.sql.gz",
         "container": "handelsregister",
-        "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+        "filter_list": "^GRANT|^DROP|^SELECT pg_catalog\\.set_config|^REVOKE|^CREATE (TRIGGER|INDEX)|ADD CONSTRAINT|^ALTER TABLE|^SET default_table_access_method",
         "substitution": {
           "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
           "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
@@ -42,7 +42,7 @@
       "read_config": {
         "file_filter": "mks-dump/kvkmac.sql.gz",
         "container": "handelsregister",
-        "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+        "filter_list": "^GRANT|^DROP|^SELECT pg_catalog\\.set_config|^REVOKE|^CREATE (TRIGGER|INDEX)|ADD CONSTRAINT|^ALTER TABLE|^SET default_table_access_method",
         "substitution": {
           "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
           "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
@@ -63,7 +63,7 @@
       "read_config": {
         "file_filter": "mks-dump/kvkves.sql.gz",
         "container": "handelsregister",
-        "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+        "filter_list": "^GRANT|^DROP|^SELECT pg_catalog\\.set_config|^REVOKE|^CREATE (TRIGGER|INDEX)|ADD CONSTRAINT|^ALTER TABLE|^SET default_table_access_method",
         "substitution": {
           "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
           "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
@@ -84,7 +84,7 @@
       "read_config": {
         "file_filter": "mks-dump/kvkveshis.sql.gz",
         "container": "handelsregister",
-        "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+        "filter_list": "^GRANT|^DROP|^SELECT pg_catalog\\.set_config|^REVOKE|^CREATE (TRIGGER|INDEX)|ADD CONSTRAINT|^ALTER TABLE|^SET default_table_access_method",
         "substitution": {
           "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
           "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
@@ -105,7 +105,7 @@
       "read_config": {
         "file_filter": "mks-dump/kvkprs.sql.gz",
         "container": "handelsregister",
-        "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+        "filter_list": "^GRANT|^DROP|^SELECT pg_catalog\\.set_config|^REVOKE|^CREATE (TRIGGER|INDEX)|ADD CONSTRAINT|^ALTER TABLE|^SET default_table_access_method",
         "substitution": {
           "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
           "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
@@ -126,7 +126,7 @@
       "read_config": {
         "file_filter": "mks-dump/kvkprsash.sql.gz",
         "container": "handelsregister",
-        "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+        "filter_list": "^GRANT|^DROP|^SELECT pg_catalog\\.set_config|^REVOKE|^CREATE (TRIGGER|INDEX)|ADD CONSTRAINT|^ALTER TABLE|^SET default_table_access_method",
         "substitution": {
           "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
           "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
@@ -147,7 +147,7 @@
       "read_config": {
         "file_filter": "mks-dump/kvkbeshdn.sql.gz",
         "container": "handelsregister",
-        "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+        "filter_list": "^GRANT|^DROP|^SELECT pg_catalog\\.set_config|^REVOKE|^CREATE (TRIGGER|INDEX)|ADD CONSTRAINT|^ALTER TABLE|^SET default_table_access_method",
         "substitution": {
           "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
           "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
@@ -168,7 +168,7 @@
       "read_config": {
         "file_filter": "mks-dump/kvkhdn.sql.gz",
         "container": "handelsregister",
-        "filter_list": "GRANT|DROP|OWNER|search_path|REVOKE|CREATE TRIGGER|CREATE INDEX|ADD CONSTRAINT|ALTER TABLE|PRIMARY KEY \\(",
+        "filter_list": "^GRANT|^DROP|^SELECT pg_catalog\\.set_config|^REVOKE|^CREATE (TRIGGER|INDEX)|ADD CONSTRAINT|^ALTER TABLE|^SET default_table_access_method",
         "substitution": {
           "igp_[a-zA-Z0-9_]+_cmg_owner": "hr",
           "(geopunt(.*?)\\.geometry\\(Point(.*?)\n)": "geopunt public.geometry(POINT,28992)"
