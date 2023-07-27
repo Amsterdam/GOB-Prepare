@@ -14,7 +14,7 @@ SET max_parallel_workers_per_gather = 0;
 CREATE TABLE brk2_prep.g_perceel_geo_union AS
 SELECT kot1.id                    AS id,
        kot1.volgnummer            AS volgnummer,
-       ST_Union(kot2.__geometrie) AS g_poly
+       ST_Collect(kot2.__geometrie) AS g_poly
 FROM brk2_prep.kadastraal_object kot1
          JOIN brk2_prep.kot_ontstaan_uit_g_perceel AS kot_g_perc
               ON kot1.id = kot_g_perc.kot_id AND kot1.volgnummer = kot_g_perc.kot_volgnummer
@@ -24,7 +24,6 @@ FROM brk2_prep.kadastraal_object kot1
               ON kot2.id = (g_perceel ->> 'kot_id')::integer
                   AND kot2.volgnummer = (g_perceel ->> 'kot_volgnummer')::integer
 WHERE kot1.indexletter = 'A'
-  AND kot1._expiration_date IS NULL
   AND kot1.aangeduid_door_brk_kadastralesectie = kot2.aangeduid_door_brk_kadastralesectie
   AND kot1.aangeduid_door_brk_kadastralegemeentecode_code = kot2.aangeduid_door_brk_kadastralegemeentecode_code
 GROUP BY kot1.id, kot1.volgnummer;
@@ -39,7 +38,6 @@ CREATE TABLE brk2_prep.kot_geo AS
 SELECT id,
        volgnummer,
        __geometrie AS geometrie,
-       _expiration_date,
        indexletter,
        heeft_een_relatie_met_bag_verblijfsobject,
        __kadastrale_aanduiding_minus_index_nummer
@@ -49,7 +47,6 @@ ANALYZE brk2_prep.kot_geo;
 
 CREATE INDEX ON brk2_prep.kot_geo (id, volgnummer);
 CREATE INDEX ON brk2_prep.kot_geo USING gist (geometrie);
-CREATE INDEX ON brk2_prep.kot_geo (_expiration_date);
 
 -- 1. Set geometry for A-percelen based on related verblijfsobject. If A-perceel is in g_poly table, check if VOT
 -- geometry falls within that polygon. Otherwise skip this check.
@@ -65,7 +62,6 @@ WITH vbo_kot_geometrie AS (SELECT DISTINCT ON (kot.id) kot.id         AS id,
                                               ON kot_g_poly.id = kot.id
                                                   AND kot_g_poly.volgnummer = kot.volgnummer
                            WHERE kot.indexletter = 'A'
-                             AND kot._expiration_date IS NULL
                              AND vbo.geometrie IS NOT NULL
                              AND (g_poly IS NULL OR ST_Within(vbo.geometrie, g_poly) = TRUE))
 UPDATE brk2_prep.kot_geo
@@ -93,11 +89,9 @@ WITH near_a_poly AS (SELECT DISTINCT ON (kot1.id) kot1.id,
                               JOIN brk2_prep.kot_geo kot2
                                    ON kot1.__kadastrale_aanduiding_minus_index_nummer =
                                       kot2.__kadastrale_aanduiding_minus_index_nummer
-                                       AND kot2._expiration_date IS NULL
                                        AND kot2.geometrie IS NOT NULL
                      WHERE kot1.geometrie IS NULL
                        AND kot1.indexletter = 'A'
-                       AND kot1._expiration_date IS NULL
                      ORDER BY kot1.id,
                               kot1.volgnummer,
                               kot1.__kadastrale_aanduiding_minus_index_nummer)
