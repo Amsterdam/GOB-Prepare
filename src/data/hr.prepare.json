@@ -240,6 +240,14 @@
         "import_kvkprs",
         "import_kvkprsash"
       ]
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "hr_prep": "hr_prepared"
+      },
+      "depends_on": "*"
     }
   ]
 }
