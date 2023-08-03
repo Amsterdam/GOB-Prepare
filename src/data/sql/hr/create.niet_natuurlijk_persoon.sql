@@ -2,7 +2,7 @@ CREATE TABLE hr_prep.nietnatuurlijkpersoon AS
 
   SELECT
     nnp.prsid::text                                                     AS _id,
-    nnp.rsin::varchar                                                   AS identificatie,
+    nnp.rsin::varchar                                                   AS rsin,
     NULL::date                                                          AS datum_actueel_tot,
     datumuitschrijving::text::date                                      AS datum_uitschrijving,
     NULL::text                                                          AS schuldsanering,

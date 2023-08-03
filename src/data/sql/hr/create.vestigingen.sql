@@ -2,7 +2,7 @@ CREATE TABLE hr_prep.vestigingen AS
 
   SELECT
     ves.vesid::text                                                     AS _id,
-    ves.vestigingsnummer                                                AS identificatie,
+    ves.vestigingsnummer                                                AS vestigingsnummer,
     NULL::date                                                          AS datum_actueel_tot,
     ves.datumaanvang::text::date                                        AS datum_aanvang,
     ves.datumeinde::text::date                                          AS datum_einde,
@@ -213,6 +213,7 @@ CREATE TABLE hr_prep.vestigingen AS
         'land_buitenland', bezk.land
       )
     END                                                                 AS bezoek_locatie,
+    bezk.geopunt                                                        AS bezoek_geopunt,
 
     -- BAG relaties; zie bag_nummeraanduidingen, bag_verblijfsobjecten, bag_ligplaatsen, bag_standplaatsen
     CASE
@@ -251,6 +252,7 @@ CREATE TABLE hr_prep.vestigingen AS
         'land_buitenland', post.land
       )
     END                                                                 AS post_locatie,
+    post.geopunt                                                        AS post_geopunt,
 
     -- BAG relaties; zie bag_nummeraanduidingen, bag_verblijfsobjecten, bag_ligplaatsen, bag_standplaatsen
     CASE

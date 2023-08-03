@@ -2,7 +2,7 @@ CREATE TABLE hr_prep.maatschappelijke_activiteiten AS
 
   SELECT
     mac.macid::varchar                                          AS _id,
-    mac.kvknummer                                               AS identificatie,
+    mac.kvknummer                                               AS kvknummer,
     NULL::date                                                  AS datum_actueel_tot,
     mac.datumaanvang::text::date                                AS datum_aanvang_maatschappelijke_activiteit,
     mac.datumeinde::text::date                                  AS datum_einde_maatschappelijke_activiteit,
@@ -145,6 +145,8 @@ CREATE TABLE hr_prep.maatschappelijke_activiteiten AS
         'land_buitenland', bezk.land
       )
     END                                                                 AS bezoek_locatie,
+    bezk.geopunt                                                        AS bezoek_geopunt,
+
     -- BAG relaties; zie bag_nummeraanduidingen, bag_verblijfsobjecten, bag_ligplaatsen, bag_standplaatsen
     CASE
       WHEN substring(bezk.identificatieaoa from 5 for 2) = '20' THEN bezk.identificatieaoa
@@ -181,7 +183,8 @@ CREATE TABLE hr_prep.maatschappelijke_activiteiten AS
         'regio_buitenland', post.regio,
         'land_buitenland', post.land
       )
-    END                                                                 AS post_locatie
+    END                                                                 AS post_locatie,
+    post.geopunt                                                        AS post_geopunt
 
   FROM
     hr.kvkmacm00 mac
