@@ -2,7 +2,7 @@
 
   SELECT
     nps.prsid::varchar                                                  AS identificatie,
-    nps.bsn::varchar                                                    AS bsn_nummer, -- altijd leeg
+    nps.bsn::varchar                                                    AS bsn, -- altijd leeg
     NULL::date                                                          AS datum_actueel_tot,
     nps.geslachtsnaam                                                   AS geslachtsnaam,
     nps.voorvoegselgeslachtsnaam                                        AS voorvoegsel_geslachtsnaam,
