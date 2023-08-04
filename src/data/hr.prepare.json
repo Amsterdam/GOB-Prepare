@@ -206,7 +206,8 @@
         "import_kvkmac",
         "import_kvkadr",
         "import_kvkhdn",
-        "import_kvkves"
+        "import_kvkves",
+        "import_kvkprs"
       ]
     },
     {
