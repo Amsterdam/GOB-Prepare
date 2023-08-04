@@ -15,7 +15,11 @@ CREATE TABLE hr_prep.maatschappelijke_activiteiten AS
     ves.datumaanvang::text::date                                AS datum_aanvang_maatschappelijke_activiteit_vestiging,
     ves.datumeinde::text::date                                  AS datum_einde_maatschappelijke_activiteit_vestiging,
     tves.wordt_uitgeoefend_in_ncv                               AS wordt_uitgeoefend_in_niet_commerciele_vestiging,
-    mac.prsid::text                                             AS heeft_als_eigenaar, -- bij gebrek aan BSN
+    CASE -- heeft_als_eigenaar_np; prsid bij gebrek aan BSN (nps.bsn)
+      WHEN nps.typering = 'natuurlijkPersoon' THEN nps.prsid::varchar
+      ELSE NULL
+    END                                                         AS heeft_als_eigenaar_np,
+    nps.rsin                                                    AS heeft_als_eigenaar_nnp,
     mac.indicatieonderneming                                    AS onderneming,
     mac.totaalwerkzamepersonen::integer                         AS totaal_werkzame_personen,
     mac.fulltimewerkzamepersonen::integer                       AS voltijd_werkzame_personen,
@@ -257,3 +261,5 @@ CREATE TABLE hr_prep.maatschappelijke_activiteiten AS
       ORDER BY
         ves.macid, ves.datumaanvang DESC
     ) ves ON mac.macid = ves.macid
+
+    LEFT JOIN hr.kvkprsm00 nps USING (prsid)
