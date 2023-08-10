@@ -8,24 +8,16 @@ CREATE TABLE hr_prep.functievervulling AS
     NULL::varchar                                               AS functie_titel,
     NULL::boolean                                               AS indicatie_statutair,
     NULL::jsonb                                                 AS schorsing,
-
-    CASE -- aansprakelijke
-      WHEN fvv.functie IS NULL THEN NULL::jsonb
-      ELSE JSONB_BUILD_OBJECT(
-        'code', NULL,
-        'omschrijving', fvv.functie
-      )
-    END                                                         AS aansprakelijke,
+    JSONB_BUILD_OBJECT(
+      'code', NULL,
+      'omschrijving', fvv.functie
+    )                                                           AS aansprakelijke,
     NULL::varchar                                               AS handelingsbekwaam,
-
-    CASE -- bevoegdheids_aansprakelijke
-      WHEN fvv.soort IS NULL THEN NULL::jsonb
-      ELSE JSONB_BUILD_OBJECT(
-        'code', NULL,
-        'omschrijving', fvv.soort
-      )
-    END                                                         AS bevoegdheids_aansprakelijke,
-
+    JSONB_BUILD_OBJECT(
+      'soort_bevoegdheid', fvv.soort,
+      'beperking_in_euros', NULL,
+      'overige_beperking', NULL
+    )                                                           AS bevoegdheids_aansprakelijke,
     NULL::jsonb                                                 AS bestuursfunctie,
     NULL::jsonb                                                 AS bevoegdheid_bestuurder,
     NULL::varchar                                               AS vertegenwoordiger_bestuurder_rechtspersoon,
