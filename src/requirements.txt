@@ -1,3 +1,3 @@
 gobconfig@git+https://github.com/Amsterdam/GOB-Config.git@v0.11.0
--e git+https://github.com/Amsterdam/GOB-Core.git@v2.15.2#egg=gobcore
+-e git+https://github.com/Amsterdam/GOB-Core.git@v2.16.0#egg=gobcore
 pandas-stubs~=2.0.2
