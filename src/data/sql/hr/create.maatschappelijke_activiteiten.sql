@@ -19,7 +19,10 @@ CREATE TABLE hr_prep.maatschappelijke_activiteiten AS
       WHEN nps.typering = 'natuurlijkPersoon' THEN nps.prsid::varchar
       ELSE NULL
     END                                                         AS heeft_als_eigenaar_np,
-    nps.rsin                                                    AS heeft_als_eigenaar_nnp,
+    CASE -- heeft_als_eigenaar_nnp; prsid omdat nps.rsin niet uniek is
+      WHEN nps.typering != 'natuurlijkPersoon' THEN nps.prsid::varchar
+      ELSE NULL
+    END                                                         AS heeft_als_eigenaar_nnp,
     mac.indicatieonderneming                                    AS onderneming,
     mac.totaalwerkzamepersonen::integer                         AS totaal_werkzame_personen,
     mac.fulltimewerkzamepersonen::integer                       AS voltijd_werkzame_personen,
