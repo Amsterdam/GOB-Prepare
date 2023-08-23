@@ -24,7 +24,7 @@ CREATE TABLE hr_prep.functievervullingen AS
     NULL::jsonb                                                 AS gemachtigde,
     NULL::boolean                                               AS volmacht,
     NULL::boolean                                               AS statutair,
-    NULL::jsonb                                                 AS heeft_hr_vestiging, -- relaties VES
+    NULL::jsonb                                                 AS heeft_hr_vestigingen, -- relaties VES
     NULL::boolean                                               AS beperkte_volmacht,
     NULL::boolean                                               AS beperking_in_geld,
     NULL::boolean                                               AS doen_van_opgave_aan_handelsregister,

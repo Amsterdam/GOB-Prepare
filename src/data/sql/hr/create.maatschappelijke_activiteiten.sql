@@ -14,7 +14,7 @@ CREATE TABLE hr_prep.maatschappelijke_activiteiten AS
     ves.hoofdvestiging_nummer                                   AS heeft_hoofdvestiging,
     ves.datumaanvang::text::date                                AS datum_aanvang_maatschappelijke_activiteit_vestiging,
     ves.datumeinde::text::date                                  AS datum_einde_maatschappelijke_activiteit_vestiging,
-    tves.wordt_uitgeoefend_in_ncv                               AS wordt_uitgeoefend_in_niet_commerciele_vestiging,
+    tves.wordt_uitgeoefend_in_ncv                               AS wordt_uitgeoefend_in_niet_commerciele_vestigingen,
     CASE -- heeft_als_eigenaar_np; prsid bij gebrek aan BSN (nps.bsn)
       WHEN nps.typering = 'natuurlijkPersoon' THEN nps.prsid::varchar
       ELSE NULL
@@ -31,7 +31,7 @@ CREATE TABLE hr_prep.maatschappelijke_activiteiten AS
     NULL::date                                                  AS datum_einde_onderneming,
     NULL                                                        AS is_overdracht_voortzetting_onderneming,
     NULL::date                                                  AS datum_overdracht_voortzetting_onderneming,
-    tves.wordt_uitgeoefend_in_cvs                               AS wordt_uitgeoefend_in_commerciele_vestiging,
+    tves.wordt_uitgeoefend_in_cvs                               AS wordt_uitgeoefend_in_commerciele_vestigingen,
     NULL::date                                                  AS datum_aanvang_onderneming_vestiging,
     NULL::date                                                  AS datum_einde_onderneming_vestiging,
     NULL::date                                                  AS datum_aanvang_onderneming_handelsnaam,

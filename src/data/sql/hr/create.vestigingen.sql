@@ -106,7 +106,7 @@ CREATE TABLE hr_prep.vestigingen AS
       )
     END                                                                 AS domeinnamen,
 
-    NULL                                                                AS is_samengevoegd_met_vestiging,
+    NULL                                                                AS is_samengevoegd_met_vestigingen,
     NULL::date                                                          AS datum_afgesloten,
     NULL::date                                                          AS datum_samenvoeging,
     ves.naam                                                            AS naam,
