@@ -233,7 +233,7 @@
     },
     {
       "type": "execute_sql",
-      "description": "Create HR natuurlijkepersonen. table",
+      "description": "Create HR natuurlijkepersonen table",
       "id": "create_hr_nps",
       "query_src": "file",
       "query": "data/sql/hr/create.natuurlijkepersonen.sql",
