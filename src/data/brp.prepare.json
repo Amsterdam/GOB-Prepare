@@ -178,6 +178,22 @@
       "type": "import_csv",
       "objectstore": "GOBObjectstore",
       "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSC54U00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.nationaliteiten_c54",
+      "id": "import_nationaliteiten_c54",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
         "file_filter": "^iburgerzaken\\/BZSVBTU00.csv$",
         "container": "development"
       },
@@ -250,6 +266,22 @@
       "encoding": "utf-8",
       "destination": "brp.reisdocumenten",
       "id": "import_reisdocumenten",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "GOBObjectstore",
+      "read_config": {
+        "file_filter": "^iburgerzaken\\/BZSKSRU00.csv$",
+        "container": "development"
+      },
+      "column_names": {},
+      "separator": ",",
+      "encoding": "utf-8",
+      "destination": "brp.kiesrecht",
+      "id": "import_kiesrecht",
       "depends_on": [
         "clear_schemas"
       ]
