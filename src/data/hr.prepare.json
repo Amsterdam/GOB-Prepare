@@ -212,20 +212,20 @@
     },
     {
       "type": "execute_sql",
-      "description": "Create HR functievervulling table",
+      "description": "Create HR functievervullingen table",
       "id": "create_hr_fvv",
       "query_src": "file",
-      "query": "data/sql/hr/create.functievervulling.sql",
+      "query": "data/sql/hr/create.functievervullingen.sql",
       "depends_on": [
         "import_kvkprsash"
       ]
     },
     {
       "type": "execute_sql",
-      "description": "Create HR nietnatuurlijkpersoon table",
+      "description": "Create HR nietnatuurlijkepersonen table",
       "id": "create_hr_nnp",
       "query_src": "file",
-      "query": "data/sql/hr/create.niet_natuurlijk_persoon.sql",
+      "query": "data/sql/hr/create.niet_natuurlijkepersonen.sql",
       "depends_on": [
         "import_kvkprs",
         "import_kvkprsash"
@@ -233,10 +233,10 @@
     },
     {
       "type": "execute_sql",
-      "description": "Create HR natuurlijkpersoon. table",
+      "description": "Create HR natuurlijkepersonen. table",
       "id": "create_hr_nps",
       "query_src": "file",
-      "query": "data/sql/hr/create.natuurlijkpersoon.sql",
+      "query": "data/sql/hr/create.natuurlijkepersonen.sql",
       "depends_on": [
         "import_kvkprs",
         "import_kvkprsash"

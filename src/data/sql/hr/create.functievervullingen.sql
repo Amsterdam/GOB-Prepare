@@ -1,4 +1,4 @@
-CREATE TABLE hr_prep.functievervulling AS
+CREATE TABLE hr_prep.functievervullingen AS
 
   SELECT
     fvv.ashid::varchar                                          AS identificatie,

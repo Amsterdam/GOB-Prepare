@@ -1,4 +1,4 @@
- CREATE TABLE hr_prep.natuurlijkpersoon AS
+ CREATE TABLE hr_prep.natuurlijkepersonen AS
 
   SELECT
     nps.prsid::varchar                                                  AS identificatie,
@@ -24,8 +24,8 @@
     nps.rol                                                             AS rol,
     nps.toegangscode::varchar                                           AS toegangscode,
     nps.nummer::integer                                                 AS nummer,
-    fvh.ashid::varchar                                                  AS heeft_functie_vervulling, -- altijd leeg
-    fvi.ashid::varchar                                                  AS is_functie_vervulling
+    fvh.ashid                                                           AS heeft_functie_vervullingen, -- altijd leeg
+    fvi.ashid                                                           AS is_functie_vervullingen
 
   FROM (
     hr.kvkprsm00
@@ -51,6 +51,23 @@
     ) AS sub USING(prsid)
   ) AS nps
 
-  LEFT JOIN hr.kvkprsashm00 fvh ON nps.prsid = fvh.prsidh
-  LEFT JOIN hr.kvkprsashm00 fvi ON nps.prsid = fvi.prsidi
+  LEFT JOIN (
+    SELECT
+      JSONB_AGG(ashid) AS ashid,
+      prsidh 
+    FROM
+      hr.kvkprsashm00
+    GROUP BY
+      prsidh
+    ) AS fvh ON nps.prsid = fvh.prsidh
+  LEFT JOIN (
+    SELECT
+      JSONB_AGG(ashid) as ashid,
+      prsidi
+    FROM
+      hr.kvkprsashm00
+    GROUP BY
+      prsidi
+    ) AS fvi ON nps.prsid = fvi.prsidi
+
   WHERE typering = 'natuurlijkPersoon'
