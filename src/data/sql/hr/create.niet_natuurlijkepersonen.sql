@@ -1,4 +1,4 @@
-CREATE TABLE hr_prep.nietnatuurlijkpersoon AS
+CREATE TABLE hr_prep.niet_natuurlijkepersonen AS
 
   SELECT
     nnp.prsid::varchar                                                  AS identificatie,
@@ -24,13 +24,30 @@ CREATE TABLE hr_prep.nietnatuurlijkpersoon AS
     nnp.rol::varchar                                                    AS rol,
     NULL::date                                                          AS datum_aanvang,
     NULL::date                                                          AS datum_einde,
-    hfvv.ashid                                                          AS heeft_functie_vervulling,
-    ifvv.ashid                                                          AS is_functie_vervulling
+    hfvv.ashid                                                          AS heeft_functie_vervullingen,
+    ifvv.ashid                                                          AS is_functie_vervullingen
 
   FROM
     hr.kvkprsm00 nnp
-    LEFT JOIN hr.kvkprsashm00 hfvv ON nnp.prsid = hfvv.prsidh
-    LEFT JOIN hr.kvkprsashm00 ifvv ON nnp.prsid = ifvv.prsidi
+
+  LEFT JOIN (
+    SELECT
+      JSONB_AGG(ashid) AS ashid,
+      prsidh 
+    FROM
+      hr.kvkprsashm00
+    GROUP BY
+      prsidh
+  ) AS hfvv ON nnp.prsid = hfvv.prsidh
+  LEFT JOIN (
+    SELECT
+      JSONB_AGG(ashid) as ashid,
+      prsidi
+    FROM
+      hr.kvkprsashm00
+    GROUP BY
+      prsidi
+  ) AS ifvv ON nnp.prsid = ifvv.prsidi
 
   WHERE
     typering != 'natuurlijkPersoon'
