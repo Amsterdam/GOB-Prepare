@@ -221,8 +221,7 @@ CREATE TABLE hr_prep.maatschappelijke_activiteiten AS
       (
         SELECT
           macid,
-          JSONB_AGG(
-            JSONB_BUILD_OBJECT('bronwaarde', vestigingsnummer)
+          JSONB_AGG(vestigingsnummer
             ORDER BY
               vestigingsnummer
           ) AS wordt_uitgeoefend_in_ncv
@@ -237,7 +236,7 @@ CREATE TABLE hr_prep.maatschappelijke_activiteiten AS
         SELECT
           macid,
           JSONB_AGG(
-            JSONB_BUILD_OBJECT('bronwaarde', vestigingsnummer)
+            vestigingsnummer
             ORDER BY
               vestigingsnummer
           ) AS wordt_uitgeoefend_in_cvs
