@@ -32,7 +32,7 @@ CREATE TABLE hr_prep.niet_natuurlijkepersonen AS
 
   LEFT JOIN (
     SELECT
-      JSONB_AGG(ashid) AS ashid,
+      JSONB_AGG(ashid::varchar) AS ashid,
       prsidh 
     FROM
       hr.kvkprsashm00
@@ -41,7 +41,7 @@ CREATE TABLE hr_prep.niet_natuurlijkepersonen AS
   ) AS hfvv ON nnp.prsid = hfvv.prsidh
   LEFT JOIN (
     SELECT
-      JSONB_AGG(ashid) as ashid,
+      JSONB_AGG(ashid::varchar) as ashid,
       prsidi
     FROM
       hr.kvkprsashm00
