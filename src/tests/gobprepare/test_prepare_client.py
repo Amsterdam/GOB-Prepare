@@ -1,8 +1,9 @@
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call, mock_open, ANY
+from unittest.mock import MagicMock, call, mock_open, patch
 
 from gobcore.exceptions import GOBException
-from gobprepare.prepare_client import PrepareClient, OracleDatastore, SqlDatastore
+
+from gobprepare.prepare_client import OracleDatastore, PrepareClient, SqlDatastore
 from gobprepare.utils.exceptions import DuplicateTableError
 from tests import fixtures
 
@@ -484,6 +485,32 @@ class TestPrepareClient(TestCase):
             call('src a', 'dst a'),
             call('src b', 'dst b'),
         ])
+
+    def test_run_prepare_action_check_row_counts(self, mock_logger):
+        """Test PrepareClient.action_check_row_counts."""
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        action = {
+            "type": "check_row_counts",
+            'id': 'action_id',
+            "table_row_counts": {"ok_table": 100, "growing_table": 500},
+            "margin_percentage": 5
+        }
+
+        prepare_client._dst_datastore.table_count = MagicMock(side_effect=[104, 509])
+        result = prepare_client._run_prepare_action(action)
+        prepare_client._dst_datastore.table_count.assert_has_calls([
+            call("ok_table"), call("growing_table")
+        ])
+        self.assertEqual(result["action"], "check_row_counts")
+        self.assertEqual(result["id"], "action_id")
+        self.assertTrue(result["row_count_check"])
+
+        prepare_client._dst_datastore.table_count.side_effect=[96, 400]
+        result = prepare_client._run_prepare_action(action)
+        prepare_client._dst_datastore.table_count.assert_has_calls([
+            call("ok_table"), call("growing_table")
+        ])
+        self.assertFalse(result["row_count_check"])
 
     def test_get_result(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
