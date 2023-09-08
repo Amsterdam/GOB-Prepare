@@ -511,6 +511,7 @@ class TestPrepareClient(TestCase):
             call("ok_table"), call("growing_table")
         ])
         self.assertFalse(result["row_count_check"])
+        mock_logger.error.assert_called_with("Deviation of -20.00% for growing_table! Expected 500 rows, got 400")
 
     def test_get_result(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
