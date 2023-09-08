@@ -33,6 +33,7 @@ from gobprepare.typing import (
     Message,
     PrepareMapping,
     PublishSchemasConfig,
+    RowCountConfig,
     SQLBaseConfig,
     Summary,
     TaskList,
@@ -232,6 +233,23 @@ class PrepareClient:
             self._publish_schema(src_schema, dst_schema)
         return list(action["publish_schemas"].values())
 
+    def action_check_row_counts(self, action: RowCountConfig) -> bool:
+        """Check import action. Verify number of rows in result tables.
+
+        :param action:
+        :return:
+        """
+        tables_counts_ok = True
+        for table, expected_count in action["table_row_counts"].items():
+            row_count = self._dst_datastore.table_count(table)  # type: ignore[union-attr]
+            deviation = ((row_count / expected_count) - 1) * 100
+            if abs(deviation) > action["margin_percentage"]:
+                logger.error(
+                    f"Deviation of {deviation:.2f}% for {table}! Expected {expected_count} rows, got {row_count}"
+                )
+                tables_counts_ok = False
+        return tables_counts_ok
+
     def _get_query(self, action: SQLBaseConfig) -> str:
         """Extract query from action. Reads query from action or from file.
 
@@ -281,6 +299,8 @@ class PrepareClient:
             result["rows_imported"] = self.action_import_api(cast(APIImporterConfig, action))
         elif action["type"] == "import_dump":
             result["file_imported"] = self.action_import_sql_dump(cast(SqlDumpImporterConfig, action))
+        elif action["type"] == "check_row_counts":
+            result["row_count_check"] = self.action_check_row_counts(cast(RowCountConfig, action))
         elif action["type"] == "join_actions":
             # Action only joins dependencies. No further actions necessary
             return None
