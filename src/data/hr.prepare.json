@@ -20,11 +20,7 @@
       "query_src": "file",
       "query": "data/sql/hr/create.vestigingen.sql",
       "depends_on": [
-        "import_kvkves",
-        "import_kvkveshdn",
-        "import_kvkhdn",
-        "import_kvkadr",
-        "import_kvkmac"
+        "clear_schemas"
       ]
     },
     {
@@ -34,11 +30,7 @@
       "query_src": "file",
       "query": "data/sql/hr/create.maatschappelijke_activiteiten.sql",
       "depends_on": [
-        "import_kvkmac",
-        "import_kvkadr",
-        "import_kvkhdn",
-        "import_kvkves",
-        "import_kvkprs"
+        "clear_schemas"
       ]
     },
     {
@@ -48,7 +40,7 @@
       "query_src": "file",
       "query": "data/sql/hr/create.functievervullingen.sql",
       "depends_on": [
-        "import_kvkprsash"
+        "clear_schemas"
       ]
     },
     {
@@ -58,8 +50,7 @@
       "query_src": "file",
       "query": "data/sql/hr/create.niet_natuurlijkepersonen.sql",
       "depends_on": [
-        "import_kvkprs",
-        "import_kvkprsash"
+        "clear_schemas"
       ]
     },
     {
@@ -69,8 +60,7 @@
       "query_src": "file",
       "query": "data/sql/hr/create.natuurlijkepersonen.sql",
       "depends_on": [
-        "import_kvkprs",
-        "import_kvkprsash"
+        "clear_schemas"
       ]
     },
     {
