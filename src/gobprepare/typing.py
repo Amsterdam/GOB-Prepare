@@ -92,3 +92,12 @@ class PublishSchemasConfig(TypedDict):
     id: str
     publish_schemas: dict[str, str]
     type: Literal["publish_schemas"]
+
+
+class RowCountConfig(ActionCommonConfig):
+    """Check table row counts action configuration."""
+
+    description: str
+    table_row_counts: dict[str, int]
+    margin_percentage: int
+    type: Literal["check_row_counts"]
