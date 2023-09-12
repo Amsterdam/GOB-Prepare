@@ -64,6 +64,26 @@
       ]
     },
     {
+      "type": "check_row_counts",
+      "description": "Verify number of rows in HR result tables",
+      "id": "check_row_counts",
+      "table_row_counts": {
+        "hr_prep.functievervullingen": 56094,
+        "hr_prep.maatschappelijke_activiteiten": 686900,
+        "hr_prep.natuurlijkepersonen": 382493,
+        "hr_prep.niet_natuurlijkepersonen": 360485,
+        "hr_prep.vestigingen": 660180
+      },
+      "margin_percentage": 5,
+      "depends_on": [
+        "create_hr_fvv",
+        "create_hr_mac",
+        "create_hr_nps",
+        "create_hr_nnp",
+        "create_hr_ves"
+      ]
+    },
+    {
       "type": "publish_schemas",
       "id": "publish_schemas",
       "publish_schemas": {
