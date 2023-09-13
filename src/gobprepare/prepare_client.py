@@ -248,6 +248,11 @@ class PrepareClient:
                     f"Deviation of {deviation:.2f}% for {table}! Expected {expected_count} rows, got {row_count}"
                 )
                 tables_counts_ok = False
+            else:
+                logger.info(
+                    f"Row count for table {table} succeeded:"
+                    f" expected {expected_count} rows, got {row_count} ({deviation:.2f}%)"
+                )
         return tables_counts_ok
 
     def _get_query(self, action: SQLBaseConfig) -> str:
