@@ -251,7 +251,7 @@ class PrepareClient:
             else:
                 logger.info(
                     f"Row count for table {table} succeeded:"
-                    f" expected {expected_count} rows, got {row_count} ({deviation:.2f}%)"
+                    f" expected {expected_count} rows, got {row_count}; deviation of {deviation:.2f}%"
                 )
         return tables_counts_ok
 
