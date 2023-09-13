@@ -1,0 +1,29 @@
+{
+  "version": "0.1",
+  "name": "Monumenten",
+  "catalogue": "monumenten",
+  "destination": {
+    "application": "GOBPrepare"
+  },
+  "actions": [
+    {
+      "type": "check_row_counts",
+      "description": "Verify number of rows in monumenten tables",
+      "id": "check_row_counts",
+      "table_row_counts": {
+        "monumenten_prep.complexen": 100,
+        "monumenten_prep.monumenten": 9881,
+        "monumenten_prep.situeringen": 64099
+      },
+      "margin_percentage": 5
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "monumenten_prep": "monumenten_prepared"
+      },
+      "depends_on": "*"
+    }
+  ]
+}
