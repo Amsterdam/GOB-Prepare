@@ -504,6 +504,9 @@ class TestPrepareClient(TestCase):
         self.assertEqual(result["action"], "check_row_counts")
         self.assertEqual(result["id"], "action_id")
         self.assertTrue(result["row_count_check"])
+        mock_logger.info.assert_called_with(
+            "Row count for table growing_table succeeded: expected 500 rows, got 509; deviation of 1.80%"
+        )
 
         prepare_client._dst_datastore.table_count.side_effect=[96, 400]
         result = prepare_client._run_prepare_action(action)
