@@ -319,10 +319,50 @@
       ]
     },
     {
+      "type": "execute_sql",
+      "description": "Create brp nationaliteiten table",
+      "id": "create_brp_nationaliteiten",
+      "query_src": "file",
+      "query": "data/sql/brp/create.nationaliteiten.sql",
+      "depends_on": [
+        "import_nationaliteiten"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create brp reisdocumenten table",
+      "id": "create_brp_reisdocumenten",
+      "query_src": "file",
+      "query": "data/sql/brp/create.reisdocumenten.sql",
+      "depends_on": [
+        "import_reisdocumenten"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create brp verblijfstitel table",
+      "id": "create_brp_verblijfstitel",
+      "query_src": "file",
+      "query": "data/sql/brp/create.verblijfstitel.sql",
+      "depends_on": [
+        "import_verblijfstitel"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create brp inschrijvingen table",
+      "id": "create_brp_inschrijvingen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.inschrijvingen.sql",
+      "depends_on": [
+        "import_personen"
+      ]
+    },
+    {
       "type": "publish_schemas",
       "id": "publish_schemas",
       "publish_schemas": {
-        "brp": "brp_prepared"
+        "brp_prep": "brp_prepared"
       },
       "depends_on": "*"
     }
