@@ -10,13 +10,13 @@ CREATE TABLE brp_prep.reisdocument AS
     rd."NummerNedReisdocument"                                                       AS nummer_nl_reisdocument,
     CASE -- datum eind geldigheid reisdocument
         WHEN rd."DatumUitgifte" IS NULL THEN NULL
-        WHEN rd."DatumUitgifte" = '0' THEN '0000-00-00'
+        WHEN rd."DatumUitgifte" = '0'
+          OR rd."DatumUitgifte" = '00000000' THEN '0000-00-00'
         WHEN length(rd."DatumUitgifte") = 8
-          AND rd."DatumUitgifte" != '00000000' THEN CONCAT(
+          AND rd."DatumUitgifte" != '00000000' THEN CONCAT_WS(
+            '-',
             substring(rd."DatumUitgifte", 1, 4),
-            '-',
             substring(rd."DatumUitgifte", 5, 2),
-            '-',
             substring(rd."DatumUitgifte", 7, 2)
           )
         ELSE rd."DatumUitgifte"
@@ -24,26 +24,26 @@ CREATE TABLE brp_prep.reisdocument AS
     rd."AutoriteitAfgifte"                                                           AS autoriteit_nl_reisdocument,
     CASE -- datum eind geldigheid reisdocument
         WHEN rd."DatumEindeGeldigheid" IS NULL THEN NULL
-        WHEN rd."DatumEindeGeldigheid" = '0' THEN '0000-00-00'
+        WHEN rd."DatumEindeGeldigheid" = '0'
+          OR rd."DatumEindeGeldigheid" = '00000000' THEN '0000-00-00'
         WHEN length(rd."DatumEindeGeldigheid") = 8
-          AND rd."DatumEindeGeldigheid" != '00000000' THEN CONCAT(
+          AND rd."DatumEindeGeldigheid" != '00000000' THEN CONCAT_WS(
+            '-',
             substring(rd."DatumEindeGeldigheid", 1, 4),
-            '-',
             substring(rd."DatumEindeGeldigheid", 5, 2),
-            '-',
             substring(rd."DatumEindeGeldigheid", 7, 2)
           )
         ELSE rd."DatumEindeGeldigheid"
     END                                                                            AS datum_einde_geldigheid_nl_reisdocument,
     CASE -- datum inhouding Nl reisdocument
       WHEN rd."DatumInhoudingVermissing" IS NULL THEN NULL
-      WHEN rd."DatumInhoudingVermissing" = '0' THEN '0000-00-00'
+      WHEN rd."DatumInhoudingVermissing" = '0'
+        OR rd."DatumInhoudingVermissing" = '00000000' THEN '0000-00-00'
       WHEN length(rd."DatumInhoudingVermissing") = 8
-        AND rd."DatumInhoudingVermissing" != '00000000' THEN CONCAT(
+        AND rd."DatumInhoudingVermissing" != '00000000' THEN CONCAT_WS(
+          '-',
           substring(rd."DatumInhoudingVermissing", 1, 4),
-          '-',
           substring(rd."DatumInhoudingVermissing", 5, 2),
-          '-',
           substring(rd."DatumInhoudingVermissing", 7, 2)
         )
       ELSE rd."DatumInhoudingVermissing"
@@ -54,32 +54,31 @@ CREATE TABLE brp_prep.reisdocument AS
     rd."GemeenteOntleningCode"                                                       AS gemeente_document,
     NULL                                                                             AS datum_document,
     rd."BeschrijvingDocument"                                                        AS beschrijving_document,
-        JSONB_BUILD_OBJECT( -- onderzoek 
+    JSONB_BUILD_OBJECT( -- onderzoek 
       'aanduiding_gegevens_in_onderzoek', NULL,
       'datum_ingang_onderzoek', 
         CASE -- datum ingang onderzoek
           WHEN rd."DatumIngangOnderzoek" IS NULL THEN NULL
-          WHEN rd."DatumIngangOnderzoek" = '0' THEN '0000-00-00'
+          WHEN rd."DatumIngangOnderzoek" = '0'
+            OR rd."DatumIngangOnderzoek" = '00000000' THEN '0000-00-00'
           WHEN length(rd."DatumIngangOnderzoek") = 8
-            AND rd."DatumIngangOnderzoek" != '00000000' THEN CONCAT(
-            substring(rd."DatumIngangOnderzoek", 1, 4),
+            AND rd."DatumIngangOnderzoek" != '00000000' THEN CONCAT_WS(
               '-',
+              substring(rd."DatumIngangOnderzoek", 1, 4),
               substring(rd."DatumIngangOnderzoek", 5, 2),
-              '-',
               substring(rd."DatumIngangOnderzoek", 7, 2)
             )
           ELSE rd."DatumIngangOnderzoek"::varchar
         END,
       'datum_einde_onderzoek',
         CASE -- datum einde onderzoek
-          WHEN rd."DatumEindeOnderzoek" IS NULL THEN NULL
-          WHEN rd."DatumEindeOnderzoek" = '0' THEN '0000-00-00'
+          WHEN rd."DatumEindeOnderzoek" = '0'
+            OR rd."DatumEindeOnderzoek" = '00000000' THEN '0000-00-00'
           WHEN length(rd."DatumEindeOnderzoek") = 8
-            AND rd."DatumEindeOnderzoek" != '00000000' THEN CONCAT(
-             substring(rd."DatumEindeOnderzoek", 1, 4),
+            AND rd."DatumEindeOnderzoek" != '00000000' THEN CONCAT_WS(
               '-',
+              substring(rd."DatumEindeOnderzoek", 1, 4),
               substring(rd."DatumEindeOnderzoek", 5, 2),
-              '-',
               substring(rd."DatumEindeOnderzoek", 7, 2)
             )
           ELSE rd."DatumEindeOnderzoek"::varchar
@@ -88,17 +87,17 @@ CREATE TABLE brp_prep.reisdocument AS
     )                                                                                AS onderzoek,
     CASE -- datum opneming
       WHEN rd."DatumOpname" IS NULL THEN NULL
-      WHEN rd."DatumOpname" = '0' THEN '0000-00-00'
+      WHEN rd."DatumOpname" = '0'
+        OR rd."DatumOpname" = '00000000' THEN '0000-00-00'
       WHEN length(rd."DatumOpname") = 8
-        AND rd."DatumOpname" != '00000000' THEN CONCAT(
+        AND rd."DatumOpname" != '00000000' THEN CONCAT_WS(
+          '-',
           substring(rd."DatumOpname", 1, 4),
-          '-',
           substring(rd."DatumOpname", 5, 2),
-          '-',
           substring(rd."DatumOpname", 7, 2)
         )
       ELSE rd."DatumOpname"
     END                                                                              AS datum_opneming,
-    NULL::text::date                                                                 AS datum_actueel_tot -- still have to decide what will be
+    NULL::varchar::date                                                              AS datum_actueel_tot -- still have to decide what will be
 
   FROM brp.reisdocumenten rd

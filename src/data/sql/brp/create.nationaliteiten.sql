@@ -19,13 +19,13 @@ CREATE TABLE brp_prep.nationaliteiten AS
     nat."GemeenteCode"::varchar                                                      AS gemeente_document,
     CASE -- datum document
       WHEN nat."Datumdocument" IS NULL THEN NULL
-      WHEN nat."Datumdocument" = '0' THEN '0000-00-00'
+      WHEN nat."Datumdocument" = '0'
+        OR nat."Datumdocument" = '00000000' THEN '0000-00-00'
       WHEN length(nat."Datumdocument") = 8
-        AND nat."Datumdocument" != '00000000' THEN CONCAT(
+        AND nat."Datumdocument" != '00000000' THEN CONCAT_WS(
+          '-',
           substring(nat."Datumdocument", 1, 4),
-          '-',
           substring(nat."Datumdocument", 5, 2),
-          '-',
           substring(nat."Datumdocument", 7, 2)
         )
       ELSE nat."Datumdocument"
@@ -36,13 +36,13 @@ CREATE TABLE brp_prep.nationaliteiten AS
       'datum_ingang_onderzoek', 
         CASE -- datum ingang onderzoek
           WHEN nat."DatumIngangOnderzoek" IS NULL THEN NULL
-          WHEN nat."DatumIngangOnderzoek" = '0' THEN '0000-00-00'
+          WHEN nat."DatumIngangOnderzoek" = '0'
+            OR nat."DatumIngangOnderzoek" = '00000000' THEN '0000-00-00'
           WHEN length(nat."DatumIngangOnderzoek") = 8
-            AND nat."DatumIngangOnderzoek" != '00000000' THEN CONCAT(
-            substring(nat."DatumIngangOnderzoek", 1, 4),
+            AND nat."DatumIngangOnderzoek" != '00000000' THEN CONCAT_WS(
               '-',
+              substring(nat."DatumIngangOnderzoek", 1, 4),
               substring(nat."DatumIngangOnderzoek", 5, 2),
-              '-',
               substring(nat."DatumIngangOnderzoek", 7, 2)
             )
           ELSE nat."DatumIngangOnderzoek"::varchar
@@ -50,13 +50,13 @@ CREATE TABLE brp_prep.nationaliteiten AS
       'datum_einde_onderzoek',
         CASE -- datum einde onderzoek
           WHEN nat."DatumEindeOnderzoek" IS NULL THEN NULL
-          WHEN nat."DatumEindeOnderzoek" = '0' THEN '0000-00-00'
+          WHEN nat."DatumEindeOnderzoek" = '0'
+            OR nat."DatumEindeOnderzoek" = '00000000' THEN '0000-00-00'
           WHEN length(nat."DatumEindeOnderzoek") = 8
-            AND nat."DatumEindeOnderzoek" != '00000000' THEN CONCAT(
-             substring(nat."DatumEindeOnderzoek", 1, 4),
+            AND nat."DatumEindeOnderzoek" != '00000000' THEN CONCAT_WS(
               '-',
+              substring(nat."DatumEindeOnderzoek", 1, 4),
               substring(nat."DatumEindeOnderzoek", 5, 2),
-              '-',
               substring(nat."DatumEindeOnderzoek", 7, 2)
             )
           ELSE nat."DatumEindeOnderzoek"::varchar
@@ -65,30 +65,30 @@ CREATE TABLE brp_prep.nationaliteiten AS
     )                                                                                AS onderzoek,
     CASE -- datum geldigheid
       WHEN nat."DatumGeldigheid" IS NULL THEN NULL
-      WHEN nat."DatumGeldigheid" = '0' THEN '0000-00-00'
+      WHEN nat."DatumGeldigheid" = '0'
+        OR nat."DatumGeldigheid" = '00000000' THEN '0000-00-00'
       WHEN length(nat."DatumGeldigheid") = 8
-        AND nat."DatumGeldigheid" != '00000000' THEN CONCAT(
+        AND nat."DatumGeldigheid" != '00000000' THEN CONCAT_WS(
+          '-',
           substring(nat."DatumGeldigheid", 1, 4),
-          '-',
           substring(nat."DatumGeldigheid", 5, 2),
-          '-',
           substring(nat."DatumGeldigheid", 7, 2)
         )
       ELSE nat."DatumGeldigheid"
     END                                                                              AS ingangsdatum_geldigheid,
     CASE -- datum opneming
       WHEN nat."DatumOpname" IS NULL THEN NULL
-      WHEN nat."DatumOpname" = '0' THEN '0000-00-00'
+      WHEN nat."DatumOpname" = '0'
+        OR nat."DatumOpname" = '00000000' THEN '0000-00-00'
       WHEN length(nat."DatumOpname") = 8
-        AND nat."DatumOpname" != '00000000' THEN CONCAT(
+        AND nat."DatumOpname" != '00000000' THEN CONCAT_WS(
+          '-',
           substring(nat."DatumOpname", 1, 4),
-          '-',
           substring(nat."DatumOpname", 5, 2),
-          '-',
           substring(nat."DatumOpname", 7, 2)
         )
       ELSE nat."DatumOpname"
     END                                                                              AS datum_opneming,
-    NULL::text::date                                                                 AS datum_actueel_tot -- still have to decide what will be
+    NULL::varchar::date                                                              AS datum_actueel_tot -- still have to decide what will be
 
   FROM brp.nationaliteiten nat

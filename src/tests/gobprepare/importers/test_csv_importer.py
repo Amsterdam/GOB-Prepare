@@ -138,14 +138,15 @@ class TestSqlCsvImporter(TestCase):
             "col_a": ["row1col1", "row1 col 2", pd.NA],
             "col_b": ["ro w2c o l1", "row2 col 2", pd.NA],
             "col_c": [pd.NA, pd.NA, pd.NA],
+            " col_name_with_spaces ": ["row4col1", "row4 col 2", pd.NA],
         })
         self.os_importer._column_names = {"col_a": "col_a_db"}
 
         columns, data = self.os_importer._process_chunk(df)
-        assert columns == ["col_a_db", "col_b", "col_c"]
+        assert columns == ["col_a_db", "col_b", "col_c", "col_name_with_spaces"]
         assert data == [
-            ('row1col1', 'ro w2c o l1', None),
-            ('row1 col 2', 'row2 col 2', None)
+            ('row1col1', 'ro w2c o l1', None, "row4col1"),
+            ('row1 col 2', 'row2 col 2', None, "row4 col 2"),
         ]
 
     @patch("gobprepare.importers.csv_importer.create_table_columnar_query")
