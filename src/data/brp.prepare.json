@@ -359,6 +359,26 @@
       ]
     },
     {
+      "type": "execute_sql",
+      "description": "Create brp kiesrechten table",
+      "id": "create_brp_kiesrechten",
+      "query_src": "file",
+      "query": "data/sql/brp/create.kiesrechten.sql",
+      "depends_on": [
+        "import_kiesrecht"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create brp gezagsverhoudingen table",
+      "id": "create_brp_igezagsverhoudingen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.gezagsverhoudingen.sql",
+      "depends_on": [
+        "import_gezagsverhouding"
+      ]
+    },
+    {
       "type": "publish_schemas",
       "id": "publish_schemas",
       "publish_schemas": {
