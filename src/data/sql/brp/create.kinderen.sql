@@ -2,7 +2,7 @@ CREATE TABLE brp_prep.kinderen AS
 
   SELECT
     kindg."BSNOuder"::varchar                                                        AS burgerservicenummer,
-    kindg."AnummerOuder"::varchar                                                    AS a_nummer,
+    kindg."AnummerOuder"::varchar                                                    AS anummer,
 
     kindg."BSN"::varchar                                                             AS kind_bSN,
     kindg."Anummer"::varchar                                                         AS kind_anummer,
