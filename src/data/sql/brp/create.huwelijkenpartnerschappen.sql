@@ -157,7 +157,7 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
       ELSE hwp."DatumGeldigheid"
     END                                                                              AS ingangsdatum_geldigheid,
 
-        CASE -- datum opneming
+    CASE -- datum opneming
       WHEN hwp."DatumOpname" IS NULL THEN NULL
       WHEN hwp."DatumOpname" = '0'
         OR hwp."DatumOpname" = '00000000' THEN '0000-00-00'
