@@ -371,7 +371,7 @@
     {
       "type": "execute_sql",
       "description": "Create brp gezagsverhoudingen table",
-      "id": "create_brp_igezagsverhoudingen",
+      "id": "create_brp_gezagsverhoudingen",
       "query_src": "file",
       "query": "data/sql/brp/create.gezagsverhoudingen.sql",
       "depends_on": [
