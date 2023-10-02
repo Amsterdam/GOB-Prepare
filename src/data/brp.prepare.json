@@ -383,7 +383,7 @@
       "description": "Create brp verplijfplaatsen table",
       "id": "create_brp_verplijfplaatsen",
       "query_src": "file",
-      "query": "data/sql/brp/create.verplijfplaatsen.sql",
+      "query": "data/sql/brp/create.verblijfplaatsen.sql",
       "depends_on": [
         "import_personen"
       ]
