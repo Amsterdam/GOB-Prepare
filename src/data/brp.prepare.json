@@ -399,6 +399,16 @@
       ]
     },
     {
+      "type": "execute_sql",
+      "description": "Create brp kinderen table",
+      "id": "create_brp_kinderen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.kinderen.sql",
+      "depends_on": [
+        "import_kindgegevens"
+      ]
+    },
+    {
       "type": "publish_schemas",
       "id": "publish_schemas",
       "publish_schemas": {
