@@ -389,6 +389,16 @@
       ]
     },
     {
+      "type": "execute_sql",
+      "description": "Create brp huwelijkenpartnerschappen table",
+      "id": "create_brp_huwelijkenpartnerschappen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.huwelijkenpartnerschappen.sql",
+      "depends_on": [
+        "import_huwelijk"
+      ]
+    },
+    {
       "type": "publish_schemas",
       "id": "publish_schemas",
       "publish_schemas": {
