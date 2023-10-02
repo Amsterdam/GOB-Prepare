@@ -25,6 +25,6 @@ CREATE TABLE brp_prep.inschrijvingen AS
       'omschrijving', prs."IndGeheimOms"::text
     )                                                                      AS indicatie_geheim,
     NULL                                                                   AS persoonskaart_gegevens_volledig_meegeconverteerd,
-    NULL::varchar:date                                                     AS datum_actueel_tot -- still have to decide what will be
+    NULL::varchar::date                                                    AS datum_actueel_tot -- still have to decide what will be
 
   FROM brp.personen prs
