@@ -379,6 +379,16 @@
       ]
     },
     {
+      "type": "execute_sql",
+      "description": "Create brp verplijfplaatsen table",
+      "id": "create_brp_verplijfplaatsen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.verplijfplaatsen.sql",
+      "depends_on": [
+        "import_personen"
+      ]
+    },
+    {
       "type": "publish_schemas",
       "id": "publish_schemas",
       "publish_schemas": {
