@@ -8,10 +8,8 @@ CREATE TABLE brp_prep.inschrijvingen AS
     NULL::text                                                            AS omschrijving_reden_opschorting_bijhouding,
     CASE -- datum eerste inschrijving
       WHEN prs."DatumInschrijving" IS NULL THEN NULL
-      WHEN prs."DatumInschrijving" = '0'
-        OR prs."DatumInschrijving" = '00000000' THEN '0000-00-00'
-      WHEN length(prs."DatumInschrijving") = 8
-        AND prs."DatumInschrijving" != '00000000' THEN CONCAT_WS(
+      WHEN prs."DatumInschrijving" = '0' THEN '0000-00-00'
+      WHEN length(prs."DatumInschrijving") = 8 THEN CONCAT_WS(
           '-',
           substring(prs."DatumInschrijving", 1, 4),
           substring(prs."DatumInschrijving", 5, 2),

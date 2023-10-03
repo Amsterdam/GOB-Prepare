@@ -31,10 +31,8 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
       --                                  b) retrun default '0000-00-00'
       --                                  c) check the value and return only jaar, or maand or dag
       WHEN hwp."Geboortedatum" IS null THEN NULL
-      WHEN hwp."Geboortedatum" = '0'
-        OR hwp."Geboortedatum" = '00000000' THEN JSONB_BUILD_OBJECT('datum', '0000-00-00')
-      WHEN length(hwp."Geboortedatum") = 8
-        AND hwp."Geboortedatum" != '00000000' THEN JSONB_BUILD_OBJECT(
+      WHEN hwp."Geboortedatum" = '0' THEN JSONB_BUILD_OBJECT('datum', '0000-00-00')
+      WHEN length(hwp."Geboortedatum") = 8 THEN JSONB_BUILD_OBJECT(
       'datum', CONCAT_WS(
           '-',
           substring(hwp."Geboortedatum", 1, 4),
@@ -52,10 +50,8 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
 
     CASE -- datum van sluiting huwelijk partnerschap
       WHEN hwp."DatumSluitingHuwelijkPartnerschap" IS NULL THEN NULL
-      WHEN hwp."DatumSluitingHuwelijkPartnerschap" = '0'
-        OR hwp."DatumSluitingHuwelijkPartnerschap" = '00000000' THEN '0000-00-00'
-      WHEN length(hwp."DatumSluitingHuwelijkPartnerschap") = 8
-        AND hwp."DatumSluitingHuwelijkPartnerschap" != '00000000' THEN CONCAT_WS(
+      WHEN hwp."DatumSluitingHuwelijkPartnerschap" = '0' THEN '0000-00-00'
+      WHEN length(hwp."DatumSluitingHuwelijkPartnerschap") = 8 THEN CONCAT_WS(
           '-',
           substring(hwp."DatumSluitingHuwelijkPartnerschap", 1, 4),
           substring(hwp."DatumSluitingHuwelijkPartnerschap", 5, 2),
@@ -76,10 +72,8 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
 
     CASE -- datum van ontbinding huwelijk
       WHEN hwp."DatumOntbindingHuwelijkPartnerschap" IS NULL THEN NULL
-      WHEN hwp."DatumOntbindingHuwelijkPartnerschap" = '0'
-        OR hwp."DatumOntbindingHuwelijkPartnerschap" = '00000000' THEN '0000-00-00'
-      WHEN length(hwp."DatumOntbindingHuwelijkPartnerschap") = 8
-        AND hwp."DatumOntbindingHuwelijkPartnerschap" != '00000000' THEN CONCAT_WS(
+      WHEN hwp."DatumOntbindingHuwelijkPartnerschap" = '0' THEN '0000-00-00'
+      WHEN length(hwp."DatumOntbindingHuwelijkPartnerschap") = 8 THEN CONCAT_WS(
           '-',
           substring(hwp."DatumOntbindingHuwelijkPartnerschap", 1, 4),
           substring(hwp."DatumOntbindingHuwelijkPartnerschap", 5, 2),
@@ -115,10 +109,8 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
       'datum_ingang_onderzoek', 
         CASE -- datum ingang onderzoek
           WHEN hwp."DatumIngangOnderzoek" IS NULL THEN NULL
-          WHEN hwp."DatumIngangOnderzoek" = '0'
-            OR hwp."DatumIngangOnderzoek" = '00000000' THEN '0000-00-00'
-          WHEN length(hwp."DatumIngangOnderzoek") = 8
-            AND hwp."DatumIngangOnderzoek" != '00000000' THEN CONCAT(
+          WHEN hwp."DatumIngangOnderzoek" = '0' THEN '0000-00-00'
+          WHEN length(hwp."DatumIngangOnderzoek") = 8 THEN CONCAT(
                '_',
               substring(hwp."DatumIngangOnderzoek", 1, 4),
               substring(hwp."DatumIngangOnderzoek", 5, 2),
@@ -129,10 +121,8 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
       'datum_einde_onderzoek',
         CASE -- datum einde onderzoek
           WHEN hwp."DatumEindeOnderzoek" IS NULL THEN NULL
-          WHEN hwp."DatumEindeOnderzoek" = '0'
-            OR hwp."DatumEindeOnderzoek" = '00000000' THEN '0000-00-00'
-          WHEN length(hwp."DatumEindeOnderzoek") = 8
-            AND hwp."DatumEindeOnderzoek" != '00000000' THEN CONCAT_WS(
+          WHEN hwp."DatumEindeOnderzoek" = '0' THEN '0000-00-00'
+          WHEN length(hwp."DatumEindeOnderzoek") = 8 THEN CONCAT_WS(
               '-',
               substring(hwp."DatumEindeOnderzoek", 1, 4),
               substring(hwp."DatumEindeOnderzoek", 5, 2),
@@ -145,10 +135,8 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
 
     CASE -- datum geldigheid
       WHEN hwp."DatumGeldigheid" IS NULL THEN NULL
-      WHEN hwp."DatumGeldigheid" = '0'
-        OR hwp."DatumGeldigheid" = '00000000' THEN '0000-00-00'
-      WHEN length(hwp."DatumGeldigheid") = 8
-        AND hwp."DatumGeldigheid" != '00000000' THEN CONCAT_WS(
+      WHEN hwp."DatumGeldigheid" = '0' THEN '0000-00-00'
+      WHEN length(hwp."DatumGeldigheid") = 8 THEN CONCAT_WS(
           '-',
           substring(hwp."DatumGeldigheid", 1, 4),
           substring(hwp."DatumGeldigheid", 5, 2),
@@ -159,10 +147,8 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
 
     CASE -- datum opneming
       WHEN hwp."DatumOpname" IS NULL THEN NULL
-      WHEN hwp."DatumOpname" = '0'
-        OR hwp."DatumOpname" = '00000000' THEN '0000-00-00'
-      WHEN length(hwp."DatumOpname") = 8
-        AND hwp."DatumOpname" != '00000000' THEN CONCAT_WS(
+      WHEN hwp."DatumOpname" = '0' THEN '0000-00-00'
+      WHEN length(hwp."DatumOpname") = 8 THEN CONCAT_WS(
           '-',
           substring(hwp."DatumOpname", 1, 4),
           substring(hwp."DatumOpname", 5, 2),

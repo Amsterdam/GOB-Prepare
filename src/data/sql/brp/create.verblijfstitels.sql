@@ -9,10 +9,8 @@ CREATE TABLE brp_prep.verblijfstitels AS
     )                                                                                AS aanduiding_verblijfstitel,
     CASE -- datum verkrijging
       WHEN vt."DatumVerkrijging" IS NULL THEN NULL
-      WHEN vt."DatumVerkrijging" = '0'
-        OR vt."DatumVerkrijging" = '00000000' THEN '0000-00-00'
-      WHEN length(vt."DatumVerkrijging") = 8
-        AND vt."DatumVerkrijging" != '00000000' THEN CONCAT_WS(
+      WHEN vt."DatumVerkrijging" = '0' THEN '0000-00-00'
+      WHEN length(vt."DatumVerkrijging") = 8 THEN CONCAT_WS(
           '-',
           substring(vt."DatumVerkrijging", 1, 4),
           substring(vt."DatumVerkrijging", 5, 2),
@@ -22,10 +20,8 @@ CREATE TABLE brp_prep.verblijfstitels AS
     END                                                                              AS ingangsdatum_verblijfstitel,
     CASE -- datum verlies
       WHEN vt."DatumVerlies" IS NULL THEN NULL
-      WHEN vt."DatumVerlies" = '0'
-        OR vt."DatumVerlies" = '00000000' THEN '0000-00-00'
-      WHEN length(vt."DatumVerlies") = 8
-        AND vt."DatumVerlies" != '00000000' THEN CONCAT_WS(
+      WHEN vt."DatumVerlies" = '0' THEN '0000-00-00'
+      WHEN length(vt."DatumVerlies") = 8 THEN CONCAT_WS(
           '-',
           substring(vt."DatumVerlies", 1, 4),
           substring(vt."DatumVerlies", 5, 2),
@@ -38,10 +34,8 @@ CREATE TABLE brp_prep.verblijfstitels AS
       'datum_ingang_onderzoek', 
         CASE -- datum ingang onderzoek
           WHEN vt."DatumIngangOnderzoek" IS NULL THEN NULL
-          WHEN vt."DatumIngangOnderzoek" = '0'
-            OR vt."DatumIngangOnderzoek" = '00000000' THEN '0000-00-00'
-          WHEN length(vt."DatumIngangOnderzoek") = 8
-            AND vt."DatumIngangOnderzoek" != '00000000' THEN CONCAT_WS(
+          WHEN vt."DatumIngangOnderzoek" = '0' THEN '0000-00-00'
+          WHEN length(vt."DatumIngangOnderzoek") = 8 THEN CONCAT_WS(
               '-',
               substring(vt."DatumIngangOnderzoek", 1, 4),
               substring(vt."DatumIngangOnderzoek", 5, 2),
@@ -52,10 +46,8 @@ CREATE TABLE brp_prep.verblijfstitels AS
       'datum_einde_onderzoek',
         CASE -- datum einde onderzoek
           WHEN vt."DatumEindeOnderzoek" IS NULL THEN NULL
-          WHEN vt."DatumEindeOnderzoek" = '0'
-            OR vt."DatumEindeOnderzoek" = '00000000' THEN '0000-00-00'
-          WHEN length(vt."DatumEindeOnderzoek") = 8
-            AND vt."DatumEindeOnderzoek" != '00000000' THEN CONCAT_WS(
+          WHEN vt."DatumEindeOnderzoek" = '0' THEN '0000-00-00'
+          WHEN length(vt."DatumEindeOnderzoek") = 8 THEN CONCAT_WS(
               '-',
               substring(vt."DatumEindeOnderzoek", 1, 4),
               substring(vt."DatumEindeOnderzoek", 5, 2),
@@ -67,10 +59,8 @@ CREATE TABLE brp_prep.verblijfstitels AS
     )                                                                                AS onderzoek,
     CASE -- datum geldigheid
       WHEN vt."DatumGeldigheid" IS NULL THEN NULL
-      WHEN vt."DatumGeldigheid" = '0'
-        OR vt."DatumGeldigheid" = '00000000' THEN '0000-00-00'
-      WHEN length(vt."DatumGeldigheid") = 8
-        AND vt."DatumGeldigheid" != '00000000' THEN CONCAT_WS(
+      WHEN vt."DatumGeldigheid" = '0' THEN '0000-00-00'
+      WHEN length(vt."DatumGeldigheid") = 8 THEN CONCAT_WS(
           '-',
           substring(vt."DatumGeldigheid", 1, 4),
           substring(vt."DatumGeldigheid", 5, 2),
@@ -80,10 +70,8 @@ CREATE TABLE brp_prep.verblijfstitels AS
     END                                                                              AS ingangsdatum_geldigheid,
     CASE -- datum opneming
       WHEN vt."DatumOpname" IS NULL THEN NULL
-      WHEN vt."DatumOpname" = '0'
-        OR vt."DatumOpname" = '00000000' THEN '0000-00-00'
-      WHEN length(vt."DatumOpname") = 8
-        AND vt."DatumOpname" != '00000000' THEN CONCAT_WS(
+      WHEN vt."DatumOpname" = '0' THEN '0000-00-00'
+      WHEN length(vt."DatumOpname") = 8 THEN CONCAT_WS(
           '-',
           substring(vt."DatumOpname", 1, 4),
           substring(vt."DatumOpname", 5, 2),

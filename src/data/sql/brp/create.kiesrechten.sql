@@ -6,10 +6,8 @@ CREATE TABLE brp_prep.kiesrechten AS
     kr."AandEuropeesKiesrecht"::varchar                                              AS aand_euro_kiesrecht,
     CASE -- datum eu kiesrecht
       WHEN kr."DatumVerzoekEukiesrecht" IS NULL THEN NULL
-      WHEN kr."DatumVerzoekEukiesrecht" = '0'
-        OR kr."DatumVerzoekEukiesrecht" = '00000000' THEN '0000-00-00'
-      WHEN length(kr."DatumVerzoekEukiesrecht") = 8
-        AND kr."DatumVerzoekEukiesrecht" != '00000000' THEN CONCAT_WS(
+      WHEN kr."DatumVerzoekEukiesrecht" = '0' THEN '0000-00-00'
+      WHEN length(kr."DatumVerzoekEukiesrecht") = 8 THEN CONCAT_WS(
           '-',
           substring(kr."DatumVerzoekEukiesrecht", 1, 4),
           substring(kr."DatumVerzoekEukiesrecht", 5, 2),
@@ -19,10 +17,8 @@ CREATE TABLE brp_prep.kiesrechten AS
     END                                                                              AS datum_euro_kiesrecht,
     CASE -- einddatum eu kiesrecht
       WHEN kr."DatumEindeUitsluitingEuKiesrecht" IS NULL THEN NULL
-      WHEN kr."DatumEindeUitsluitingEuKiesrecht" = '0'
-        OR kr."DatumEindeUitsluitingEuKiesrecht" = '00000000' THEN '0000-00-00'
-      WHEN length(kr."DatumEindeUitsluitingEuKiesrecht") = 8
-        AND kr."DatumEindeUitsluitingEuKiesrecht" != '00000000' THEN CONCAT_WS(
+      WHEN kr."DatumEindeUitsluitingEuKiesrecht" = '0' THEN '0000-00-00'
+      WHEN length(kr."DatumEindeUitsluitingEuKiesrecht") = 8 THEN CONCAT_WS(
           '-',
           substring(kr."DatumEindeUitsluitingEuKiesrecht", 1, 4),
           substring(kr."DatumEindeUitsluitingEuKiesrecht", 5, 2),
@@ -36,10 +32,8 @@ CREATE TABLE brp_prep.kiesrechten AS
     kr."AandUitsluitingKiesrecht"::varchar                                           AS aand_uitgesloten_kiesrecht,
     CASE -- einddatum uitsluiting kiesrecht
       WHEN kr."DatumEindeUitsluitingKiesrecht" IS NULL THEN NULL
-      WHEN kr."DatumEindeUitsluitingKiesrecht" = '0'
-        OR kr."DatumEindeUitsluitingKiesrecht" = '00000000' THEN '0000-00-00'
-      WHEN length(kr."DatumEindeUitsluitingKiesrecht") = 8
-        AND kr."DatumEindeUitsluitingKiesrecht" != '00000000' THEN CONCAT_WS(
+      WHEN kr."DatumEindeUitsluitingKiesrecht" = '0' THEN '0000-00-00'
+      WHEN length(kr."DatumEindeUitsluitingKiesrecht") = 8 THEN CONCAT_WS(
           '-',
           substring(kr."DatumEindeUitsluitingKiesrecht", 1, 4),
           substring(kr."DatumEindeUitsluitingKiesrecht", 5, 2),
@@ -50,10 +44,8 @@ CREATE TABLE brp_prep.kiesrechten AS
     kr."GemeenteCodeOntlening"::varchar                                              AS gemeente_document,
     CASE -- einddatum ontlening
       WHEN kr."DatumOntlening" IS NULL THEN NULL
-      WHEN kr."DatumOntlening" = '0'
-        OR kr."DatumOntlening" = '00000000' THEN '0000-00-00'
-      WHEN length(kr."DatumOntlening") = 8
-        AND kr."DatumOntlening" != '00000000' THEN CONCAT_WS(
+      WHEN kr."DatumOntlening" = '0' THEN '0000-00-00'
+      WHEN length(kr."DatumOntlening") = 8 THEN CONCAT_WS(
           '-',
           substring(kr."DatumOntlening", 1, 4),
           substring(kr."DatumOntlening", 5, 2),

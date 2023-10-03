@@ -25,10 +25,8 @@ CREATE TABLE brp_prep.kinderen AS
       --                                  b) retrun default '0000-00-00'
       --                                  c) check the value and return only jaar, or maand or dag
       WHEN kindg."Geboortedatum" IS null THEN NULL
-      WHEN kindg."Geboortedatum" = '0'
-        OR kindg."Geboortedatum" = '00000000' THEN JSONB_BUILD_OBJECT('datum', '0000-00-00')
-      WHEN length(kindg."Geboortedatum") = 8
-        AND kindg."Geboortedatum" != '00000000' THEN JSONB_BUILD_OBJECT(
+      WHEN kindg."Geboortedatum" = '0' THEN JSONB_BUILD_OBJECT('datum', '0000-00-00')
+      WHEN length(kindg."Geboortedatum") = 8 THEN JSONB_BUILD_OBJECT(
       'datum', CONCAT_WS(
           '-',
           substring(kindg."Geboortedatum", 1, 4),
@@ -48,10 +46,8 @@ CREATE TABLE brp_prep.kinderen AS
 
     CASE -- datum document
       WHEN kindg."OntlDatumKindgegevens" IS NULL THEN NULL
-      WHEN kindg."OntlDatumKindgegevens" = '0'
-        OR kindg."OntlDatumKindgegevens" = '00000000' THEN '0000-00-00'
-      WHEN length(kindg."OntlDatumKindgegevens") = 8
-        AND kindg."OntlDatumKindgegevens" != '00000000' THEN CONCAT_WS(
+      WHEN kindg."OntlDatumKindgegevens" = '0' THEN '0000-00-00'
+      WHEN length(kindg."OntlDatumKindgegevens") = 8 THEN CONCAT_WS(
           '-',
           substring(kindg."OntlDatumKindgegevens", 1, 4),
           substring(kindg."OntlDatumKindgegevens", 5, 2),
@@ -67,10 +63,8 @@ CREATE TABLE brp_prep.kinderen AS
       'datum_ingang_onderzoek', 
         CASE -- datum ingang onderzoek
           WHEN kindg."DatumIngangOnderzoek" IS NULL THEN NULL
-          WHEN kindg."DatumIngangOnderzoek" = '0'
-            OR kindg."DatumIngangOnderzoek" = '00000000' THEN '0000-00-00'
-          WHEN length(kindg."DatumIngangOnderzoek") = 8
-            AND kindg."DatumIngangOnderzoek" != '00000000' THEN CONCAT(
+          WHEN kindg."DatumIngangOnderzoek" = '0' THEN '0000-00-00'
+          WHEN length(kindg."DatumIngangOnderzoek") = 8 THEN CONCAT_WS(
                '_',
               substring(kindg."DatumIngangOnderzoek", 1, 4),
               substring(kindg."DatumIngangOnderzoek", 5, 2),
@@ -81,10 +75,8 @@ CREATE TABLE brp_prep.kinderen AS
       'datum_einde_onderzoek',
         CASE -- datum einde onderzoek
           WHEN kindg."DatumEindeOnderzoek" IS NULL THEN NULL
-          WHEN kindg."DatumEindeOnderzoek" = '0'
-            OR kindg."DatumEindeOnderzoek" = '00000000' THEN '0000-00-00'
-          WHEN length(kindg."DatumEindeOnderzoek") = 8
-            AND kindg."DatumEindeOnderzoek" != '00000000' THEN CONCAT_WS(
+          WHEN kindg."DatumEindeOnderzoek" = '0' THEN '0000-00-00'
+          WHEN length(kindg."DatumEindeOnderzoek") = 8 THEN CONCAT_WS(
               '-',
               substring(kindg."DatumEindeOnderzoek", 1, 4),
               substring(kindg."DatumEindeOnderzoek", 5, 2),
@@ -97,10 +89,8 @@ CREATE TABLE brp_prep.kinderen AS
 
     CASE -- datum geldigheid
       WHEN kindg."DatumGeldigheid" IS NULL THEN NULL
-      WHEN kindg."DatumGeldigheid" = '0'
-        OR kindg."DatumGeldigheid" = '00000000' THEN '0000-00-00'
-      WHEN length(kindg."DatumGeldigheid") = 8
-        AND kindg."DatumGeldigheid" != '00000000' THEN CONCAT_WS(
+      WHEN kindg."DatumGeldigheid" = '0' THEN '0000-00-00'
+      WHEN length(kindg."DatumGeldigheid") = 8 THEN CONCAT_WS(
           '-',
           substring(kindg."DatumGeldigheid", 1, 4),
           substring(kindg."DatumGeldigheid", 5, 2),
@@ -111,10 +101,8 @@ CREATE TABLE brp_prep.kinderen AS
 
     CASE -- datum opneming
       WHEN kindg."DatumOpname" IS NULL THEN NULL
-      WHEN kindg."DatumOpname" = '0'
-        OR kindg."DatumOpname" = '00000000' THEN '0000-00-00'
-      WHEN length(kindg."DatumOpname") = 8
-        AND kindg."DatumOpname" != '00000000' THEN CONCAT_WS(
+      WHEN kindg."DatumOpname" = '0' THEN '0000-00-00'
+      WHEN length(kindg."DatumOpname") = 8 THEN CONCAT_WS(
           '-',
           substring(kindg."DatumOpname", 1, 4),
           substring(kindg."DatumOpname", 5, 2),

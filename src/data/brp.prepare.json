@@ -340,10 +340,10 @@
     },
     {
       "type": "execute_sql",
-      "description": "Create brp verblijfstitel table",
-      "id": "create_brp_verblijfstitel",
+      "description": "Create brp verblijfstitels table",
+      "id": "create_brp_verblijfstitels",
       "query_src": "file",
-      "query": "data/sql/brp/create.verblijfstitel.sql",
+      "query": "data/sql/brp/create.verblijfstitels.sql",
       "depends_on": [
         "import_verblijfstitel"
       ]
@@ -406,6 +406,16 @@
       "query": "data/sql/brp/create.kinderen.sql",
       "depends_on": [
         "import_kindgegevens"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create brp ouders table",
+      "id": "create_brp_personen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.ouders.sql",
+      "depends_on": [
+        "import_personen"
       ]
     },
     {

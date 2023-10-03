@@ -24,10 +24,8 @@ CREATE TABLE brp_prep.verblijfplaatsen AS
     prs."GemeenteVanInschrijvingOms"                                                 AS gemeente_van_inschrijving,
     CASE -- datum inschrijving
       WHEN prs."DatumInschrijving" IS NULL THEN NULL
-      WHEN prs."DatumInschrijving" = '0'
-        OR prs."DatumInschrijving" = '00000000' THEN '0000-00-00'
-      WHEN length(prs."DatumInschrijving") = 8
-        AND prs."DatumInschrijving" != '00000000' THEN CONCAT_WS(
+      WHEN prs."DatumInschrijving" = '0' THEN '0000-00-00'
+      WHEN length(prs."DatumInschrijving") = 8 THEN CONCAT_WS(
           '-',
           substring(prs."DatumInschrijving", 1, 4),
           substring(prs."DatumInschrijving", 5, 2),
@@ -39,10 +37,8 @@ CREATE TABLE brp_prep.verblijfplaatsen AS
     NULL::varchar                                                                    AS gemeentedeel, -- Not available
     CASE -- datum inschrijving
       WHEN prs."DatumAanvangHuishouding" IS NULL THEN NULL
-      WHEN prs."DatumAanvangHuishouding" = '0'
-        OR prs."DatumAanvangHuishouding" = '00000000' THEN '0000-00-00'
-      WHEN length(prs."DatumAanvangHuishouding") = 8
-        AND prs."DatumAanvangHuishouding" != '00000000' THEN CONCAT_WS(
+      WHEN prs."DatumAanvangHuishouding" = '0' THEN '0000-00-00'
+      WHEN length(prs."DatumAanvangHuishouding") = 8 THEN CONCAT_WS(
           '-',
           substring(prs."DatumAanvangHuishouding", 1, 4),
           substring(prs."DatumAanvangHuishouding", 5, 2),
@@ -80,10 +76,8 @@ CREATE TABLE brp_prep.verblijfplaatsen AS
       'datum_ingang_onderzoek', 
         CASE -- datum ingang onderzoek
           WHEN prs."DatumIngangOnderzoekAdres" IS NULL THEN NULL
-          WHEN prs."DatumIngangOnderzoekAdres" = '0'
-            OR prs."DatumIngangOnderzoekAdres" = '00000000' THEN '0000-00-00'
-          WHEN length(prs."DatumIngangOnderzoekAdres") = 8
-            AND prs."DatumIngangOnderzoekAdres" != '00000000' THEN CONCAT(
+          WHEN prs."DatumIngangOnderzoekAdres" = '0' THEN '0000-00-00'
+          WHEN length(prs."DatumIngangOnderzoekAdres") = 8 THEN CONCAT_WS(
                '_',
               substring(prs."DatumIngangOnderzoekAdres", 1, 4),
               substring(prs."DatumIngangOnderzoekAdres", 5, 2),
@@ -94,10 +88,8 @@ CREATE TABLE brp_prep.verblijfplaatsen AS
       'datum_einde_onderzoek',
         CASE -- datum einde onderzoek
           WHEN prs."DatumEindeOnderzoekAdres" IS NULL THEN NULL
-          WHEN prs."DatumEindeOnderzoekAdres" = '0'
-            OR prs."DatumEindeOnderzoekAdres" = '00000000' THEN '0000-00-00'
-          WHEN length(prs."DatumEindeOnderzoekAdres") = 8
-            AND prs."DatumEindeOnderzoekAdres" != '00000000' THEN CONCAT_WS(
+          WHEN prs."DatumEindeOnderzoekAdres" = '0' THEN '0000-00-00'
+          WHEN length(prs."DatumEindeOnderzoekAdres") = 8 THEN CONCAT_WS(
               '-',
               substring(prs."DatumEindeOnderzoekAdres", 1, 4),
               substring(prs."DatumEindeOnderzoekAdres", 5, 2),
@@ -109,10 +101,8 @@ CREATE TABLE brp_prep.verblijfplaatsen AS
     )                                                                                AS onderzoek,
     CASE -- ingangsdatum geldigheid
       WHEN prs."DatumGeldigheidAdres" IS NULL THEN NULL
-      WHEN prs."DatumGeldigheidAdres" = '0'
-        OR prs."DatumGeldigheidAdres" = '00000000' THEN '0000-00-00'
-      WHEN length(prs."DatumGeldigheidAdres") = 8
-        AND prs."DatumGeldigheidAdres" != '00000000' THEN CONCAT_WS(
+      WHEN prs."DatumGeldigheidAdres" = '0' THEN '0000-00-00'
+      WHEN length(prs."DatumGeldigheidAdres") = 8 THEN CONCAT_WS(
           '-',
           substring(prs."DatumGeldigheidAdres", 1, 4),
           substring(prs."DatumGeldigheidAdres", 5, 2),
@@ -122,10 +112,8 @@ CREATE TABLE brp_prep.verblijfplaatsen AS
     END                                                                              AS ingangsdatum_geldigheid,
     CASE -- datum opneming
       WHEN prs."DatumOpnameAdres" IS NULL THEN NULL
-      WHEN prs."DatumOpnameAdres" = '0'
-        OR prs."DatumOpnameAdres" = '00000000' THEN '0000-00-00'
-      WHEN length(prs."DatumOpnameAdres") = 8
-        AND prs."DatumOpnameAdres" != '00000000' THEN CONCAT_WS(
+      WHEN prs."DatumOpnameAdres" = '0' THEN '0000-00-00'
+      WHEN length(prs."DatumOpnameAdres") = 8 THEN CONCAT_WS(
           '-',
           substring(prs."DatumOpnameAdres", 1, 4),
           substring(prs."DatumOpnameAdres", 5, 2),
