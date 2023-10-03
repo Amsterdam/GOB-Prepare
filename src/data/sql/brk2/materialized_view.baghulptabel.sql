@@ -15,7 +15,7 @@ SELECT kadastraalobject_id,
            woonplaatsnaam_afwijkend,
            hoofdadres_identificatie,
            typering
-           ) FILTER (WHERE typering = 'VBO') AS vot_adressen,
+           ) FILTER (WHERE substring(bag_id, 5, 2) = '01') AS vot_adressen,
        JSONB_AGG(
        adres ORDER BY
            koppelingswijze_code,
@@ -30,7 +30,7 @@ SELECT kadastraalobject_id,
            woonplaatsnaam_afwijkend,
            hoofdadres_identificatie,
            typering
-           ) FILTER (WHERE typering = 'STA') AS sps_adressen,
+           ) FILTER (WHERE substring(bag_id, 5, 2) = '03') AS sps_adressen,
        JSONB_AGG(
        adres ORDER BY
            koppelingswijze_code,
@@ -45,13 +45,13 @@ SELECT kadastraalobject_id,
            woonplaatsnaam_afwijkend,
            hoofdadres_identificatie,
            typering
-           ) FILTER (WHERE typering = 'LIG') AS lps_adressen
+           ) FILTER (WHERE substring(bag_id, 5, 2) = '02') AS lps_adressen
 FROM (SELECT kol.kadastraalobject_id,
              kol.kadastraalobject_volgnummer,
              JSONB_BUILD_OBJECT(
                      'koppelingswijze_code', koppelingswijze_code,
                      'koppelingswijze_omschrijving', ckw.omschrijving,
-                     'bag_id', aol.bag_identificatie,
+                     'bag_id', coalesce(aol.bag_identificatie, obl.bag_identificatie), -- See below for explanation
                      'openbareruimtenaam', openbareruimtenaam,
                      'huisnummer', huisnummer,
                      'huisletter', huisletter,
@@ -64,7 +64,13 @@ FROM (SELECT kol.kadastraalobject_id,
                  )                 AS adres,
              kol.koppelingswijze_code,
              ckw.omschrijving      AS koppelingswijze_omschrijving,
-             aol.bag_identificatie AS bag_id,
+             -- coalesce because of wrongly migrated data from brk1 to brk2 in source database
+             -- Old objects have aol.bag_identificatie empty and obl.bag_identificatie contains a VOT/LPS/SPS.
+             -- New objects have aol.bag_identificatie filled with VOT/LPS/SPS and obl.bag_identificatie with a NAG.
+             -- The coalesce makes sure that the VOT/LPS/SPS is always used.
+             -- Be aware that this is a workaround and that the source data should be fixed and that this fix may
+             -- introduce a bug in the future, depending on how the source data is fixed.
+             coalesce(aol.bag_identificatie, obl.bag_identificatie) AS bag_id,
              obl.openbareruimtenaam,
              obl.huisnummer,
              obl.huisletter,
