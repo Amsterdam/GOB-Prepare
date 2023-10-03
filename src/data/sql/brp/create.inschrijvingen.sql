@@ -8,14 +8,24 @@ CREATE TABLE brp_prep.inschrijvingen AS
     NULL::text                                                            AS omschrijving_reden_opschorting_bijhouding,
     CASE -- datum eerste inschrijving
       WHEN prs."DatumInschrijving" IS NULL THEN NULL
-      WHEN prs."DatumInschrijving" = '0' THEN '0000-00-00'
-      WHEN length(prs."DatumInschrijving") = 8 THEN CONCAT_WS(
-          '-',
-          substring(prs."DatumInschrijving", 1, 4),
-          substring(prs."DatumInschrijving", 5, 2),
-          substring(prs."DatumInschrijving", 7, 2)
+      WHEN prs."DatumInschrijving" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
+          'datum', '0000-00-00',
+          'jaar', '00',
+          'maand', '00',
+          'dag', '00'
+          )
+      WHEN length(prs."DatumInschrijving") = 8 THEN JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+            '-',
+            substring(prs."DatumInschrijving", 1, 4),
+            substring(prs."DatumInschrijving", 5, 2),
+            substring(prs."DatumInschrijving", 7, 2)
+          ),
+        'jaar', substring(prs."DatumInschrijving", 1, 4),
+        'maand', substring(prs."DatumInschrijving", 5, 2),
+        'dag', substring(prs."DatumInschrijving", 7, 2)
         )
-      ELSE prs."DatumInschrijving"
+      ELSE NULL
     END                                                                    AS datum_eerste_inschrijving_gba,
     prs."GemeenteVanInschrijvingCode"::varchar                            AS gemeente_waar_persoonskaart_is,
     JSONB_BUILD_OBJECT( -- nationaliteit

@@ -24,27 +24,47 @@ CREATE TABLE brp_prep.verblijfplaatsen AS
     prs."GemeenteVanInschrijvingOms"                                                 AS gemeente_van_inschrijving,
     CASE -- datum inschrijving
       WHEN prs."DatumInschrijving" IS NULL THEN NULL
-      WHEN prs."DatumInschrijving" = '0' THEN '0000-00-00'
-      WHEN length(prs."DatumInschrijving") = 8 THEN CONCAT_WS(
-          '-',
-          substring(prs."DatumInschrijving", 1, 4),
-          substring(prs."DatumInschrijving", 5, 2),
-          substring(prs."DatumInschrijving", 7, 2)
+      WHEN prs."DatumInschrijving" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
+          'datum', '0000-00-00',
+          'jaar', '00',
+          'maand', '00',
+          'dag', '00'
+          )
+      WHEN length(prs."DatumInschrijving") = 8 THEN JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+            '-',
+            substring(prs."DatumInschrijving", 1, 4),
+            substring(prs."DatumInschrijving", 5, 2),
+            substring(prs."DatumInschrijving", 7, 2)
+          ),
+        'jaar', substring(prs."DatumInschrijving", 1, 4),
+        'maand', substring(prs."DatumInschrijving", 5, 2),
+        'dag', substring(prs."DatumInschrijving", 7, 2)
         )
-      ELSE prs."DatumInschrijving"
+      ELSE NULL
     END                                                                              AS datum_inschrijving,
     prs."FunctieAdres"                                                               AS functie_adres,
     NULL::varchar                                                                    AS gemeentedeel, -- Not available
     CASE -- datum inschrijving
       WHEN prs."DatumAanvangHuishouding" IS NULL THEN NULL
-      WHEN prs."DatumAanvangHuishouding" = '0' THEN '0000-00-00'
-      WHEN length(prs."DatumAanvangHuishouding") = 8 THEN CONCAT_WS(
-          '-',
-          substring(prs."DatumAanvangHuishouding", 1, 4),
-          substring(prs."DatumAanvangHuishouding", 5, 2),
-          substring(prs."DatumAanvangHuishouding", 7, 2)
+      WHEN prs."DatumAanvangHuishouding" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
+          'datum', '0000-00-00',
+          'jaar', '00',
+          'maand', '00',
+          'dag', '00'
+          )
+      WHEN length(prs."DatumAanvangHuishouding") = 8 THEN JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+            '-',
+            substring(prs."DatumAanvangHuishouding", 1, 4),
+            substring(prs."DatumAanvangHuishouding", 5, 2),
+            substring(prs."DatumAanvangHuishouding", 7, 2)
+          ),
+        'jaar', substring(prs."DatumAanvangHuishouding", 1, 4),
+        'maand', substring(prs."DatumAanvangHuishouding", 5, 2),
+        'dag', substring(prs."DatumAanvangHuishouding", 7, 2)
         )
-      ELSE prs."DatumAanvangHuishouding"
+      ELSE NULL
     END                                                                              AS datum_aanvang_adreshouding,
     prs."Straatnaam"                                                                 AS straatnaam,
     prs."NaamOpenbareRuimte"                                                         AS naam_openbare_ruimte,
@@ -101,25 +121,45 @@ CREATE TABLE brp_prep.verblijfplaatsen AS
     )                                                                                AS onderzoek,
     CASE -- ingangsdatum geldigheid
       WHEN prs."DatumGeldigheidAdres" IS NULL THEN NULL
-      WHEN prs."DatumGeldigheidAdres" = '0' THEN '0000-00-00'
-      WHEN length(prs."DatumGeldigheidAdres") = 8 THEN CONCAT_WS(
-          '-',
-          substring(prs."DatumGeldigheidAdres", 1, 4),
-          substring(prs."DatumGeldigheidAdres", 5, 2),
-          substring(prs."DatumGeldigheidAdres", 7, 2)
+      WHEN prs."DatumGeldigheidAdres" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
+          'datum', '0000-00-00',
+          'jaar', '00',
+          'maand', '00',
+          'dag', '00'
+          )
+      WHEN length(prs."DatumGeldigheidAdres") = 8 THEN JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+            '-',
+            substring(prs."DatumGeldigheidAdres", 1, 4),
+            substring(prs."DatumGeldigheidAdres", 5, 2),
+            substring(prs."DatumGeldigheidAdres", 7, 2)
+          ),
+        'jaar', substring(prs."DatumGeldigheidAdres", 1, 4),
+        'maand', substring(prs."DatumGeldigheidAdres", 5, 2),
+        'dag', substring(prs."DatumGeldigheidAdres", 7, 2)
         )
-      ELSE prs."DatumGeldigheidAdres"
+      ELSE NULL
     END                                                                              AS ingangsdatum_geldigheid,
     CASE -- datum opneming
       WHEN prs."DatumOpnameAdres" IS NULL THEN NULL
-      WHEN prs."DatumOpnameAdres" = '0' THEN '0000-00-00'
-      WHEN length(prs."DatumOpnameAdres") = 8 THEN CONCAT_WS(
-          '-',
-          substring(prs."DatumOpnameAdres", 1, 4),
-          substring(prs."DatumOpnameAdres", 5, 2),
-          substring(prs."DatumOpnameAdres", 7, 2)
+      WHEN prs."DatumOpnameAdres" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
+          'datum', '0000-00-00',
+          'jaar', '00',
+          'maand', '00',
+          'dag', '00'
+          )
+      WHEN length(prs."DatumOpnameAdres") = 8 THEN JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+            '-',
+            substring(prs."DatumOpnameAdres", 1, 4),
+            substring(prs."DatumOpnameAdres", 5, 2),
+            substring(prs."DatumOpnameAdres", 7, 2)
+          ),
+        'jaar', substring(prs."DatumOpnameAdres", 1, 4),
+        'maand', substring(prs."DatumOpnameAdres", 5, 2),
+        'dag', substring(prs."DatumOpnameAdres", 7, 2)
         )
-      ELSE prs."DatumOpnameAdres"
+      ELSE NULL
     END                                                                              AS datum_opneming,
     NULL                                                                             AS datum_actueel_tot -- TODO: still have to decide what will be
 

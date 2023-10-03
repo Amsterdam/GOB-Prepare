@@ -19,14 +19,24 @@ CREATE TABLE brp_prep.nationaliteiten AS
     nat."GemeenteCode"::varchar                                                      AS gemeente_document,
     CASE -- datum document
       WHEN nat."Datumdocument" IS NULL THEN NULL
-      WHEN nat."Datumdocument" = '0' THEN '0000-00-00'
-      WHEN length(nat."Datumdocument") = 8 THEN CONCAT_WS(
-          '-',
-          substring(nat."Datumdocument", 1, 4),
-          substring(nat."Datumdocument", 5, 2),
-          substring(nat."Datumdocument", 7, 2)
+      WHEN nat."Datumdocument" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
+          'datum', '0000-00-00',
+          'jaar', '00',
+          'maand', '00',
+          'dag', '00'
+          )
+      WHEN length(nat."Datumdocument") = 8 THEN JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+            '-',
+            substring(nat."Datumdocument", 1, 4),
+            substring(nat."Datumdocument", 5, 2),
+            substring(nat."Datumdocument", 7, 2)
+          ),
+        'jaar', substring(nat."Datumdocument", 1, 4),
+        'maand', substring(nat."Datumdocument", 5, 2),
+        'dag', substring(nat."Datumdocument", 7, 2)
         )
-      ELSE nat."Datumdocument"
+      ELSE NULL
     END                                                                              AS datum_document,
     nat."DocumentOms"::text                                                          AS beschrijving_document,
     JSONB_BUILD_OBJECT( -- onderzoek 
@@ -59,25 +69,45 @@ CREATE TABLE brp_prep.nationaliteiten AS
     )                                                                                AS onderzoek,
     CASE -- datum geldigheid
       WHEN nat."DatumGeldigheid" IS NULL THEN NULL
-      WHEN nat."DatumGeldigheid" = '0' THEN '0000-00-00'
-      WHEN length(nat."DatumGeldigheid") = 8 THEN CONCAT_WS(
-          '-',
-          substring(nat."DatumGeldigheid", 1, 4),
-          substring(nat."DatumGeldigheid", 5, 2),
-          substring(nat."DatumGeldigheid", 7, 2)
+      WHEN nat."DatumGeldigheid" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
+          'datum', '0000-00-00',
+          'jaar', '00',
+          'maand', '00',
+          'dag', '00'
+          )
+      WHEN length(nat."DatumGeldigheid") = 8 THEN JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+            '-',
+            substring(nat."DatumGeldigheid", 1, 4),
+            substring(nat."DatumGeldigheid", 5, 2),
+            substring(nat."DatumGeldigheid", 7, 2)
+          ),
+        'jaar', substring(nat."DatumGeldigheid", 1, 4),
+        'maand', substring(nat."DatumGeldigheid", 5, 2),
+        'dag', substring(nat."DatumGeldigheid", 7, 2)
         )
-      ELSE nat."DatumGeldigheid"
+      ELSE NULL
     END                                                                              AS ingangsdatum_geldigheid,
     CASE -- datum opneming
       WHEN nat."DatumOpname" IS NULL THEN NULL
-      WHEN nat."DatumOpname" = '0' THEN '0000-00-00'
-      WHEN length(nat."DatumOpname") = 8 THEN CONCAT_WS(
-          '-',
-          substring(nat."DatumOpname", 1, 4),
-          substring(nat."DatumOpname", 5, 2),
-          substring(nat."DatumOpname", 7, 2)
+      WHEN nat."DatumOpname" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
+          'datum', '0000-00-00',
+          'jaar', '00',
+          'maand', '00',
+          'dag', '00'
+          )
+      WHEN length(nat."DatumOpname") = 8 THEN JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+            '-',
+            substring(nat."DatumOpname", 1, 4),
+            substring(nat."DatumOpname", 5, 2),
+            substring(nat."DatumOpname", 7, 2)
+          ),
+        'jaar', substring(nat."DatumOpname", 1, 4),
+        'maand', substring(nat."DatumOpname", 5, 2),
+        'dag', substring(nat."DatumOpname", 7, 2)
         )
-      ELSE nat."DatumOpname"
+      ELSE NULL
     END                                                                              AS datum_opneming,
     NULL::varchar::date                                                              AS datum_actueel_tot -- still have to decide what will be
 
