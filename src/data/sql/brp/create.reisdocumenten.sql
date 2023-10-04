@@ -10,13 +10,7 @@ CREATE TABLE brp_prep.reisdocument AS
     rd."NummerNedReisdocument"                                                       AS nummer_nl_reisdocument,
     CASE -- datum eind geldigheid reisdocument
         WHEN rd."DatumUitgifte" IS NULL THEN NULL
-        WHEN rd."DatumUitgifte" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-          'datum', '0000-00-00',
-          'jaar', '00',
-          'maand', '00',
-          'dag', '00'
-          )
-      WHEN length(rd."DatumUitgifte") = 8 THEN JSONB_BUILD_OBJECT(
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
             substring(rd."DatumUitgifte", 1, 4),
@@ -27,18 +21,11 @@ CREATE TABLE brp_prep.reisdocument AS
         'maand', substring(rd."DatumUitgifte", 5, 2),
         'dag', substring(rd."DatumUitgifte", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS datum_verstrekking_nl_reisdocument,
     rd."AutoriteitAfgifte"                                                           AS autoriteit_nl_reisdocument,
     CASE -- datum eind geldigheid reisdocument
-        WHEN rd."DatumEindeGeldigheid" IS NULL THEN NULL
-        WHEN rd."DatumEindeGeldigheid" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-          'datum', '0000-00-00',
-          'jaar', '00',
-          'maand', '00',
-          'dag', '00'
-          )
-      WHEN length(rd."DatumEindeGeldigheid") = 8 THEN JSONB_BUILD_OBJECT(
+      WHEN rd."DatumEindeGeldigheid" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
             substring(rd."DatumEindeGeldigheid", 1, 4),
@@ -49,17 +36,11 @@ CREATE TABLE brp_prep.reisdocument AS
         'maand', substring(rd."DatumEindeGeldigheid", 5, 2),
         'dag', substring(rd."DatumEindeGeldigheid", 7, 2)
         )
-      ELSE NULL
     END                                                                            AS datum_einde_geldigheid_nl_reisdocument,
-    CASE -- datum inhouding Nl reisdocument
+
+   CASE -- datum inhouding Nl reisdocument
       WHEN rd."DatumInhoudingVermissing" IS NULL THEN NULL
-      WHEN rd."DatumInhoudingVermissing" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-          'datum', '0000-00-00',
-          'jaar', '00',
-          'maand', '00',
-          'dag', '00'
-          )
-      WHEN length(rd."DatumInhoudingVermissing") = 8 THEN JSONB_BUILD_OBJECT(
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
             substring(rd."DatumInhoudingVermissing", 1, 4),
@@ -70,50 +51,50 @@ CREATE TABLE brp_prep.reisdocument AS
         'maand', substring(rd."DatumInhoudingVermissing", 5, 2),
         'dag', substring(rd."DatumInhoudingVermissing", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS datum_inhouding_Nl_reisdocument,
+
     NULL::varchar                                                                    AS aanduiding_inhouding_nl_reisdocument,
     NULL::varchar                                                                    AS lengteHouder,
     rd."SignaleringNedReisdocument"                                                  AS signalering_nl_reisdocument,
     rd."GemeenteOntleningCode"                                                       AS gemeente_document,
     NULL                                                                             AS datum_document,
     rd."BeschrijvingDocument"                                                        AS beschrijving_document,
-    JSONB_BUILD_OBJECT( -- onderzoek 
-      'aanduiding_gegevens_in_onderzoek', NULL,
-      'datum_ingang_onderzoek', 
-        CASE -- datum ingang onderzoek
-          WHEN rd."DatumIngangOnderzoek" IS NULL THEN NULL
-          WHEN rd."DatumIngangOnderzoek" = '0' THEN '0000-00-00'
-          WHEN length(rd."DatumIngangOnderzoek") = 8 THEN CONCAT_WS(
-              '-',
-              substring(rd."DatumIngangOnderzoek", 1, 4),
-              substring(rd."DatumIngangOnderzoek", 5, 2),
-              substring(rd."DatumIngangOnderzoek", 7, 2)
-            )
-          ELSE rd."DatumIngangOnderzoek"::varchar
-        END,
-      'datum_einde_onderzoek',
-        CASE -- datum einde onderzoek
-          WHEN rd."DatumEindeOnderzoek" = '0' THEN '0000-00-00'
-          WHEN length(rd."DatumEindeOnderzoek") = 8 THEN CONCAT_WS(
-              '-',
-              substring(rd."DatumEindeOnderzoek", 1, 4),
-              substring(rd."DatumEindeOnderzoek", 5, 2),
-              substring(rd."DatumEindeOnderzoek", 7, 2)
-            )
-          ELSE rd."DatumEindeOnderzoek"::varchar
-        END,
-       'onjuist_strijdig_openbare_orde', NULL
-    )                                                                                AS onderzoek,
+
+    NULL::varchar                                                                    AS aanduiding_gegevens_in_onderzoek,
+    CASE -- datum ingang onderzoek
+      WHEN rd."DatumIngangOnderzoek" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+          '-',
+          substring(rd."DatumIngangOnderzoek", 1, 4),
+          substring(rd."DatumIngangOnderzoek", 5, 2),
+          substring(rd."DatumIngangOnderzoek", 7, 2)
+        ),
+        'jaar', substring(rd."DatumIngangOnderzoek", 1, 4),
+        'maand', substring(rd."DatumIngangOnderzoek", 5, 2),
+        'dag', substring(rd."DatumIngangOnderzoek", 7, 2)
+      )
+    END                                                                              AS datum_ingang_onderzoek,
+
+    CASE -- datum einde onderzoek
+      WHEN rd."DatumEindeOnderzoek" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+          '-',
+          substring(rd."DatumEindeOnderzoek", 1, 4),
+          substring(rd."DatumEindeOnderzoek", 5, 2),
+          substring(rd."DatumEindeOnderzoek", 7, 2)
+        ),
+        'jaar', substring(rd."DatumEindeOnderzoek", 1, 4),
+        'maand', substring(rd."DatumEindeOnderzoek", 5, 2),
+        'dag', substring(rd."DatumEindeOnderzoek", 7, 2)
+      )
+    END                                                                              AS datum_einde_onderzoek,
+    NULL::varchar                                                                    AS onjuist_strijdig_openbare_orde,
+
     CASE -- datum opneming
       WHEN rd."DatumOpname" IS NULL THEN NULL
-      WHEN rd."DatumOpname" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-          'datum', '0000-00-00',
-          'jaar', '00',
-          'maand', '00',
-          'dag', '00'
-          )
-      WHEN length(rd."DatumOpname") = 8 THEN JSONB_BUILD_OBJECT(
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
             substring(rd."DatumOpname", 1, 4),
@@ -124,7 +105,6 @@ CREATE TABLE brp_prep.reisdocument AS
         'maand', substring(rd."DatumOpname", 5, 2),
         'dag', substring(rd."DatumOpname", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS datum_opneming,
     NULL::varchar::date                                                              AS datum_actueel_tot -- still have to decide what will be
 

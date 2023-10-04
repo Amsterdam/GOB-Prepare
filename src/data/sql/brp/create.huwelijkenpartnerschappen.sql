@@ -23,21 +23,8 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
     hwp."GeboorteplaatsOms"                                                           AS partner_geboortePlaats,
     hwp."GeboortelandOms"                                                             AS partner_geboorteLand,
     CASE -- geboorte datum van de partner
-      -- discussion point
-      -- complete geboortedatum --> return json {datum, jaar, maand, dag}
-      -- What to do if datum = 0
-      -- incomplete geboortedatum --> what to do:
-      --                                  a) retrun NULL
-      --                                  b) retrun default {"datum": "0000-00-00", "jaar": "0000", "maand": "00", "dag": "00"}
-      --                                  c) return what is available: {"datum": "1973-00-00", "jaar": "0000", "maand": "00", "dag": "00"}
       WHEN hwp."Geboortedatum" IS NULL THEN NULL
-      WHEN hwp."Geboortedatum" = '0' THEN JSONB_BUILD_OBJECT(
-        'datum', '0000-00-00',
-        'jaar', '00',
-        'maand', '00',
-        'dag', '00'
-        )
-      WHEN length(hwp."Geboortedatum") = 8 THEN JSONB_BUILD_OBJECT(
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
             substring(hwp."Geboortedatum", 1, 4),
@@ -48,20 +35,13 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
         'maand', substring(hwp."Geboortedatum", 5, 2),
         'dag', substring(hwp."Geboortedatum", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS partner_geboortedatum,
 
     hwp."GeslachtsaanduidingOms"                                                     AS partner_geslachtsaanduiding,
 
     CASE -- datum van sluiting huwelijk partnerschap
       WHEN hwp."DatumSluitingHuwelijkPartnerschap" IS NULL THEN NULL
-      WHEN hwp."DatumSluitingHuwelijkPartnerschap" = '0' THEN JSONB_BUILD_OBJECT(
-        'datum', '0000-00-00',
-        'jaar', '00',
-        'maand', '00',
-        'dag', '00'
-        )
-      WHEN length(hwp."DatumSluitingHuwelijkPartnerschap") = 8 THEN JSONB_BUILD_OBJECT(
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
             substring(hwp."DatumSluitingHuwelijkPartnerschap", 1, 4),
@@ -72,7 +52,6 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
         'maand', substring(hwp."DatumSluitingHuwelijkPartnerschap", 5, 2),
         'dag', substring(hwp."DatumSluitingHuwelijkPartnerschap", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS partner_datum_sluiting_huwelijk_partnerschap,
 
     JSONB_BUILD_OBJECT( -- plaats sluiting huwelijk
@@ -87,13 +66,7 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
 
     CASE -- datum van ontbinding huwelijk
       WHEN hwp."DatumOntbindingHuwelijkPartnerschap" IS NULL THEN NULL
-      WHEN hwp."DatumOntbindingHuwelijkPartnerschap" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-          'datum', '0000-00-00',
-          'jaar', '00',
-          'maand', '00',
-          'dag', '00'
-          )
-      WHEN length(hwp."DatumOntbindingHuwelijkPartnerschap") = 8 THEN JSONB_BUILD_OBJECT(
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
             substring(hwp."DatumOntbindingHuwelijkPartnerschap", 1, 4),
@@ -104,7 +77,6 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
         'maand', substring(hwp."DatumOntbindingHuwelijkPartnerschap", 5, 2),
         'dag', substring(hwp."DatumOntbindingHuwelijkPartnerschap", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS partner_datum_ontbinding_huwelijk_partnerschap,
 
     JSONB_BUILD_OBJECT( -- plaats ontbinding huwelijk
@@ -134,44 +106,41 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
     NULL::varchar                                                                    AS datum_document,
     NULL::varchar                                                                    AS beschrijving_document,
 
-    JSONB_BUILD_OBJECT( -- onderzoek 
-      'aanduiding_gegevens_in_onderzoek', hwp."GegevensInOnderzoek"::varchar,
-      'datum_ingang_onderzoek', 
-        CASE -- datum ingang onderzoek
-          WHEN hwp."DatumIngangOnderzoek" IS NULL THEN NULL
-          WHEN hwp."DatumIngangOnderzoek" = '0' THEN '0000-00-00'
-          WHEN length(hwp."DatumIngangOnderzoek") = 8 THEN CONCAT(
-               '_',
-              substring(hwp."DatumIngangOnderzoek", 1, 4),
-              substring(hwp."DatumIngangOnderzoek", 5, 2),
-              substring(hwp."DatumIngangOnderzoek", 7, 2)
-            )
-          ELSE hwp."DatumIngangOnderzoek"::varchar
-        END,
-      'datum_einde_onderzoek',
-        CASE -- datum einde onderzoek
-          WHEN hwp."DatumEindeOnderzoek" IS NULL THEN NULL
-          WHEN hwp."DatumEindeOnderzoek" = '0' THEN '0000-00-00'
-          WHEN length(hwp."DatumEindeOnderzoek") = 8 THEN CONCAT_WS(
-              '-',
-              substring(hwp."DatumEindeOnderzoek", 1, 4),
-              substring(hwp."DatumEindeOnderzoek", 5, 2),
-              substring(hwp."DatumEindeOnderzoek", 7, 2)
-            )
-          ELSE hwp."DatumEindeOnderzoek"::varchar
-        END,
-      'onjuist_strijdig_openbare_orde', NULL::varchar -- Not available
-    )                                                                                AS onderzoek,
+    hwp."GegevensInOnderzoek"::varchar                                               AS aanduiding_gegevens_in_onderzoek,
+    CASE -- datum ingang onderzoek
+      WHEN hwp."DatumIngangOnderzoek" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+          '-',
+          substring(hwp."DatumIngangOnderzoek", 1, 4),
+          substring(hwp."DatumIngangOnderzoek", 5, 2),
+          substring(hwp."DatumIngangOnderzoek", 7, 2)
+        ),
+        'jaar', substring(hwp."DatumIngangOnderzoek", 1, 4),
+        'maand', substring(hwp."DatumIngangOnderzoek", 5, 2),
+        'dag', substring(hwp."DatumIngangOnderzoek", 7, 2)
+      )
+    END                                                                              AS datum_ingang_onderzoek,
+
+    CASE -- datum einde onderzoek
+      WHEN hwp."DatumEindeOnderzoek" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+          '-',
+          substring(hwp."DatumEindeOnderzoek", 1, 4),
+          substring(hwp."DatumEindeOnderzoek", 5, 2),
+          substring(hwp."DatumEindeOnderzoek", 7, 2)
+        ),
+        'jaar', substring(hwp."DatumEindeOnderzoek", 1, 4),
+        'maand', substring(hwp."DatumEindeOnderzoek", 5, 2),
+        'dag', substring(hwp."DatumEindeOnderzoek", 7, 2)
+      )
+    END                                                                              AS datum_einde_onderzoek,
+    NULL::varchar                                                                    AS onjuist_strijdig_openbare_orde,
 
     CASE -- datum geldigheid
       WHEN hwp."DatumGeldigheid" IS NULL THEN NULL
-      WHEN hwp."DatumGeldigheid" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-          'datum', '0000-00-00',
-          'jaar', '00',
-          'maand', '00',
-          'dag', '00'
-          )
-      WHEN length(hwp."DatumGeldigheid") = 8 THEN JSONB_BUILD_OBJECT(
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
             substring(hwp."DatumGeldigheid", 1, 4),
@@ -182,18 +151,11 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
         'maand', substring(hwp."DatumGeldigheid", 5, 2),
         'dag', substring(hwp."DatumGeldigheid", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS ingangsdatum_geldigheid,
 
     CASE -- datum opneming
       WHEN hwp."DatumOpname" IS NULL THEN NULL
-      WHEN hwp."DatumOpname" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-          'datum', '0000-00-00',
-          'jaar', '00',
-          'maand', '00',
-          'dag', '00'
-          )
-      WHEN length(hwp."DatumOpname") = 8 THEN JSONB_BUILD_OBJECT(
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
             substring(hwp."DatumOpname", 1, 4),
@@ -204,7 +166,6 @@ CREATE TABLE brp_prep.huwelijkenpartnerschappen AS
         'maand', substring(hwp."DatumOpname", 5, 2),
         'dag', substring(hwp."DatumOpname", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS datum_opneming,
     NULL::varchar::date                                                              AS datum_actueel_tot -- TODO: still have to decide what will be
 

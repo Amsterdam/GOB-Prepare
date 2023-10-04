@@ -380,8 +380,8 @@
     },
     {
       "type": "execute_sql",
-      "description": "Create brp verplijfplaatsen table",
-      "id": "create_brp_verplijfplaatsen",
+      "description": "Create brp verblijfplaatsen table",
+      "id": "create_brp_verblijfplaatsen",
       "query_src": "file",
       "query": "data/sql/brp/create.verblijfplaatsen.sql",
       "depends_on": [

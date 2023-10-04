@@ -1,48 +1,34 @@
 CREATE TABLE brp_prep.kinderen AS
 
   SELECT
-    kindg."BSNOuder"::varchar                                                        AS burgerservicenummer,
-    kindg."AnummerOuder"::varchar                                                    AS anummer,
+    kind."BSNOuder"::varchar                                                        AS burgerservicenummer,
+    kind."AnummerOuder"::varchar                                                    AS anummer,
 
-    kindg."BSN"::varchar                                                             AS kind_bSN,
-    kindg."Anummer"::varchar                                                         AS kind_anummer,
-    kindg."Geslachtsnaam"                                                            AS kind_geslachtsnaam,
+    kind."BSN"::varchar                                                             AS kind_bSN,
+    kind."Anummer"::varchar                                                         AS kind_anummer,
+    kind."Geslachtsnaam"                                                            AS kind_geslachtsnaam,
     JSONB_BUILD_OBJECT( -- voorvoegsel geslachtsnaam van het kind
       'code', NULL::varchar,
-      'omschrijving', kindg."Voorvoegsel"::varchar
+      'omschrijving', kind."Voorvoegsel"::varchar
     )                                                                                AS kind_voorvoegsel_geslachtsnaam,
 
-    kindg."Voornamen"                                                                AS kind_oornamen,
-    kindg."Adellijketitel"                                                           AS kind_adellijke_titel_predicaat,
-    kindg."GeboorteplaatsOms"                                                        AS kind_geboorte_plaats,
-    kindg."GeboorteplaatsOms"                                                        AS kind_geboorte_land,
+    kind."Voornamen"                                                                AS kind_oornamen,
+    kind."Adellijketitel"                                                           AS kind_adellijke_titel_predicaat,
+    kind."GeboorteplaatsOms"                                                        AS kind_geboorte_plaats,
+    kind."GeboorteplaatsOms"                                                        AS kind_geboorte_land,
     CASE -- geboorte datum van het kind
-      -- discussion point
-      -- complete geboortedatum --> return json {datum, jaar, maand, dag}
-      -- What to do if datum = 0
-      -- incomplete geboortedatum --> what to do:
-      --                                  a) retrun NULL
-      --                                  b) retrun default {"datum": "0000-00-00", "jaar": "0000", "maand": "00", "dag": "00"}
-      --                                  c) return what is available: {"datum": "1973-00-00", "jaar": "0000", "maand": "00", "dag": "00"}
-      WHEN kindg."Geboortedatum" IS NULL THEN NULL
-      WHEN kindg."Geboortedatum" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-        'datum', '0000-00-00',
-        'jaar', '00',
-        'maand', '00',
-        'dag', '00'
-        )
-      WHEN length(kindg."Geboortedatum") = 8 THEN JSONB_BUILD_OBJECT(
+      WHEN kind."Geboortedatum" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
-            substring(kindg."Geboortedatum", 1, 4),
-            substring(kindg."Geboortedatum", 5, 2),
-            substring(kindg."Geboortedatum", 7, 2)
+            substring(kind."Geboortedatum", 1, 4),
+            substring(kind."Geboortedatum", 5, 2),
+            substring(kind."Geboortedatum", 7, 2)
           ),
-        'jaar', substring(kindg."Geboortedatum", 1, 4),
-        'maand', substring(kindg."Geboortedatum", 5, 2),
-        'dag', substring(kindg."Geboortedatum", 7, 2)
+        'jaar', substring(kind."Geboortedatum", 1, 4),
+        'maand', substring(kind."Geboortedatum", 5, 2),
+        'dag', substring(kind."Geboortedatum", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS kind_geboortedatum,
     JSONB_BUILD_OBJECT( -- registergemeente akte
       'code', NULL::varchar
@@ -51,105 +37,85 @@ CREATE TABLE brp_prep.kinderen AS
       'code', NULL::varchar,
       'omschrijving', NULL::varchar
     )                                                                                AS aktenummer, -- unvailable
-    kindg."OntlGemeenteKindgegevens"                                                 AS gemeente_document,
+    kind."OntlGemeenteKindgegevens"                                                 AS gemeente_document,
 
     CASE -- datum document
-      WHEN kindg."OntlDatumKindgegevens" IS NULL THEN NULL
-      WHEN kindg."OntlDatumKindgegevens" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-        'datum', '0000-00-00',
-        'jaar', '00',
-        'maand', '00',
-        'dag', '00'
-        )
-      WHEN length(kindg."OntlDatumKindgegevens") = 8 THEN JSONB_BUILD_OBJECT(
+      WHEN kind."OntlDatumKindgegevens" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
-            substring(kindg."OntlDatumKindgegevens", 1, 4),
-            substring(kindg."OntlDatumKindgegevens", 5, 2),
-            substring(kindg."OntlDatumKindgegevens", 7, 2)
+            substring(kind."OntlDatumKindgegevens", 1, 4),
+            substring(kind."OntlDatumKindgegevens", 5, 2),
+            substring(kind."OntlDatumKindgegevens", 7, 2)
           ),
-        'jaar', substring(kindg."OntlDatumKindgegevens", 1, 4),
-        'maand', substring(kindg."OntlDatumKindgegevens", 5, 2),
-        'dag', substring(kindg."OntlDatumKindgegevens", 7, 2)
+        'jaar', substring(kind."OntlDatumKindgegevens", 1, 4),
+        'maand', substring(kind."OntlDatumKindgegevens", 5, 2),
+        'dag', substring(kind."OntlDatumKindgegevens", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS datum_document,
 
-    kindg."Beschrijving document"                                                    AS beschrijving_document,
-
-    JSONB_BUILD_OBJECT( -- onderzoek 
-      'aanduiding_gegevens_in_onderzoek', kindg."GegevensInOnderzoek"::varchar,
-      'datum_ingang_onderzoek', 
-        CASE -- datum ingang onderzoek
-          WHEN kindg."DatumIngangOnderzoek" IS NULL THEN NULL
-          WHEN kindg."DatumIngangOnderzoek" = '0' THEN '0000-00-00'
-          WHEN length(kindg."DatumIngangOnderzoek") = 8 THEN CONCAT_WS(
-               '_',
-              substring(kindg."DatumIngangOnderzoek", 1, 4),
-              substring(kindg."DatumIngangOnderzoek", 5, 2),
-              substring(kindg."DatumIngangOnderzoek", 7, 2)
-            )
-          ELSE kindg."DatumIngangOnderzoek"::varchar
-        END,
-      'datum_einde_onderzoek',
-        CASE -- datum einde onderzoek
-          WHEN kindg."DatumEindeOnderzoek" IS NULL THEN NULL
-          WHEN kindg."DatumEindeOnderzoek" = '0' THEN '0000-00-00'
-          WHEN length(kindg."DatumEindeOnderzoek") = 8 THEN CONCAT_WS(
-              '-',
-              substring(kindg."DatumEindeOnderzoek", 1, 4),
-              substring(kindg."DatumEindeOnderzoek", 5, 2),
-              substring(kindg."DatumEindeOnderzoek", 7, 2)
-            )
-          ELSE kindg."DatumEindeOnderzoek"::varchar
-        END,
-      'onjuist_strijdig_openbare_orde', NULL::varchar -- Not available
-    )                                                                                AS onderzoek,
+    kind."Beschrijving document"                                                     AS beschrijving_document,
+    kind."GegevensInOnderzoek"::varchar                                              AS aanduiding_gegevens_in_onderzoek,
+    CASE -- datum ingang onderzoek
+      WHEN kind."DatumIngangOnderzoek" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+          '-',
+          substring(kind."DatumIngangOnderzoek", 1, 4),
+          substring(kind."DatumIngangOnderzoek", 5, 2),
+          substring(kind."DatumIngangOnderzoek", 7, 2)
+        ),
+        'jaar', substring(kind."DatumIngangOnderzoek", 1, 4),
+        'maand', substring(kind."DatumIngangOnderzoek", 5, 2),
+        'dag', substring(kind."DatumIngangOnderzoek", 7, 2)
+      )
+    END                                                                              AS datum_ingang_onderzoek,
+    CASE -- datum einde onderzoek
+      WHEN kind."DatumEindeOnderzoek" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+          '-',
+          substring(kind."DatumEindeOnderzoek", 1, 4),
+          substring(kind."DatumEindeOnderzoek", 5, 2),
+          substring(kind."DatumEindeOnderzoek", 7, 2)
+        ),
+        'jaar', substring(kind."DatumEindeOnderzoek", 1, 4),
+        'maand', substring(kind."DatumEindeOnderzoek", 5, 2),
+        'dag', substring(kind."DatumEindeOnderzoek", 7, 2)
+      )
+    END                                                                              AS datum_einde_onderzoek,
+    NULL::varchar                                                                    AS onjuist_strijdig_openbare_orde,
 
     CASE -- datum geldigheid
-      WHEN kindg."DatumGeldigheid" IS NULL THEN NULL
-      WHEN kindg."DatumGeldigheid" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-          'datum', '0000-00-00',
-          'jaar', '00',
-          'maand', '00',
-          'dag', '00'
-          )
-      WHEN length(kindg."DatumGeldigheid") = 8 THEN JSONB_BUILD_OBJECT(
+      WHEN kind."DatumGeldigheid" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
-            substring(kindg."DatumGeldigheid", 1, 4),
-            substring(kindg."DatumGeldigheid", 5, 2),
-            substring(kindg."DatumGeldigheid", 7, 2)
+            substring(kind."DatumGeldigheid", 1, 4),
+            substring(kind."DatumGeldigheid", 5, 2),
+            substring(kind."DatumGeldigheid", 7, 2)
           ),
-        'jaar', substring(kindg."DatumGeldigheid", 1, 4),
-        'maand', substring(kindg."DatumGeldigheid", 5, 2),
-        'dag', substring(kindg."DatumGeldigheid", 7, 2)
+        'jaar', substring(kind."DatumGeldigheid", 1, 4),
+        'maand', substring(kind."DatumGeldigheid", 5, 2),
+        'dag', substring(kind."DatumGeldigheid", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS ingangsdatum_geldigheid,
 
     CASE -- datum opneming
-      WHEN kindg."DatumOpname" IS NULL THEN NULL
-      WHEN kindg."DatumOpname" = '0' THEN JSONB_BUILD_OBJECT( -- TODO: NOT definitif. Watting for answer
-          'datum', '0000-00-00',
-          'jaar', '00',
-          'maand', '00',
-          'dag', '00'
-          )
-      WHEN length(kindg."DatumOpname") = 8 THEN JSONB_BUILD_OBJECT(
+      WHEN kind."DatumOpname" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
         'datum', CONCAT_WS(
             '-',
-            substring(kindg."DatumOpname", 1, 4),
-            substring(kindg."DatumOpname", 5, 2),
-            substring(kindg."DatumOpname", 7, 2)
+            substring(kind."DatumOpname", 1, 4),
+            substring(kind."DatumOpname", 5, 2),
+            substring(kind."DatumOpname", 7, 2)
           ),
-        'jaar', substring(kindg."DatumOpname", 1, 4),
-        'maand', substring(kindg."DatumOpname", 5, 2),
-        'dag', substring(kindg."DatumOpname", 7, 2)
+        'jaar', substring(kind."DatumOpname", 1, 4),
+        'maand', substring(kind."DatumOpname", 5, 2),
+        'dag', substring(kind."DatumOpname", 7, 2)
         )
-      ELSE NULL
     END                                                                              AS datum_opneming,
     NULL::varchar                                                                    AS registratie_betrekking, -- unavailable
     NULL::varchar::date                                                              AS datum_actueel_tot -- TODO: still have to decide what will be
 
-  FROM brp.kindgegevens kindg
+  FROM brp.kindgegevens kind
