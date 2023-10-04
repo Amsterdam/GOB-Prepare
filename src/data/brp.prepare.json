@@ -411,11 +411,21 @@
     {
       "type": "execute_sql",
       "description": "Create brp ouders table",
-      "id": "create_brp_personen",
+      "id": "create_brp_ouders",
       "query_src": "file",
       "query": "data/sql/brp/create.ouders.sql",
       "depends_on": [
         "import_personen"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Create brp verwijzingen table",
+      "id": "create_brp_verwijzingen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.verwijzingen.sql",
+      "depends_on": [
+        "import_verwijsgegevens"
       ]
     },
     {
