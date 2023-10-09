@@ -5,7 +5,7 @@ CREATE TABLE brp_prep.reisdocument AS
     rd."Anummer"::varchar                                                            AS anummer,
     JSONB_BUILD_OBJECT( -- nationaliteit
       'code', NULL::varchar,
-      'omschrijving', rd."SoortNedReisdocument"::text
+      'omschrijving', rd."SoortNedReisdocument"::varchar
       )                                                                              AS soort_nl_reisdocument,
     rd."NummerNedReisdocument"                                                       AS nummer_nl_reisdocument,
     CASE -- datum eind geldigheid reisdocument

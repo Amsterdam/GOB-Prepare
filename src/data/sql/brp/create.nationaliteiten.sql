@@ -5,17 +5,17 @@ CREATE TABLE brp_prep.nationaliteiten AS
     nat."Anummer"::varchar                                                           AS anummer,
     JSONB_BUILD_OBJECT( -- nationaliteit
       'code', nat."NationaliteitCode"::varchar,
-      'omschrijving', nat."NationaliteitOms"::text
+      'omschrijving', nat."NationaliteitOms"::varchar
       )                                                                              AS nationaliteit,
     JSONB_BUILD_OBJECT( -- nationaliteit verkrijging
       'code', nat."VerkrijgingCode"::varchar,
-      'omschrijving', nat."VerkrijgingOms"::text
+      'omschrijving', nat."VerkrijgingOms"::varchar
       )                                                                              AS reden_verkrijging_ned_nat,
     JSONB_BUILD_OBJECT( -- nationaliteit verlies
       'code', nat."VerliesCode"::varchar,
-      'omschrijving', nat."VerliesOms"::text
+      'omschrijving', nat."VerliesOms"::varchar
       )                                                                              AS reden_verlies_ned_nat,
-    nat."ByzNederlanderschap"::text                                                  AS aanduiding_bijzonder_nederlanderschap,
+    nat."ByzNederlanderschap"::varchar                                                  AS aanduiding_bijzonder_nederlanderschap,
     nat."GemeenteCode"::varchar                                                      AS gemeente_document,
     CASE -- datum document
       WHEN nat."Datumdocument" IS NULL THEN NULL
@@ -31,7 +31,7 @@ CREATE TABLE brp_prep.nationaliteiten AS
         'dag', substring(nat."Datumdocument", 7, 2)
         )
     END                                                                              AS datum_document,
-    nat."DocumentOms"::text                                                          AS beschrijving_document,
+    nat."DocumentOms"::varchar                                                          AS beschrijving_document,
 
     nat."GegevensInOnderzoek"::varchar                                               AS aanduiding_gegevens_in_onderzoek,
     CASE -- datum ingang onderzoek

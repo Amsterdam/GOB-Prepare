@@ -5,7 +5,7 @@ CREATE TABLE brp_prep.verblijfstitels AS
     vt."Anummer"::varchar                                                            AS anummer,
     JSONB_BUILD_OBJECT( -- nationaliteit
       'code', vt."VerblijftitelCode"::varchar,
-      'omschrijving', vt."VerblijftitelOms"::text
+      'omschrijving', vt."VerblijftitelOms"::varchar
     )                                                                                AS aanduiding_verblijfstitel,
     CASE -- datum verkrijging
       WHEN vt."DatumVerkrijging" IS NULL THEN NULL
