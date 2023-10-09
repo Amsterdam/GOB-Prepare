@@ -429,6 +429,16 @@
       ]
     },
     {
+      "type": "execute_sql",
+      "description": "Create brp overlijden table",
+      "id": "create_brp_overlijden",
+      "query_src": "file",
+      "query": "data/sql/brp/create.overlijden.sql",
+      "depends_on": [
+        "import_overlijden"
+      ]
+    },
+    {
       "type": "publish_schemas",
       "id": "publish_schemas",
       "publish_schemas": {
