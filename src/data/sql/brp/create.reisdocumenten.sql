@@ -51,10 +51,10 @@ CREATE TABLE brp_prep.reisdocument AS
         'maand', substring(rd."DatumInhoudingVermissing", 5, 2),
         'dag', substring(rd."DatumInhoudingVermissing", 7, 2)
         )
-    END                                                                              AS datum_inhouding_Nl_reisdocument,
+    END                                                                              AS datum_inhouding_nl_reisdocument,
 
     NULL::varchar                                                                    AS aanduiding_inhouding_nl_reisdocument,
-    NULL::varchar                                                                    AS lengteHouder,
+    NULL::varchar                                                                    AS lengte_houder,
     rd."SignaleringNedReisdocument"                                                  AS signalering_nl_reisdocument,
     rd."GemeenteOntleningCode"                                                       AS gemeente_document,
     NULL                                                                             AS datum_document,
@@ -91,6 +91,20 @@ CREATE TABLE brp_prep.reisdocument AS
       )
     END                                                                              AS datum_einde_onderzoek,
     NULL::varchar                                                                    AS onjuist_strijdig_openbare_orde,
+    CASE -- datum geldigheid
+      WHEN rd."DatumGeldigheid" IS NULL THEN NULL
+      ELSE JSONB_BUILD_OBJECT(
+        'datum', CONCAT_WS(
+            '-',
+            substring(rd."DatumGeldigheid", 1, 4),
+            substring(rd."DatumGeldigheid", 5, 2),
+            substring(rd."DatumGeldigheid", 7, 2)
+          ),
+        'jaar', substring(rd."DatumGeldigheid", 1, 4),
+        'maand', substring(rd."DatumGeldigheid", 5, 2),
+        'dag', substring(rd."DatumGeldigheid", 7, 2)
+        )
+    END                                                                              AS ingangsdatum_geldigheid,
 
     CASE -- datum opneming
       WHEN rd."DatumOpname" IS NULL THEN NULL
