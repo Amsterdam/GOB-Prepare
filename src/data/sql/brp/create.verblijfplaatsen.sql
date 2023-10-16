@@ -20,36 +20,10 @@ SELECT
     ELSE NULL
   END                                                                              AS adresseert_bag_standplaats,
   prs."GemeenteVanInschrijvingOms"                                                 AS gemeente_van_inschrijving,
-  CASE -- datum inschrijving
-    WHEN prs."DatumInschrijving" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-          '-',
-          substring(prs."DatumInschrijving", 1, 4),
-          substring(prs."DatumInschrijving", 5, 2),
-          substring(prs."DatumInschrijving", 7, 2)
-        ),
-      'jaar', substring(prs."DatumInschrijving", 1, 4),
-      'maand', substring(prs."DatumInschrijving", 5, 2),
-      'dag', substring(prs."DatumInschrijving", 7, 2)
-      )
-  END                                                                              AS datum_inschrijving,
+  brp_datum_prefix_prs."DatumInschrijving"                                         AS datum_inschrijving,
   prs."FunctieAdres"                                                               AS functie_adres,
   NULL::varchar                                                                    AS gemeentedeel, -- Not available
-  CASE -- datum inschrijving
-    WHEN prs."DatumAanvangHuishouding" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-          '-',
-          substring(prs."DatumAanvangHuishouding", 1, 4),
-          substring(prs."DatumAanvangHuishouding", 5, 2),
-          substring(prs."DatumAanvangHuishouding", 7, 2)
-        ),
-      'jaar', substring(prs."DatumAanvangHuishouding", 1, 4),
-      'maand', substring(prs."DatumAanvangHuishouding", 5, 2),
-      'dag', substring(prs."DatumAanvangHuishouding", 7, 2)
-      )
-  END                                                                              AS datum_aanvang_adreshouding,
+  brp_datum_prefix_prs."DatumAanvangHuishouding"                                   AS datum_aanvang_adreshouding,
   prs."Straatnaam"                                                                 AS straatnaam,
   prs."NaamOpenbareRuimte"                                                         AS naam_openbare_ruimte,
   prs."Huisnummer"                                                                 AS huisnummer,
@@ -76,66 +50,13 @@ SELECT
   NULL                                                                             AS aangever_adreshouding, -- Not available
   NULL                                                                             AS indicatie_document, -- Not available
 
-  prs."GegevensInOnderzoekAdres"::varchar                                                AS aanduiding_gegevens_in_onderzoek,
-  CASE -- datum ingang onderzoek
-    WHEN prs."DatumIngangOnderzoekAdres" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-        '-',
-        substring(prs."DatumIngangOnderzoekAdres", 1, 4),
-        substring(prs."DatumIngangOnderzoekAdres", 5, 2),
-        substring(prs."DatumIngangOnderzoekAdres", 7, 2)
-      ),
-      'jaar', substring(prs."DatumIngangOnderzoekAdres", 1, 4),
-      'maand', substring(prs."DatumIngangOnderzoekAdres", 5, 2),
-      'dag', substring(prs."DatumIngangOnderzoekAdres", 7, 2)
-    )
-  END                                                                              AS datum_ingang_onderzoek,
-
-  CASE -- datum einde onderzoek
-    WHEN prs."DatumEindeOnderzoekAdres" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-        '-',
-        substring(prs."DatumEindeOnderzoekAdres", 1, 4),
-        substring(prs."DatumEindeOnderzoekAdres", 5, 2),
-        substring(prs."DatumEindeOnderzoekAdres", 7, 2)
-      ),
-      'jaar', substring(prs."DatumEindeOnderzoekAdres", 1, 4),
-      'maand', substring(prs."DatumEindeOnderzoekAdres", 5, 2),
-      'dag', substring(prs."DatumEindeOnderzoekAdres", 7, 2)
-    )
-  END                                                                              AS datum_einde_onderzoek,
+  prs."GegevensInOnderzoekAdres"::varchar                                          AS aanduiding_gegevens_in_onderzoek,
+  brp_datum_prefix_prs."DatumIngangOnderzoekAdres"                                 AS datum_ingang_onderzoek,
+  brp_datum_prefix_prs."DatumEindeOnderzoekAdres"                                  AS datum_einde_onderzoek,
   NULL::varchar                                                                    AS onjuist_strijdig_openbare_orde,
 
-  CASE -- ingangsdatum geldigheid
-    WHEN prs."DatumGeldigheidAdres" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-          '-',
-          substring(prs."DatumGeldigheidAdres", 1, 4),
-          substring(prs."DatumGeldigheidAdres", 5, 2),
-          substring(prs."DatumGeldigheidAdres", 7, 2)
-        ),
-      'jaar', substring(prs."DatumGeldigheidAdres", 1, 4),
-      'maand', substring(prs."DatumGeldigheidAdres", 5, 2),
-      'dag', substring(prs."DatumGeldigheidAdres", 7, 2)
-      )
-  END                                                                              AS ingangsdatum_geldigheid,
-  CASE -- datum opneming
-    WHEN prs."DatumOpnameAdres" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-          '-',
-          substring(prs."DatumOpnameAdres", 1, 4),
-          substring(prs."DatumOpnameAdres", 5, 2),
-          substring(prs."DatumOpnameAdres", 7, 2)
-        ),
-      'jaar', substring(prs."DatumOpnameAdres", 1, 4),
-      'maand', substring(prs."DatumOpnameAdres", 5, 2),
-      'dag', substring(prs."DatumOpnameAdres", 7, 2)
-      )
-  END                                                                              AS datum_opneming,
+  brp_datum_prefix_prs."DatumGeldigheidAdres"                                      AS ingangsdatum_geldigheid,
+  brp_datum_prefix_prs."DatumOpnameAdres"                                          AS datum_opneming,
   NULL                                                                             AS datum_actueel_tot -- TODO: still have to decide what will be
 
 FROM brp.personen prs

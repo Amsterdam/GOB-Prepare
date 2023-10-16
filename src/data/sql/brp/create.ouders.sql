@@ -10,22 +10,7 @@ SELECT
   ouder1."AdellijketitelOuder1"                                                              AS ouder_adellijke_titel_predikaat,
   ouder1."GeboorteplaatsOmsOuder1"                                                           AS ouder_geboorte_plaats,
   ouder1."GeboortelandOmsOuder1"                                                             AS ouder_geboorte_land,
-
-  CASE -- geboorte datum van de ouder 1
-    WHEN ouder1."GeboortedatumOuder1" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-          '-',
-          substring(ouder1."GeboortedatumOuder1", 1, 4),
-          substring(ouder1."GeboortedatumOuder1", 5, 2),
-          substring(ouder1."GeboortedatumOuder1", 7, 2)
-        ),
-      'jaar', substring(ouder1."GeboortedatumOuder1", 1, 4),
-      'maand', substring(ouder1."GeboortedatumOuder1", 5, 2),
-      'dag', substring(ouder1."GeboortedatumOuder1", 7, 2)
-      )
-  END                                                                                        AS ouder_geboortedatum,
-
+  brp_datum_prefix_ouder1."GeboortedatumOuder1"                                              AS ouder_geboortedatum,
   ouder1."GeslachtsaanduidingOmsOuder1"                                                      AS ouder_geslachtsaanduiding,
 
   NULL::varchar                                                                              AS datum_familierechtelijke_betrekking,
@@ -42,65 +27,13 @@ SELECT
   NULL::varchar                                                                              AS beschrijving_document,
 
   ouder1."GegevensInOnderzoekOuder1"::varchar                                                AS aanduiding_gegevens_in_onderzoek,
-  CASE -- datum ingang onderzoek
-    WHEN ouder1."DatumIngangOnderzoekOuder1" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-        '-',
-        substring(ouder1."DatumIngangOnderzoekOuder1", 1, 4),
-        substring(ouder1."DatumIngangOnderzoekOuder1", 5, 2),
-        substring(ouder1."DatumIngangOnderzoekOuder1", 7, 2)
-      ),
-      'jaar', substring(ouder1."DatumIngangOnderzoekOuder1", 1, 4),
-      'maand', substring(ouder1."DatumIngangOnderzoekOuder1", 5, 2),
-      'dag', substring(ouder1."DatumIngangOnderzoekOuder1", 7, 2)
-    )
-  END                                                                                        AS datum_ingang_onderzoek,
+  brp_datum_prefix_ouder1."DatumIngangOnderzoekOuder1"                                       AS datum_ingang_onderzoek,
 
-  CASE -- datum einde onderzoek
-    WHEN ouder1."DatumEindeOnderzoekOuder1" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-        '-',
-        substring(ouder1."DatumEindeOnderzoekOuder1", 1, 4),
-        substring(ouder1."DatumEindeOnderzoekOuder1", 5, 2),
-        substring(ouder1."DatumEindeOnderzoekOuder1", 7, 2)
-      ),
-      'jaar', substring(ouder1."DatumEindeOnderzoekOuder1", 1, 4),
-      'maand', substring(ouder1."DatumEindeOnderzoekOuder1", 5, 2),
-      'dag', substring(ouder1."DatumEindeOnderzoekOuder1", 7, 2)
-    )
-  END                                                                                        AS datum_einde_onderzoek,
+  brp_datum_prefix_ouder1."DatumEindeOnderzoekOuder1"                                        AS datum_einde_onderzoek,
   NULL::varchar                                                                              AS onjuist_strijdig_openbare_orde,
 
-  CASE -- datum opneming ouder 1
-    WHEN ouder1."DatumOpnameOuder1" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-          '-',
-          substring(ouder1."DatumOpnameOuder1", 1, 4),
-          substring(ouder1."DatumOpnameOuder1", 5, 2),
-          substring(ouder1."DatumOpnameOuder1", 7, 2)
-        ),
-      'jaar', substring(ouder1."DatumOpnameOuder1", 1, 4),
-      'maand', substring(ouder1."DatumOpnameOuder1", 5, 2),
-      'dag', substring(ouder1."DatumOpnameOuder1", 7, 2)
-      )
-  END                                                                                        AS datum_opneming,
-  CASE -- datum geldigheid ouder 1
-    WHEN ouder1."DatumGeldigheidOuder1" IS NULL THEN NULL
-    WHEN length(ouder1."DatumGeldigheidOuder1") = 8 THEN JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-          '-',
-          substring(ouder1."DatumGeldigheidOuder1", 1, 4),
-          substring(ouder1."DatumGeldigheidOuder1", 5, 2),
-          substring(ouder1."DatumGeldigheidOuder1", 7, 2)
-        ),
-      'jaar', substring(ouder1."DatumGeldigheidOuder1", 1, 4),
-      'maand', substring(ouder1."DatumGeldigheidOuder1", 5, 2),
-      'dag', substring(ouder1."DatumGeldigheidOuder1", 7, 2)
-      )
-  END                                                                                        AS ingangsdatum_geldigheid,
+  brp_datum_prefix_ouder1."DatumOpnameOuder1"                                                AS datum_opneming,
+  brp_datum_prefix_ouder1."DatumGeldigheidOuder1"                                            AS ingangsdatum_geldigheid,
   NULL::varchar::date                                                                        AS datum_actueel_tot -- TODO: still have to decide what will be
 
 FROM brp.personen ouder1
@@ -120,20 +53,7 @@ SELECT
   ouder2."GeboorteplaatsOmsOuder2"                                                           AS ouder_geboorte_plaats,
   ouder2."GeboortelandOmsOuder2"                                                             AS ouder_geboorte_land,
 
-  CASE -- geboorte datum van de ouder 2
-    WHEN ouder2."GeboortedatumOuder2" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-          '-',
-          substring(ouder2."GeboortedatumOuder2", 1, 4),
-          substring(ouder2."GeboortedatumOuder2", 5, 2),
-          substring(ouder2."GeboortedatumOuder2", 7, 2)
-        ),
-      'jaar', substring(ouder2."GeboortedatumOuder2", 1, 4),
-      'maand', substring(ouder2."GeboortedatumOuder2", 5, 2),
-      'dag', substring(ouder2."GeboortedatumOuder2", 7, 2)
-      )
-  END                                                                                        AS ouder_geboortedatum,
+  brp_datum_prefix_ouder2."GeboortedatumOuder2"                                              AS ouder_geboortedatum,
 
   ouder2."GeslachtsaanduidingOmsOuder2"                                                      AS ouder_geslachtsaanduiding,
 
@@ -151,65 +71,12 @@ SELECT
   NULL::varchar                                                                              AS beschrijving_document,
 
   ouder2."GegevensInOnderzoekOuder2"::varchar                                                AS aanduiding_gegevens_in_onderzoek,
-  CASE -- datum ingang onderzoek
-    WHEN ouder2."DatumIngangOnderzoekOuder2" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-        '-',
-        substring(ouder2."DatumIngangOnderzoekOuder2", 1, 4),
-        substring(ouder2."DatumIngangOnderzoekOuder2", 5, 2),
-        substring(ouder2."DatumIngangOnderzoekOuder2", 7, 2)
-      ),
-      'jaar', substring(ouder2."DatumIngangOnderzoekOuder2", 1, 4),
-      'maand', substring(ouder2."DatumIngangOnderzoekOuder2", 5, 2),
-      'dag', substring(ouder2."DatumIngangOnderzoekOuder2", 7, 2)
-    )
-  END                                                                                        AS datum_ingang_onderzoek,
-
-  CASE -- datum einde onderzoek
-    WHEN ouder2."DatumEindeOnderzoekOuder2" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-        '-',
-        substring(ouder2."DatumEindeOnderzoekOuder2", 1, 4),
-        substring(ouder2."DatumEindeOnderzoekOuder2", 5, 2),
-        substring(ouder2."DatumEindeOnderzoekOuder2", 7, 2)
-      ),
-      'jaar', substring(ouder2."DatumEindeOnderzoekOuder2", 1, 4),
-      'maand', substring(ouder2."DatumEindeOnderzoekOuder2", 5, 2),
-      'dag', substring(ouder2."DatumEindeOnderzoekOuder2", 7, 2)
-    )
-  END                                                                                        AS datum_einde_onderzoek,
+  brp_datum_prefix_ouder2."DatumIngangOnderzoekOuder2"                                       AS datum_ingang_onderzoek,
+  brp_datum_prefix_ouder2."DatumEindeOnderzoekOuder2"                                        AS datum_einde_onderzoek,
   NULL::varchar                                                                              AS onjuist_strijdig_openbare_orde,
 
-  CASE -- datum opneming ouder 1
-    WHEN ouder2."DatumOpnameOuder2" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-          '-',
-          substring(ouder2."DatumOpnameOuder2", 1, 4),
-          substring(ouder2."DatumOpnameOuder2", 5, 2),
-          substring(ouder2."DatumOpnameOuder2", 7, 2)
-        ),
-      'jaar', substring(ouder2."DatumOpnameOuder2", 1, 4),
-      'maand', substring(ouder2."DatumOpnameOuder2", 5, 2),
-      'dag', substring(ouder2."DatumOpnameOuder2", 7, 2)
-      )
-  END                                                                                        AS datum_opneming,
-  CASE -- datum geldigheid ouder 1
-    WHEN ouder2."DatumGeldigheidOuder2" IS NULL THEN NULL
-    ELSE JSONB_BUILD_OBJECT(
-      'datum', CONCAT_WS(
-          '-',
-          substring(ouder2."DatumGeldigheidOuder2", 1, 4),
-          substring(ouder2."DatumGeldigheidOuder2", 5, 2),
-          substring(ouder2."DatumGeldigheidOuder2", 7, 2)
-        ),
-      'jaar', substring(ouder2."DatumGeldigheidOuder2", 1, 4),
-      'maand', substring(ouder2."DatumGeldigheidOuder2", 5, 2),
-      'dag', substring(ouder2."DatumGeldigheidOuder2", 7, 2)
-      )
-  END                                                                                        AS ingangsdatum_geldigheid,
+  brp_datum_prefix_ouder2."DatumOpnameOuder2"                                                AS datum_opneming,
+  brp_datum_prefix_ouder2."DatumGeldigheidOuder2"                                            AS ingangsdatum_geldigheid,
   NULL::varchar::date                                                                        AS datum_actueel_tot -- TODO: still have to decide what will be
 
 FROM brp.personen ouder2

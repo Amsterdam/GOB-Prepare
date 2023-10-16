@@ -26,6 +26,7 @@ class TestPrepareClientInit(TestCase):
         self.mock_dataset = {
             'version': '0.1',
             'name': 'Test Dataset',
+            'catalogue': 'some catalogue',
             'source': {
                 'application': fixtures.random_string()
             },
@@ -78,6 +79,7 @@ class TestPrepareClient(TestCase):
         self.mock_dataset = {
             'version': '0.1',
             'name': 'Test Dataset',
+            'catalogue': 'some catalogue',
             'source': {
                 'application': fixtures.random_string()
             },
@@ -257,6 +259,37 @@ class TestPrepareClient(TestCase):
             call("ANALYZE schema.table_name")
         ])
         mock_logger.info.assert_called_with("Created table 'schema.table_name'")
+
+        # test for create a date object in brp queries
+        self.mock_dataset['catalogue'] = 'brp'
+        action['query'] = """SELECT
+            tb."BSN"::varchar                                            AS dest_burgerservicenummer,
+            brp_datum_prefix_tb."StartDatum"                             AS dest_start_datum
+        FROM brp.srcTable tb"""
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._dst_datastore = MagicMock()
+        prepare_client._run_prepare_action(action)
+        mock_create_table.assert_called_with(
+            prepare_client._dst_datastore,
+            "schema.table_name",
+            """SELECT
+            tb."BSN"::varchar                                            AS dest_burgerservicenummer,\n
+                CASE
+                    WHEN tb."StartDatum" IS NULL THEN NULL
+                    ELSE JSONB_BUILD_OBJECT(
+                        'datum', CONCAT_WS(
+                            '-',
+                            substring(tb."StartDatum", 1, 4),
+                            substring(tb."StartDatum", 5, 2),
+                            substring(tb."StartDatum", 7, 2)
+                        ),
+                        'jaar', substring(tb."StartDatum", 1, 4),
+                        'maand', substring(tb."StartDatum", 5, 2),
+                        'dag', substring(tb."StartDatum", 7, 2)
+                        )
+                END                                                                  AS dest_start_datum
+        FROM brp.srcTable tb\n"""
+        )
 
     @patch("gobprepare.prepare_client.SqlAPIImporter", autospec=True)
     def test_action_import_api(self, mock_importer, mock_logger):

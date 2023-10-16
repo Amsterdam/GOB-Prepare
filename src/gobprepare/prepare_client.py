@@ -39,11 +39,11 @@ from gobprepare.typing import (
     TaskList,
 )
 from gobprepare.utils.exceptions import DuplicateTableError
-from gobprepare.utils.postgres import create_table_columnar_as_query
+from gobprepare.utils.postgres import brp_build_date_json, create_table_columnar_as_query
 
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
-
+BRP_CATALOGUE = "brp"
 
 ActionConfig = dict[str, Any]
 
@@ -67,6 +67,7 @@ class PrepareClient:
         self._prepare_config = prepare_config
         self._actions = prepare_config["actions"]
         self._name = prepare_config["name"]
+        self._catalogue = prepare_config["catalogue"]
         self.source = self._prepare_config.get("source")
         self.source_app = self._prepare_config.get("source", {}).get("application")
         self.destination = self._prepare_config["destination"]
@@ -208,6 +209,8 @@ class PrepareClient:
     def action_create_table(self, action: CreateTableConfig) -> None:
         """Create destination table."""
         query = self._get_query(action)
+        if self._catalogue == BRP_CATALOGUE:
+            query = brp_build_date_json(query)
         create_query = create_table_columnar_as_query(self._dst_datastore, action["table_name"], query)
         self._dst_datastore.execute(create_query)  # type: ignore[union-attr]
         self._dst_datastore.execute(f"ANALYZE {action['table_name']}")  # type: ignore[union-attr]
