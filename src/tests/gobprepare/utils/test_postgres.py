@@ -82,32 +82,3 @@ class TestPostgresUtils(TestCase):
             self.assertEqual("CREATE TABLE schema.tablename (id int, text varchar) USING columnar", result)
             mock_logger_warning.assert_not_called()
 
-    def test_brp_build_date_json(self, test_query):
-        test_query = f"""SELECT
-            tb."BSN"::varchar                                            AS dest_burgerservicenummer,
-            tb."Anummer"::varchar                                        AS dest_anummer,
-            tb."KiesrechtKenmerk"::varchar                               AS dest_kiesrecht_kenmerk,
-            brp_datum_prefix_tb."StartDatum"                             AS dest_start_datum
-        FROM brp.srcTable tb"""
-        expected_result = """SELECT
-            tb."BSN"::varchar                                            AS dest_burgerservicenummer,
-            tb."Anummer"::varchar                                        AS dest_anummer,
-            tb."KiesrechtKenmerk"::varchar                               AS dest_kiesrecht_kenmerk,\n
-                CASE
-                    WHEN tb."StartDatum" IS NULL THEN NULL
-                    ELSE JSONB_BUILD_OBJECT(
-                        'datum', CONCAT_WS(
-                            '-',
-                            substring(tb."StartDatum", 1, 4),
-                            substring(tb."StartDatum", 5, 2),
-                            substring(tb."StartDatum", 7, 2)
-                        ),
-                        'jaar', substring(tb."StartDatum", 1, 4),
-                        'maand', substring(tb."StartDatum", 5, 2),
-                        'dag', substring(tb."StartDatum", 7, 2)
-                        )
-                END                                                                  AS dest_start_datum
-        FROM brp.srcTable tb\n"""
-
-        result = brp_build_date_json(test_query)
-        self.assertEqual(result, expected_result)

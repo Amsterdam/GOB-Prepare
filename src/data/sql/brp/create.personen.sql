@@ -16,7 +16,7 @@ SELECT
   END                                                                                      AS adellijke_titel_redikaat,
   prs."GeboorteplaatsOms"::varchar                                                         AS geboorte_plaats,
   prs."GeboortelandOms"::varchar                                                           AS geboorte_land,
-  brp_datum_prefix_prs."Geboortedatum"                                                     AS geboortedatum,
+  brp_build_date_json(prs."Geboortedatum")                                                 AS geboortedatum,
   prs."GeslachtsaanduidingOms"::varchar                                                    AS geslachtsaanduiding,
   NULL                                                                                     AS vorig_a_nummer,
   NULL                                                                                     AS volgende_a_nummer,
@@ -31,16 +31,13 @@ SELECT
   prs."GemeenteVanInschrijvingCode"::varchar                                               AS gemeente_document,
   NULL                                                                                     AS datum_document,
   NULL                                                                                     AS beschrijving_document,
-
   prs."GegevensInOnderzoekPersoon"::varchar                                                AS aanduiding_gegevens_in_onderzoek,
-  brp_datum_prefix_prs."DatumIngangOnderzoekPersoon"                                       AS datum_ingang_onderzoek,
-  brp_datum_prefix_prs."DatumEindeOnderzoekPersoon"                                        AS datum_einde_onderzoek,
+  brp_build_date_json(prs."DatumIngangOnderzoekPersoon")                                   AS datum_ingang_onderzoek,
+  brp_build_date_json(prs."DatumEindeOnderzoekPersoon")                                    AS datum_einde_onderzoek,
   NULL::varchar                                                                            AS onjuist_strijdig_openbare_orde,
-
-  brp_datum_prefix_prs."DatumGeldigheidPersoon"                                            AS begin_geldigheid,
+  brp_build_date_json(prs."DatumGeldigheidPersoon")                                        AS begin_geldigheid,
   NULL::date                                                                               AS eind_geldigheid,
-  brp_datum_prefix_prs."DatumOpnamePersoon"                                                AS datum_opneming,
-
+  brp_build_date_json(prs."DatumOpnamePersoon")                                            AS datum_opneming,
   prs."BSNOuder1"                                                                          AS heeft_brp_ouder1,
   prs."BSNOuder2"                                                                          AS heeft_brp_ouder2,
   nat.nationaliteiten                                                                      AS heeft_brp_nationalteiten,
@@ -62,7 +59,6 @@ SELECT
 
 FROM
   brp.personen prs
-
   LEFT JOIN ( -- nationaliteiten
     SELECT 
       "BSN",
@@ -75,7 +71,6 @@ FROM
     GROUP BY
       "BSN"
   ) AS nat ON prs."BSN" = nat."BSN"
-
   LEFT JOIN ( -- verblijfstitel
     SELECT 
       "BSN",
@@ -84,7 +79,6 @@ FROM
       ) AS verblijfstitel
     FROM brp.verblijfstitel
     ) AS vt ON prs."BSN" = vt."BSN"
-
   LEFT JOIN ( -- huwelijkenpartnerschappen
     SELECT 
       "BSN",
@@ -97,7 +91,6 @@ FROM
     GROUP BY
       "BSN"
   ) AS hw ON prs."BSN" = hw."BSN"
-
   LEFT JOIN ( -- gezagsverhouding
     SELECT 
       "BSN",
@@ -106,7 +99,6 @@ FROM
       ) AS gezagsverhouding
     FROM brp.gezagsverhouding
   ) AS gv ON prs."BSN" = gv."BSN"
-
   LEFT JOIN  ( -- verwijzingen
     SELECT 
       "BSN",
@@ -115,7 +107,6 @@ FROM
       ) AS verwijzingen
     FROM brp.verwijsgegevens
   ) AS verw ON prs."BSN" = verw."BSN"
-
   LEFT JOIN  ( -- kiesrechten
     SELECT 
       "BSN",
@@ -124,7 +115,6 @@ FROM
       ) AS kiesrechten
     FROM brp.kiesrecht
   ) AS kr ON prs."BSN" = kr."BSN"
-
   LEFT JOIN  ( -- reisdocumenten
     SELECT 
       "BSN",
@@ -137,7 +127,6 @@ FROM
     GROUP BY
       "BSN"
   ) AS rd ON prs."BSN" = rd."BSN"
-
   LEFT JOIN  ( -- overlijdens
     SELECT 
       "BSN",

@@ -40,37 +40,3 @@ def create_table_columnar_query(postgres_datastore: PostgresDatastore, tablename
         return f"CREATE TABLE {tablename} ({columndefs}) USING columnar"
     return f"CREATE TABLE {tablename} ({columndefs})"
 
-
-def brp_build_date_json(query: str) -> str:
-    """Convert a date string to a date json in sql query.
-
-    input: sql query with some datum statement as "brp_datum_prefix_tb."Datum"     AS datum"
-    output: sql query with the datum statement as date json
-    prefix "brp_datum_prefix_" used to identify datum columns in de sql query.
-    """
-    statements = query.splitlines()
-    new_query = ""
-    for line in statements:
-        if "brp_datum_prefix_" in line:
-            brp_datum = line.split("brp_datum_prefix_")[1].split(" AS ")
-            src_column_name = brp_datum[0].strip()
-            column_name = brp_datum[1].strip()
-
-            date_statement = f"""
-                CASE
-                    WHEN {src_column_name} IS NULL THEN NULL
-                    ELSE JSONB_BUILD_OBJECT(
-                        'datum', CONCAT_WS(
-                            '-',
-                            substring({src_column_name}, 1, 4),
-                            substring({src_column_name}, 5, 2),
-                            substring({src_column_name}, 7, 2)
-                        ),
-                        'jaar', substring({src_column_name}, 1, 4),
-                        'maand', substring({src_column_name}, 5, 2),
-                        'dag', substring({src_column_name}, 7, 2)
-                        )
-                END                                                                  AS {column_name}"""
-            line = date_statement
-        new_query = f"""{new_query}{line}\n"""
-    return new_query

@@ -319,6 +319,16 @@
       ]
     },
     {
+      "type": "execute_sql",
+      "description": "Create brp date json function",
+      "id": "create_date_function",
+      "query_src": "file",
+      "query": "data/sql/brp/create.date.function.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
       "type": "create_table",
       "description": "Create brp nationaliteiten table",
       "table_name": "brp_prep.nationaliteiten",
@@ -326,7 +336,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.nationaliteiten.sql",
       "depends_on": [
-        "import_nationaliteiten"
+        "import_nationaliteiten",
+        "create_date_function"
       ]
     },
     {
@@ -337,7 +348,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.reisdocumenten.sql",
       "depends_on": [
-        "import_reisdocumenten"
+        "import_reisdocumenten",
+        "create_date_function"
       ]
     },
     {
@@ -348,7 +360,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.verblijfstitels.sql",
       "depends_on": [
-        "import_verblijfstitel"
+        "import_verblijfstitel",
+        "create_date_function"
       ]
     },
     {
@@ -359,7 +372,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.inschrijvingen.sql",
       "depends_on": [
-        "import_personen"
+        "import_personen",
+        "create_date_function"
       ]
     },
     {
@@ -370,7 +384,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.kiesrechten.sql",
       "depends_on": [
-        "import_kiesrecht"
+        "import_kiesrecht",
+        "create_date_function"
       ]
     },
     {
@@ -381,7 +396,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.gezagsverhoudingen.sql",
       "depends_on": [
-        "import_gezagsverhouding"
+        "import_gezagsverhouding",
+        "create_date_function"
       ]
     },
     {
@@ -392,7 +408,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.verblijfplaatsen.sql",
       "depends_on": [
-        "import_personen"
+        "import_personen",
+        "create_date_function"
       ]
     },
     {
@@ -403,7 +420,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.huwelijkenpartnerschappen.sql",
       "depends_on": [
-        "import_huwelijk"
+        "import_huwelijk",
+        "create_date_function"
       ]
     },
     {
@@ -414,7 +432,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.kinderen.sql",
       "depends_on": [
-        "import_kindgegevens"
+        "import_kindgegevens",
+        "create_date_function"
       ]
     },
     {
@@ -425,7 +444,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.ouders.sql",
       "depends_on": [
-        "import_personen"
+        "import_personen",
+        "create_date_function"
       ]
     },
     {
@@ -436,7 +456,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.verwijzingen.sql",
       "depends_on": [
-        "import_verwijsgegevens"
+        "import_verwijsgegevens",
+        "create_date_function"
       ]
     },
     {
@@ -447,7 +468,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.overlijdens.sql",
       "depends_on": [
-        "import_overlijden"
+        "import_overlijden",
+        "create_date_function"
       ]
     },
     {
@@ -458,7 +480,8 @@
       "query_src": "file",
       "query": "data/sql/brp/create.personen.sql",
       "depends_on": [
-        "import_personen"
+        "import_personen",
+        "create_date_function"
       ]
     },
     {
