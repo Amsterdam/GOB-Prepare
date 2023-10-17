@@ -451,6 +451,17 @@
       ]
     },
     {
+      "type": "create_table",
+      "description": "Create brp personen table",
+      "table_name": "brp_prep.personen",
+      "id": "create_brp_personen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.personen.sql",
+      "depends_on": [
+        "import_personen"
+      ]
+    },
+    {
       "type": "publish_schemas",
       "id": "publish_schemas",
       "publish_schemas": {
