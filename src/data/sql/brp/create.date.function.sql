@@ -23,5 +23,3 @@ BEGIN
       END;
 END;
 $$ LANGUAGE plpgsql;
-
-select brp_build_date_json('20231017');
