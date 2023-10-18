@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from gobprepare.utils.postgres import create_table_columnar_query, create_table_columnar_as_query, brp_build_date_json
+from gobprepare.utils.postgres import create_table_columnar_query, create_table_columnar_as_query
 
 
 class MockPostgresDatastore:

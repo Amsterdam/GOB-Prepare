@@ -39,4 +39,3 @@ def create_table_columnar_query(postgres_datastore: PostgresDatastore, tablename
     if _is_columnar_supported(postgres_datastore):
         return f"CREATE TABLE {tablename} ({columndefs}) USING columnar"
     return f"CREATE TABLE {tablename} ({columndefs})"
-

@@ -67,7 +67,6 @@ class PrepareClient:
         self._prepare_config = prepare_config
         self._actions = prepare_config["actions"]
         self._name = prepare_config["name"]
-        self._catalogue = prepare_config["catalogue"]
         self.source = self._prepare_config.get("source")
         self.source_app = self._prepare_config.get("source", {}).get("application")
         self.destination = self._prepare_config["destination"]
