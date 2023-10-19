@@ -46,41 +46,6 @@
       "id": "create_bestand_table"
     },
     {
-      "type": "clone",
-      "source_schema": "G0363_BRK2",
-      "destination_schema": "brk2",
-      "id_columns": {
-        "_defaults": [
-          ["ID", "VOLGNUMMER"],
-          ["ID"],
-          ["CODE"],
-          ["KADASTRAALOBJECT_ID", "KADASTRAALOBJECT_VOLGNUMMER"],
-          ["ZAKELIJKRECHT_ID"],
-          ["TENAAMSTELLING_ID"],
-          ["MUTATIE_ID"]
-        ],
-        "AANTEKENING_BETROKKENPERSOON": [
-          "AANTEKENING_ID"
-        ],
-        "ADRESSEERBAAR_NEVENADRES": [
-          "ADRESSEERBAAR_OBJECT_ID"
-        ],
-        "MANDELIGHEID_ISGEBASEERDOP": [
-          "MANDELIGHEID_ID"
-        ],
-        "PUBLIEKRECHTELIJKE_GEZAG": [
-          "BEPERKING_ID"
-        ]
-      },
-      "ignore": [
-        "VERSIE"
-      ],
-      "depends_on": [
-        "clear_schemas"
-      ],
-      "id": "clone_source"
-    },
-    {
       "type": "import_csv",
       "source": "https://developer.kadaster.nl/schemas/waardelijsten/BurgemKadgemSectie/BurgemKadgemSectie.csv",
       "destination": "brk2.import_burgerlijke_gemeentes",
@@ -110,7 +75,32 @@
       "query": "data/sql/brk2/materialized_view.baghulptabel.sql",
       "id": "create_baghulptabel",
       "depends_on": [
-        "clone_source"
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "source": "https://developer.kadaster.nl/schemas/waardelijsten/AardAantekening/AardAantekening.csv",
+      "destination": "brk2.import_aardaantekening",
+      "column_names": {
+        "Code": "code",
+        "Waarde": "omschrijving",
+        "DatumVanaf": "datum_vanaf",
+        "DatumTot": "datum_tot",
+        "Toelichting": "type"
+      },
+      "id": "import_aardaantekening_csv",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "import_csv",
+      "source": "https://developer.kadaster.nl/schemas/waardelijsten/AardZakelijkRecht/AardZakelijkRecht.csv",
+      "destination": "brk2_prep.aardzakelijkrecht_waardelijst_import",
+      "id": "import_aardzakelijkrecht_waardelijst",
+      "depends_on": [
+        "clear_schemas"
       ]
     },
     {
@@ -119,10 +109,24 @@
       "id": "populate_aardzakelijkrecht_waardelijst",
       "table_name": "brk2_prep.aardzakelijkrecht_waardelijst",
       "depends_on": [
-        "clear_schemas"
+        "import_aardzakelijkrecht_waardelijst"
       ],
       "query_src": "file",
       "query": "data/sql/brk2/select.aardzakelijkrecht_waardelijst.sql"
+    },
+    {
+      "type": "import_csv",
+      "objectstore": "Basisinformatie",
+      "read_config": {
+        "file_filter": "^brk/Oude_Nieuwe_ids/Conversietabel_BRK1_2_Identificaties.csv$",
+        "container": "acceptatie"
+      },
+      "separator": ",",
+      "destination": "brk2_prep.id_conversion",
+      "id": "import_id_conversion_csv",
+      "depends_on": [
+        "clear_schemas"
+      ]
     },
     {
       "type": "create_table",
@@ -143,6 +147,7 @@
       "query": "data/sql/brk2/preselect.kot.geldigheid.sql",
       "id": "select_kot_geldigheid",
       "depends_on": [
+        "import_burgerlijke_gemeentes",
         "create_baghulptabel"
       ]
     },
@@ -198,7 +203,8 @@
       "id": "select_zrt",
       "depends_on": [
         "preselect_zrt_kot",
-        "preselect_zrt_asg"
+        "preselect_zrt_asg",
+        "import_id_conversion_csv"
       ]
     },
     {
@@ -299,7 +305,9 @@
       "query": "data/sql/brk2/select.aantekening_kadastraal_object.sql",
       "id": "select_akt",
       "depends_on": [
-        "select_kot"
+        "select_kot",
+        "import_aardaantekening_csv",
+        "import_id_conversion_csv"
       ]
     },
     {
