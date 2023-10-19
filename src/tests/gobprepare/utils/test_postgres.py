@@ -81,3 +81,4 @@ class TestPostgresUtils(TestCase):
 
             self.assertEqual("CREATE TABLE schema.tablename (id int, text varchar) USING columnar", result)
             mock_logger_warning.assert_not_called()
+

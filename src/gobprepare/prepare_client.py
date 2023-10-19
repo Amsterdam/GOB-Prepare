@@ -44,7 +44,6 @@ from gobprepare.utils.postgres import create_table_columnar_as_query
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
 
-
 ActionConfig = dict[str, Any]
 
 
