@@ -319,10 +319,176 @@
       ]
     },
     {
+      "type": "execute_sql",
+      "description": "Create brp date json function",
+      "id": "create_date_function",
+      "query_src": "file",
+      "query": "data/sql/brp/create.date.function.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp nationaliteiten table",
+      "table_name": "brp_prep.nationaliteiten",
+      "id": "create_brp_nationaliteiten",
+      "query_src": "file",
+      "query": "data/sql/brp/create.nationaliteiten.sql",
+      "depends_on": [
+        "import_nationaliteiten",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp reisdocumenten table",
+      "table_name": "brp_prep.reisdocumenten",
+      "id": "create_brp_reisdocumenten",
+      "query_src": "file",
+      "query": "data/sql/brp/create.reisdocumenten.sql",
+      "depends_on": [
+        "import_reisdocumenten",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp verblijfstitels table",
+      "table_name": "brp_prep.verblijfstitels",
+      "id": "create_brp_verblijfstitels",
+      "query_src": "file",
+      "query": "data/sql/brp/create.verblijfstitels.sql",
+      "depends_on": [
+        "import_verblijfstitel",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp inschrijvingen table",
+      "table_name": "brp_prep.inschrijvingen",
+      "id": "create_brp_inschrijvingen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.inschrijvingen.sql",
+      "depends_on": [
+        "import_personen",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp kiesrechten table",
+      "table_name": "brp_prep.kiesrechten",
+      "id": "create_brp_kiesrechten",
+      "query_src": "file",
+      "query": "data/sql/brp/create.kiesrechten.sql",
+      "depends_on": [
+        "import_kiesrecht",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp gezagsverhoudingen table",
+      "table_name": "brp_prep.gezagsverhoudingen",
+      "id": "create_brp_gezagsverhoudingen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.gezagsverhoudingen.sql",
+      "depends_on": [
+        "import_gezagsverhouding",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp verblijfplaatsen table",
+      "table_name": "brp_prep.verblijfplaatsen",
+      "id": "create_brp_verblijfplaatsen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.verblijfplaatsen.sql",
+      "depends_on": [
+        "import_personen",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp huwelijkenpartnerschappen table",
+      "table_name": "brp_prep.huwelijkenpartnerschappen",
+      "id": "create_brp_huwelijkenpartnerschappen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.huwelijkenpartnerschappen.sql",
+      "depends_on": [
+        "import_huwelijk",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp kinderen table",
+      "table_name": "brp_prep.kinderen",
+      "id": "create_brp_kinderen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.kinderen.sql",
+      "depends_on": [
+        "import_kindgegevens",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp ouders table",
+      "table_name": "brp_prep.ouders",
+      "id": "create_brp_ouders",
+      "query_src": "file",
+      "query": "data/sql/brp/create.ouders.sql",
+      "depends_on": [
+        "import_personen",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp verwijzingen table",
+      "table_name": "brp_prep.verwijzingen",
+      "id": "create_brp_verwijzingen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.verwijzingen.sql",
+      "depends_on": [
+        "import_verwijsgegevens",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp overlijdens table",
+      "table_name": "brp_prep.overlijdens",
+      "id": "create_brp_overlijden",
+      "query_src": "file",
+      "query": "data/sql/brp/create.overlijdens.sql",
+      "depends_on": [
+        "import_overlijden",
+        "create_date_function"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create brp personen table",
+      "table_name": "brp_prep.personen",
+      "id": "create_brp_personen",
+      "query_src": "file",
+      "query": "data/sql/brp/create.personen.sql",
+      "depends_on": [
+        "import_personen",
+        "create_date_function"
+      ]
+    },
+    {
       "type": "publish_schemas",
       "id": "publish_schemas",
       "publish_schemas": {
-        "brp": "brp_prepared"
+        "brp_prep": "brp_prepared"
       },
       "depends_on": "*"
     }

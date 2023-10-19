@@ -85,7 +85,7 @@ class SqlCsvImporter:
         # Replace empty values with None to insert NULL in database
         df.replace(to_replace=pd_NA, value=None, inplace=True)
 
-        columns = [self._column_names.get(col, col) for col in df if isinstance(col, str)]
+        columns = [self._column_names.get(col, col).strip() for col in df if isinstance(col, str)]
         data = [row for row in zip(*[df[col] for col in df])]
 
         return columns, data
