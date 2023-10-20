@@ -62,7 +62,7 @@ FROM brk2.kadastraal_object kot
          LEFT JOIN brk2.c_kadastralegemeente kge
                    ON kot.kadastralegemeente_code = kge.code
          LEFT JOIN (SELECT "CBSCode", "BGMNaam", "KadGemNaam"
-                    FROM brk2.import_burgerlijke_gemeentes
+                    FROM brk2_prep.import_burgerlijke_gemeentes
                     GROUP BY "CBSCode", "BGMNaam", "KadGemNaam") brg
                    ON kge.omschrijving = brg."KadGemNaam"
          LEFT JOIN brk2.c_soortgrootte sge
@@ -71,7 +71,7 @@ FROM brk2.kadastraal_object kot
                    ON kot.cultuurcodeonbebouwd_code = cod.code
          LEFT JOIN brk2.c_cultuurcodebebouwd ccb
                    ON kot.cultuurcodebebouwd_code = ccb.code
-         LEFT JOIN brk2.baghulptabel adr
+         LEFT JOIN brk2_prep.baghulptabel adr
                    ON adr.kadastraalobject_id = kot.id AND adr.kadastraalobject_volgnummer = kot.volgnummer
          LEFT JOIN (SELECT koo.kadastraalobject_id,
                            koo.kadastraalobject_volgnummer,

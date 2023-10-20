@@ -2,9 +2,6 @@
   "version": "0.1",
   "name": "BRK2",
   "catalogue": "brk2",
-  "source": {
-    "application": "Neuron"
-  },
   "destination": {
     "application": "GOBPrepare"
   },
@@ -12,7 +9,6 @@
     {
       "type": "clear",
       "schemas": [
-        "brk2",
         "brk2_prep"
       ],
       "id": "clear_schemas"
@@ -27,7 +23,7 @@
       ],
       "query_src": "string",
       "destination_table": {
-        "name": "brk2.bestand",
+        "name": "brk2_prep.bestand",
         "create": true,
         "columns": [
           {
@@ -48,7 +44,7 @@
     {
       "type": "import_csv",
       "source": "https://developer.kadaster.nl/schemas/waardelijsten/BurgemKadgemSectie/BurgemKadgemSectie.csv",
-      "destination": "brk2.import_burgerlijke_gemeentes",
+      "destination": "brk2_prep.import_burgerlijke_gemeentes",
       "id": "import_burgerlijke_gemeentes",
       "depends_on": [
         "clear_schemas"
@@ -81,7 +77,7 @@
     {
       "type": "import_csv",
       "source": "https://developer.kadaster.nl/schemas/waardelijsten/AardAantekening/AardAantekening.csv",
-      "destination": "brk2.import_aardaantekening",
+      "destination": "brk2_prep.import_aardaantekening",
       "column_names": {
         "Code": "code",
         "Waarde": "omschrijving",
@@ -147,6 +143,7 @@
       "query": "data/sql/brk2/preselect.kot.geldigheid.sql",
       "id": "select_kot_geldigheid",
       "depends_on": [
+        "clear_schemas",
         "import_burgerlijke_gemeentes",
         "create_baghulptabel"
       ]
