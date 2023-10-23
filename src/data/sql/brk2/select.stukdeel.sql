@@ -21,7 +21,7 @@ SELECT sdl.id                                                               AS i
        stk.soortregister_code                                               AS soort_register_stuk_code,
        srr.omschrijving                                                     AS soort_register_stuk_omschrijving,
        stk.deel                                                             AS deel_soort_stuk,
-       bsd.brk_bsd_toestandsdatum                                           AS toestandsdatum,
+       meta.toestandsdatum                                                  AS toestandsdatum,
        stk.tekeningingeschreven                                             AS tekening_ingeschreven,
        stk.tijdstipondertekening                                            AS tijdstip_ondertekening,
        stk.toelichtingbewaarder                                             AS toelichting_bewaarder,
@@ -119,7 +119,7 @@ FROM brk2.stukdeel sdl
                     GROUP BY q.is_gebaseerd_op_brk_stukdeel_identificatie) ec
                    ON sdl.identificatie = ec.stukdeel_identificatie
          LEFT OUTER JOIN brk2_prep.id_conversion idc ON idc.ident_nieuw = stk.identificatie
-         JOIN brk2.bestand bsd ON TRUE
+         JOIN brk2_prep.meta meta ON TRUE
 WHERE COALESCE(
                 tng.tng_ids -> 0 -> 'tng_identificatie',
                 akt.akt_ids -> 0 -> 'akt_identificatie',
