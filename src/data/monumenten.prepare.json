@@ -52,8 +52,8 @@
       "id": "check_row_counts",
       "table_row_counts": {
         "monumenten_prep.complexen": 100,
-        "monumenten_prep.monumenten": 9881,
-        "monumenten_prep.situeringen": 64099
+        "monumenten_prep.monumenten": 9781,
+        "monumenten_prep.situeringen": 63974
       },
       "margin_percentage": 5,
       "depends_on": [
