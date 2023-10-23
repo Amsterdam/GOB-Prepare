@@ -19,7 +19,7 @@
       "table_name": "monumenten_prep.monumenten",
       "id": "create_monumenten_monumenten",
       "query_src": "file",
-      "query": "data/sql/brp/create.monumenten.sql",
+      "query": "data/sql/monumenten/create.monumenten.sql",
       "depends_on": [
         "clear_schemas"
       ]
@@ -30,7 +30,7 @@
       "table_name": "monumenten_prep.complexen",
       "id": "create_monumenten_complexen",
       "query_src": "file",
-      "query": "data/sql/brp/create.complexen.sql",
+      "query": "data/sql/monumenten/create.complexen.sql",
       "depends_on": [
         "clear_schemas"
       ]
@@ -41,7 +41,7 @@
       "table_name": "monumenten_prep.situeringen",
       "id": "create_monumenten_situeringen",
       "query_src": "file",
-      "query": "data/sql/brp/create.situeringen.sql",
+      "query": "data/sql/monumenten/create.situeringen.sql",
       "depends_on": [
         "clear_schemas"
       ]
