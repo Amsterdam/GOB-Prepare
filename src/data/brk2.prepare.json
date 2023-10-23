@@ -2,9 +2,6 @@
   "version": "0.1",
   "name": "BRK2",
   "catalogue": "brk2",
-  "source": {
-    "application": "Neuron"
-  },
   "destination": {
     "application": "GOBPrepare"
   },
@@ -12,43 +9,14 @@
     {
       "type": "clear",
       "schemas": [
-        "brk2",
         "brk2_prep"
       ],
       "id": "clear_schemas"
     },
     {
-      "type": "select",
-      "source": "src",
-      "query": [
-        "         SELECT TRUNC(MAX(BSD.DATUM_AANGEMAAKT)) AS brk_bsd_toestandsdatum",
-        "         ,      'Toestandsdatum, d.i. de laatste aanmaakdatum van de BRK-berichten in de naar DIVA gerepliceerde BRK-levering.' AS omschrijving",
-        "           FROM   G0363_BRK2MON.BESTAND BSD"
-      ],
-      "query_src": "string",
-      "destination_table": {
-        "name": "brk2.bestand",
-        "create": true,
-        "columns": [
-          {
-            "name": "brk_bsd_toestandsdatum",
-            "type": "TIMESTAMP"
-          },
-          {
-            "name": "omschrijving",
-            "type": "VARCHAR(120)"
-          }
-        ]
-      },
-      "depends_on": [
-        "clear_schemas"
-      ],
-      "id": "create_bestand_table"
-    },
-    {
       "type": "import_csv",
       "source": "https://developer.kadaster.nl/schemas/waardelijsten/BurgemKadgemSectie/BurgemKadgemSectie.csv",
-      "destination": "brk2.import_burgerlijke_gemeentes",
+      "destination": "brk2_prep.import_burgerlijke_gemeentes",
       "id": "import_burgerlijke_gemeentes",
       "depends_on": [
         "clear_schemas"
@@ -81,7 +49,7 @@
     {
       "type": "import_csv",
       "source": "https://developer.kadaster.nl/schemas/waardelijsten/AardAantekening/AardAantekening.csv",
-      "destination": "brk2.import_aardaantekening",
+      "destination": "brk2_prep.import_aardaantekening",
       "column_names": {
         "Code": "code",
         "Waarde": "omschrijving",
@@ -147,6 +115,7 @@
       "query": "data/sql/brk2/preselect.kot.geldigheid.sql",
       "id": "select_kot_geldigheid",
       "depends_on": [
+        "clear_schemas",
         "import_burgerlijke_gemeentes",
         "create_baghulptabel"
       ]
@@ -341,6 +310,7 @@
       "query": "data/sql/brk2/select.kadastraal_subject.sql",
       "id": "select_sjt",
       "depends_on": [
+        "select_meta",
         "create_view_subject_actueel",
         "select_tng",
         "select_zrt"
@@ -384,6 +354,7 @@
       "query": "data/sql/brk2/select.stukdeel.sql",
       "id": "select_sdl",
       "depends_on": [
+        "select_meta",
         "select_art",
         "select_akt",
         "select_tng",

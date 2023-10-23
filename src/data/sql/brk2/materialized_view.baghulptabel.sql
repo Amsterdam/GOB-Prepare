@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW brk2.baghulptabel AS
+CREATE MATERIALIZED VIEW brk2_prep.baghulptabel AS
 SELECT kadastraalobject_id,
        kadastraalobject_volgnummer,
        JSONB_AGG(
