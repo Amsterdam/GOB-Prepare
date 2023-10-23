@@ -310,6 +310,7 @@
       "query": "data/sql/brk2/select.kadastraal_subject.sql",
       "id": "select_sjt",
       "depends_on": [
+        "select_meta",
         "create_view_subject_actueel",
         "select_tng",
         "select_zrt"
@@ -353,6 +354,7 @@
       "query": "data/sql/brk2/select.stukdeel.sql",
       "id": "select_sdl",
       "depends_on": [
+        "select_meta",
         "select_art",
         "select_akt",
         "select_tng",
