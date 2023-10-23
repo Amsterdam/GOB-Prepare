@@ -7,6 +7,46 @@
   },
   "actions": [
     {
+      "type": "clear",
+      "schemas": [
+        "monumenten_prep"
+      ],
+      "id": "clear_schemas"
+    },
+    {
+      "type": "create_table",
+      "description": "Create monumenten table",
+      "table_name": "monumenten_prep.monumenten",
+      "id": "create_monumenten_monumenten",
+      "query_src": "file",
+      "query": "data/sql/monumenten/create.monumenten.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create complexen table",
+      "table_name": "monumenten_prep.complexen",
+      "id": "create_monumenten_complexen",
+      "query_src": "file",
+      "query": "data/sql/monumenten/create.complexen.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create situeringen table",
+      "table_name": "monumenten_prep.situeringen",
+      "id": "create_monumenten_situeringen",
+      "query_src": "file",
+      "query": "data/sql/monumenten/create.situeringen.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
       "type": "check_row_counts",
       "description": "Verify number of rows in monumenten tables",
       "id": "check_row_counts",
@@ -15,7 +55,12 @@
         "monumenten_prep.monumenten": 9881,
         "monumenten_prep.situeringen": 64099
       },
-      "margin_percentage": 5
+      "margin_percentage": 5,
+      "depends_on": [
+        "create_monumenten_monumenten",
+        "create_monumenten_complexen",
+        "create_monumenten_situeringen"
+      ]
     },
     {
       "type": "publish_schemas",
