@@ -119,7 +119,7 @@ FROM brk2.stukdeel sdl
                     GROUP BY q.is_gebaseerd_op_brk_stukdeel_identificatie) ec
                    ON sdl.identificatie = ec.stukdeel_identificatie
          LEFT OUTER JOIN brk2_prep.id_conversion idc ON idc.ident_nieuw = stk.identificatie
-         JOIN brk2_prep.bestand bsd ON TRUE
+         JOIN brk2.bestand bsd ON TRUE
 WHERE COALESCE(
                 tng.tng_ids -> 0 -> 'tng_identificatie',
                 akt.akt_ids -> 0 -> 'akt_identificatie',
