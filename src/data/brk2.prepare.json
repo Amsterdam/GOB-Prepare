@@ -97,9 +97,8 @@
       ]
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select meta",
-      "table_name": "brk2_prep.meta",
       "query_src": "file",
       "query": "data/sql/brk2/select.meta.sql",
       "id": "select_meta",
