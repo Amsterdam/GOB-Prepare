@@ -3,6 +3,8 @@
 -- the source database.
 -- We get these attributes from the brk2_prep.zakelijk_recht table instead of from the kadastraalobject table from the
 -- brk schema, because the kadastraal object references aren't populated on all ZRT objects in the brk schema.
+SET max_parallel_workers_per_gather = 0;
+CREATE TABLE brk2_prep.tenaamstelling USING columnar AS
 SELECT tng.identificatie                          AS identificatie,
        tng.id                                     AS neuron_id,
        zrt.volgnummer                             AS volgnummer,
