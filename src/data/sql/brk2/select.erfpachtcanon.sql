@@ -1,3 +1,5 @@
+SET max_parallel_workers_per_gather = 0;
+CREATE TABLE brk2_prep.erfpachtcanon USING columnar AS
 SELECT ec.identificatie                                            AS identificatie
      , z.volgnummer                                                AS volgnummer
      , ec.soort_code                                               AS soort_code

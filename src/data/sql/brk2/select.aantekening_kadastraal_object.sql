@@ -1,3 +1,5 @@
+SET max_parallel_workers_per_gather = 0;
+CREATE TABLE brk2_prep.aantekening_kadastraal_object USING columnar AS
 SELECT atg.identificatie                          AS identificatie,
        atg.id                                     AS __neuron_id,
        idc.ident_oud                              AS was_identificatie,

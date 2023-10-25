@@ -1,3 +1,5 @@
+SET max_parallel_workers_per_gather = 0;
+CREATE TABLE brk2_prep.stukdeel USING columnar AS
 SELECT sdl.id                                                               AS id,
        sdl.identificatie                                                    AS identificatie,
        idc.ident_oud                                                        AS was_identificatie,

@@ -174,9 +174,8 @@
       ]
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select Erfpachtcanon",
-      "table_name": "brk2_prep.erfpachtcanon",
       "query_src": "file",
       "query": "data/sql/brk2/select.erfpachtcanon.sql",
       "id": "select_ec",
@@ -263,9 +262,8 @@
       ]
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select AKT",
-      "table_name": "brk2_prep.aantekening_kadastraal_object",
       "query_src": "file",
       "query": "data/sql/brk2/select.aantekening_kadastraal_object.sql",
       "id": "select_akt",
@@ -276,9 +274,8 @@
       ]
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select ART",
-      "table_name": "brk2_prep.aantekening_recht",
       "query_src": "file",
       "query": "data/sql/brk2/select.aantekening_recht.sql",
       "id": "select_art",
@@ -299,9 +296,8 @@
       "query_src": "file"
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select SJT",
-      "table_name": "brk2_prep.kadastraal_subject",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastraal_subject.sql",
       "id": "select_sjt",
@@ -343,9 +339,8 @@
       ]
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select SDL",
-      "table_name": "brk2_prep.stukdeel",
       "query_src": "file",
       "query": "data/sql/brk2/select.stukdeel.sql",
       "id": "select_sdl",
