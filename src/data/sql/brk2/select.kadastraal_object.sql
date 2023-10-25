@@ -1,3 +1,5 @@
+SET max_parallel_workers_per_gather = 0;
+CREATE TABLE brk2_prep.kadastraal_object USING columnar AS
 SELECT kot.identificatie                           AS identificatie,
        kot.volgnummer                              AS volgnummer,
        kot.id                                      AS id,

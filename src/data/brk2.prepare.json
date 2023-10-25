@@ -120,9 +120,8 @@
       ]
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select KOT",
-      "table_name": "brk2_prep.kadastraal_object",
       "query_src": "file",
       "query": "data/sql/brk2/select.kadastraal_object.sql",
       "id": "select_kot",
