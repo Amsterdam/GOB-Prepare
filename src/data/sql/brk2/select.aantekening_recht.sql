@@ -1,3 +1,5 @@
+SET max_parallel_workers_per_gather = 0;
+CREATE TABLE brk2_prep.aantekening_recht USING columnar AS
 SELECT atg.id                                            AS neuron_id,
        atg.identificatie                                 AS identificatie,
        idc.ident_oud                                     AS was_identificatie,
