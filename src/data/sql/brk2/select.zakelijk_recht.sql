@@ -1,3 +1,5 @@
+SET max_parallel_workers_per_gather = 0;
+CREATE TABLE brk2_prep.zakelijk_recht USING columnar AS
 WITH akr_codes(aard_code, akr_code) AS (VALUES ('1', 'BK'),
                                                ('2', 'VE'),
                                                ('3', 'EP'),

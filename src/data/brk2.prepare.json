@@ -162,9 +162,8 @@
       "table_name": "brk2_prep.zrt_asg"
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select ZRT",
-      "table_name": "brk2_prep.zakelijk_recht",
       "query_src": "file",
       "query": "data/sql/brk2/select.zakelijk_recht.sql",
       "id": "select_zrt",
@@ -254,9 +253,8 @@
       "query": "data/sql/brk2/finalise.kadastraal_object.sql"
     },
     {
-      "type": "create_table",
+      "type": "execute_sql",
       "description": "Select TNG",
-      "table_name": "brk2_prep.tenaamstelling",
       "query_src": "file",
       "query": "data/sql/brk2/select.tenaamstelling.sql",
       "id": "select_tng",
