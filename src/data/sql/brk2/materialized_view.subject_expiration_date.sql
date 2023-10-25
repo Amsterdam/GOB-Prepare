@@ -1,3 +1,4 @@
+DROP MATERIALIZED VIEW IF EXISTS brk2_prep.subject_expiration_date;
 CREATE MATERIALIZED VIEW brk2_prep.subject_expiration_date AS (
     SELECT
     	q.subject_id,

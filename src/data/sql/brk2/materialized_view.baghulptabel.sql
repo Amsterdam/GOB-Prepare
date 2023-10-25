@@ -1,3 +1,4 @@
+DROP MATERIALIZED VIEW IF EXISTS brk2_prep.baghulptabel;
 CREATE MATERIALIZED VIEW brk2_prep.baghulptabel AS
 SELECT kadastraalobject_id,
        kadastraalobject_volgnummer,
