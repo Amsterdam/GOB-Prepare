@@ -104,7 +104,7 @@
       "query": "data/sql/brk2/select.meta.sql",
       "id": "select_meta",
       "depends_on": [
-        "create_bestand_table"
+        "clear_schemas"
       ]
     },
     {
