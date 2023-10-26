@@ -38,12 +38,12 @@ SELECT kot.identificatie                           AS identificatie,
            WHEN kot.soortgrootte_code IN ('2', '5', '6', '7', '8', '9', '10', '11', '12') THEN 'J'
            ELSE 'N'
            END                                     AS indicatie_voorlopige_kadastrale_grens,
-       kot.geometrie                               AS __geometrie, -- Temporary field. Only contains G-percelen. A 'geometrie' field will be added later in the finalise step.
-       prc.geometrie                               AS plaatscoordinaten,
+       kot.geometrie::geometry                     AS __geometrie, -- Temporary field. Only contains G-percelen. A 'geometrie' field will be added later in the finalise step.
+       prc.geometrie::geometry                     AS plaatscoordinaten,
        prc.rotatie                                 AS perceelnummer_rotatie,
        prc.verschuiving_x                          AS perceelnummer_verschuiving_x,
        prc.verschuiving_y                          AS perceelnummer_verschuiving_y,
-       bij.geometrie                               AS bijpijling_geometrie,
+       bij.geometrie::geometry                     AS bijpijling_geometrie,
        kot.koop_som                                AS koopsom,
        kot.koop_valuta_code                        AS koopsom_valutacode,
        kot.koopjaar                                AS koopjaar,
