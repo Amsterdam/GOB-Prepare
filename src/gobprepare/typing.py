@@ -101,3 +101,12 @@ class RowCountConfig(ActionCommonConfig):
     table_row_counts: dict[str, int]
     margin_percentage: int
     type: Literal["check_row_counts"]
+
+class syncSchemaConfig(ActionCommonConfig):
+    """Check table row counts action configuration."""
+
+    description: str
+    public_schema: str
+    table_name: str
+    schema: str
+    type: Literal["source_sync_complete"]

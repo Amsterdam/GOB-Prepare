@@ -35,11 +35,18 @@ from gobprepare.typing import (
     PublishSchemasConfig,
     RowCountConfig,
     SQLBaseConfig,
+    syncSchemaConfig,
     Summary,
     TaskList,
 )
 from gobprepare.utils.exceptions import DuplicateTableError
-from gobprepare.utils.postgres import create_table_columnar_as_query
+from gobprepare.utils.postgres import (
+    create_table_columnar_as_query,
+    check_table_existence_query,
+    create_update_table_query,
+    create_select_where_query
+)
+
 
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
@@ -254,6 +261,72 @@ class PrepareClient:
                 )
         return tables_counts_ok
 
+    def action_check_source_sync_complete(self, action: syncSchemaConfig) -> bool:
+        """Check import action. Verify when sync tables from databricks is completed.
+
+        :param action:
+        :return:
+        """
+
+        public_schema = action["public_schema"]
+        table_name = action["table_name"]
+        schema = action["schema"]
+        if not self._dst_datastore.query(check_table_existence_query(public_schema, table_name)):
+            raise GOBException(f"Table '{public_schema}.{table_name}' does not exists.")
+        else:
+            try:
+                where_conditions = [{ "sync_schema": schema }]
+                select_query = create_select_where_query(table_name, where_conditions)
+                record = next(self._dst_datastore.query(select_query))
+            except StopIteration:
+                raise GOBException(f"No record for schema '{schema}' found in '{public_schema}.{table_name}'.")
+            else:
+                self._execute_update_sync_schema(schema, table_name, record, update_action = 'start_prepare')
+
+    def action_complete_prepare(self, action: syncSchemaConfig) -> None:
+        """update sync table after prepare is completed.
+
+        :param action:
+        :return:
+        """
+        public_schema = action["public_schema"]
+        table_name = action["table_name"]
+        schema = action["schema"]
+        try:
+            where_conditions = [{ "sync_schema": schema }]
+            select_query = create_select_where_query(table_name, where_conditions)
+            record = next(self._dst_datastore.query(select_query))
+        except StopIteration:
+            raise GOBException(f"No record for schema '{schema}' found in '{public_schema}.{table_name}'.")
+        else:
+            self._execute_update_sync_schema(schema, table_name, record, update_action = 'end_prepare')
+
+    def _execute_update_sync_schema(self, schema, table_name, record: [str], update_action: str) -> None:
+        last_successful_sync = record[1]
+        last_sync_start = record[2]
+        # start prepare
+        if update_action == 'start_prepare':
+            if last_successful_sync == None:
+                raise GOBException(f"Prepare processing for '{schema}' can not be started."
+                                f"Databricks sync for schema '{schema}' not completed yet."
+                                f"Last sync job started at '{last_sync_start}'")
+
+            update_list = [{
+                "last_prepare_start": "current_timestamp",
+                "last_prepare_end": "NULL"
+            }]
+            logger.info(f"START: Prepare processing for '{schema}' started.")
+        # end prepare
+        elif update_action == 'end_prepare':
+            update_list = [{
+                "last_prepare_end": "CURRENT_TIMESTAMP"
+            }]
+            logger.info(f"END: Prepare processing for '{schema}' completed.")
+
+        where_conditions = [{"sync_schema": schema}]
+        update_query = create_update_table_query(table_name, update_list, where_conditions)
+        self._dst_datastore.execute(update_query)
+
     def _get_query(self, action: SQLBaseConfig) -> str:
         """Extract query from action. Reads query from action or from file.
 
@@ -305,11 +378,15 @@ class PrepareClient:
             result["file_imported"] = self.action_import_sql_dump(cast(SqlDumpImporterConfig, action))
         elif action["type"] == "check_row_counts":
             result["row_count_check"] = self.action_check_row_counts(cast(RowCountConfig, action))
+        elif action["type"] == "check_source_sync_complete":
+            result["check_source_sync"] = self.action_check_source_sync_complete(cast(syncSchemaConfig, action))
         elif action["type"] == "join_actions":
             # Action only joins dependencies. No further actions necessary
             return None
         elif action["type"] == "publish_schemas":
             result["published_schemas"] = self.action_publish_schemas(cast(PublishSchemasConfig, action))
+        elif action["type"] == "complete_prepare":
+            result["complete_prepare"] = self.action_complete_prepare(cast(syncSchemaConfig, action))
         else:
             raise NotImplementedError
 

@@ -7,11 +7,22 @@
   },
   "actions": [
     {
+      "type": "check_source_sync_complete",
+      "id": "check_source_sync",
+      "description": "Check if databricks tables sync is completed before starting 'monumenten' prepare",
+      "schema": "monumenten",
+      "public_schema": "public",
+      "table_name": "synced_schemas"
+    },
+    {
       "type": "clear",
       "schemas": [
         "monumenten_prep"
       ],
-      "id": "clear_schemas"
+      "id": "clear_schemas",
+        "depends_on": [
+          "check_source_sync"
+        ]
     },
     {
       "type": "create_table",
@@ -68,6 +79,17 @@
       "publish_schemas": {
         "monumenten_prep": "monumenten_prepared"
       },
+      "depends_on": [
+        "check_row_counts"
+      ]
+    },
+    {
+      "type": "complete_prepare",
+      "id": "update_after_prepare_complete",
+      "description": "Update sync table after 'monumenten' prepare completed",
+      "schema": "monumenten",
+      "public_schema": "public",
+      "table_name": "synced_schemas",
       "depends_on": "*"
     }
   ]
