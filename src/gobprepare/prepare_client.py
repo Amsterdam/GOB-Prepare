@@ -275,7 +275,7 @@ class PrepareClient:
         self._update_sync_schema(table_name, schema, update_action = 'start_prepare')
         return True
 
-    def action_complete_prepare(self, action: SyncSchemaConfig) -> None:
+    def action_complete_prepare(self, action: SyncSchemaConfig) -> bool:
         """update sync table after prepare is completed.
 
         :param action:
@@ -297,8 +297,6 @@ class PrepareClient:
             raise GOBException(f"Prepare processing for '{schema}' can not be started."
                                 f" Databricks sync for schema '{schema}' not completed yet."
                                 f" Last sync job started at '{schema_sync_data[2]}'")
-
-        return schema_sync_data
 
     def _update_sync_schema(self, table_name, schema, update_action: str) -> None:
         if update_action == "start_prepare":
