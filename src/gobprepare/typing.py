@@ -102,7 +102,7 @@ class RowCountConfig(ActionCommonConfig):
     margin_percentage: int
     type: Literal["check_row_counts"]
 
-class syncSchemaConfig(ActionCommonConfig):
+class SyncSchemaConfig(ActionCommonConfig):
     """Check table row counts action configuration."""
 
     description: str
