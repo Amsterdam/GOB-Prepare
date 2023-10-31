@@ -577,7 +577,7 @@ class TestPrepareClient(TestCase):
     def test__check_last_schema_sync(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
 
-        prepare_client._dst_datastore.query = MagicMock(return_value=iter(['some_schema', 'last_sync_start', 'lats_sync_end', 'last_prepare_start', 'lats_prepare_end']))
+        prepare_client._dst_datastore.query = MagicMock(return_value=iter([{'last_sync_start': 12345, 'last_sync_end': 12345}]))
         prepare_client._check_last_schema_sync('some_table_name', 'some_schema')
         prepare_client._dst_datastore.query.assert_called_once()
 
@@ -585,10 +585,10 @@ class TestPrepareClient(TestCase):
         with self.assertRaisesRegex(GOBException, "No record for schema 'some_schema' found in 'public.synced_schemas'."):
           prepare_client._check_last_schema_sync('some_table_name', 'some_schema')
 
-        prepare_client._dst_datastore.query = MagicMock(return_value=iter([[None, 'last_sync_start']]))
+        prepare_client._dst_datastore.query = MagicMock(return_value=iter([{'last_sync_start': 12345, 'last_sync_end': None}]))
         with self.assertRaisesRegex(GOBException, f"Prepare processing for 'some_schema' can not be started."
                                 f" Databricks sync for schema 'some_schema' not completed yet."
-                                f" Last sync job started at 'last_sync_start'."):
+                                f" Last sync job started at '12345'."):
           prepare_client._check_last_schema_sync('some_table_name', 'some_schema')
             
     def test__update_sync_schema(self, mock_logger):
