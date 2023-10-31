@@ -35,15 +35,12 @@ from gobprepare.typing import (
     PublishSchemasConfig,
     RowCountConfig,
     SQLBaseConfig,
-    SyncSchemaConfig,
     Summary,
+    SyncSchemaConfig,
     TaskList,
 )
 from gobprepare.utils.exceptions import DuplicateTableError
-from gobprepare.utils.postgres import (
-    create_table_columnar_as_query,
-    check_table_existence_query
-)
+from gobprepare.utils.postgres import check_table_existence_query, create_table_columnar_as_query
 
 
 READ_BATCH_SIZE = 100000
@@ -268,11 +265,15 @@ class PrepareClient:
         table_name = action["table_name"]
         schema = action["schema"]
 
-        if not self._dst_datastore.query(check_table_existence_query("public", table_name)):
+        if not self._dst_datastore.query(check_table_existence_query("public", table_name)):  # type: ignore[union-attr]
             raise GOBException(f"Table 'public.{table_name}' does not exists.")
 
         self._check_last_schema_sync(table_name, schema)
-        self._update_sync_schema(table_name, schema, update_action = 'start_prepare')
+        update_columns = ["last_prepare_start = CURRENT_TIMESTAMP", "last_prepare_end = NULL"]
+        self._update_sync_schema(table_name, schema, update_columns)
+        logger.info(f"Prepare for '{schema}' started.")
+
+
         return True
 
     def action_complete_prepare(self, action: SyncSchemaConfig) -> bool:
@@ -284,32 +285,29 @@ class PrepareClient:
         table_name = action["table_name"]
         schema = action["schema"]
         self._check_last_schema_sync(table_name, schema)
-        self._update_sync_schema(table_name, schema, update_action = 'end_prepare')
+        update_columns = ["last_prepare_end = CURRENT_TIMESTAMP"]
+        self._update_sync_schema(table_name, schema, update_columns)
+        logger.info(f"Prepare for '{schema}' completed.")
+
         return True
 
     def _check_last_schema_sync(self, table_name, schema) -> None:
-        select_query = f"SELECT * FROM public.{table_name} WHERE sync_schema = '{schema}'"
+        select_query = f"SELECT last_sync_end, last_sync_start FROM public.{table_name} WHERE sync_schema = '{schema}'"
         try:
-            schema_sync_data = next(self._dst_datastore.query(select_query))
+            schema_sync_data = next(self._dst_datastore.query(select_query))  # type: ignore[union-attr]
         except StopIteration:
             raise GOBException(f"No record for schema '{schema}' found in 'public.synced_schemas'.")
-        if schema_sync_data[1] is None:
-            raise GOBException(f"Prepare processing for '{schema}' can not be started."
-                                f" Databricks sync for schema '{schema}' not completed yet."
-                                f" Last sync job started at '{schema_sync_data[2]}'")
+        if schema_sync_data[0] is None:
+            raise GOBException(
+                f"Prepare processing for '{schema}' can not be started. "
+                f"Databricks sync for schema '{schema}' not completed yet. "
+                f"Last sync job started at '{schema_sync_data[1]}'."
+            )
 
-    def _update_sync_schema(self, table_name, schema, update_action: str) -> None:
-        if update_action == "start_prepare":
-            column_value_updates = f"last_prepare_start = CURRENT_TIMESTAMP, last_prepare_end = NULL"
-            logger.info(f"Prepare for '{schema}' started.")
-
-        elif update_action == "end_prepare":
-            column_value_updates = f" last_prepare_end = CURRENT_TIMESTAMP"
-            logger.info(f"Prepare for '{schema}' completed.")
-
-        update_query = f"UPDATE public.{table_name} SET {column_value_updates} WHERE sync_schema = '{schema}'"
-        self._dst_datastore.execute(update_query)
-
+    def _update_sync_schema(self, table_name, schema, update_columns: list[str]) -> None:
+        columns_values = ",".join(map(str, update_columns))
+        update_query = f"UPDATE public.{table_name} SET {columns_values} WHERE sync_schema = '{schema}'"
+        self._dst_datastore.execute(update_query)  # type: ignore[union-attr]
 
     def _get_query(self, action: SQLBaseConfig) -> str:
         """Extract query from action. Reads query from action or from file.
