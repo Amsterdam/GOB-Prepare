@@ -275,7 +275,7 @@ class PrepareClient:
         return True
 
     def action_complete_prepare(self, action: SyncSchemaConfig) -> bool:
-        """update sync table after prepare is completed.
+        """Update sync table after prepare is completed.
 
         :param action:
         :return:
@@ -295,15 +295,16 @@ class PrepareClient:
             schema_sync_data = next(self._dst_datastore.query(select_query))  # type: ignore[union-attr]
         except StopIteration:
             raise GOBException(f"No record for schema '{schema}' found in 'public.synced_schemas'.")
-        if schema_sync_data[0] is None:
+
+        if schema_sync_data["last_sync_end"] is None:
             raise GOBException(
                 f"Prepare processing for '{schema}' can not be started. "
                 f"Databricks sync for schema '{schema}' not completed yet. "
-                f"Last sync job started at '{schema_sync_data[1]}'."
+                f"Last sync job started at '{schema_sync_data['last_sync_start']}'."
             )
 
     def _update_sync_schema(self, table_name, schema, update_columns: list[str]) -> None:
-        columns_values = ",".join(map(str, update_columns))
+        columns_values = ",".join((str(col_value) for col_value in update_columns))
         update_query = f"UPDATE public.{table_name} SET {columns_values} WHERE sync_schema = '{schema}'"
         self._dst_datastore.execute(update_query)  # type: ignore[union-attr]
 
