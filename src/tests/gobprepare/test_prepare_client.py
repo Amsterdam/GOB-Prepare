@@ -516,6 +516,95 @@ class TestPrepareClient(TestCase):
         self.assertFalse(result["row_count_check"])
         mock_logger.error.assert_called_with("Deviation of -20.00% for growing_table! Expected 500 rows, got 400")
 
+    def test_run_prepare_action_check_source_sync_complete(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client.action_check_source_sync_complete = MagicMock(return_value=True)
+        action = {
+            "type": "check_source_sync_complete",
+            "id": "check_source_sync",
+            'table_name': 'some_table_name',
+            'schema': 'some_schema'
+        }
+
+        result = prepare_client._run_prepare_action(action)
+        prepare_client.action_check_source_sync_complete.assert_called_with(action)
+        self.assertTrue(result['check_source_sync'])
+
+    def test_run_prepare_action_complete_prepare(self, mock_logger):
+            prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+            prepare_client.action_complete_prepare = MagicMock(return_value=True)
+            action = {
+                "type": "complete_prepare",
+                "id": "update_after_prepare_complete",
+                'table_name': 'some_table_name',
+                'schema': 'some_schema'
+            }
+
+            result = prepare_client._run_prepare_action(action)
+            prepare_client.action_complete_prepare.assert_called_with(action)
+            self.assertTrue(result['complete_prepare'])
+
+    def test_action_check_source_sync_complete(self, mock_logger):
+        action = {
+            'table_name': 'some_table_name',
+            'schema': 'some_schema'
+        }
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._check_last_schema_sync = MagicMock(return_value=None)
+        prepare_client._update_sync_schema = MagicMock(return_value=None)
+        result = prepare_client.action_check_source_sync_complete(action)
+        self.assertEqual(result, True)
+        mock_logger.info.assert_called_once()
+
+        prepare_client._dst_datastore.query = MagicMock(return_value=None)
+
+        with self.assertRaisesRegex(GOBException, "Table 'public.some_table_name' does not exists."):
+            prepare_client.action_check_source_sync_complete(action)
+
+
+    def test_action_complete_prepare(self, mock_logger):
+        action = {
+            'table_name': 'some_table_name',
+            'schema': 'some_schema'
+        }
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        prepare_client._check_last_schema_sync = MagicMock(return_value=None)
+        prepare_client._update_sync_schema = MagicMock(return_value=None)
+        result = prepare_client.action_complete_prepare(action)
+        self.assertEqual(result, True)
+        mock_logger.info.assert_called_once()
+
+    def test__check_last_schema_sync(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+
+        prepare_client._dst_datastore.query = MagicMock(return_value=iter(['some_schema', 'last_sync_start', 'lats_sync_end', 'last_prepare_start', 'lats_prepare_end']))
+        prepare_client._check_last_schema_sync('some_table_name', 'some_schema')
+        prepare_client._dst_datastore.query.assert_called_once()
+
+        prepare_client._dst_datastore.query = MagicMock(return_value=iter([]))
+        with self.assertRaisesRegex(GOBException, "No record for schema 'some_schema' found in 'public.synced_schemas'."):
+          prepare_client._check_last_schema_sync('some_table_name', 'some_schema')
+
+        prepare_client._dst_datastore.query = MagicMock(return_value=iter([[None, 'last_sync_start']]))
+        with self.assertRaisesRegex(GOBException, f"Prepare processing for 'some_schema' can not be started."
+                                f" Databricks sync for schema 'some_schema' not completed yet."
+                                f" Last sync job started at 'last_sync_start'."):
+          prepare_client._check_last_schema_sync('some_table_name', 'some_schema')
+            
+    def test__update_sync_schema(self, mock_logger):
+        prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
+        update_columns = ["last_prepare_start = CURRENT_TIMESTAMP", "last_prepare_end = NULL"]
+
+        prepare_client._update_sync_schema('some_table_name', 'some_schema', update_columns)
+        # mock_logger.info.assert_called_once()
+        prepare_client._dst_datastore.execute.assert_called_with("UPDATE public.some_table_name SET last_prepare_start = CURRENT_TIMESTAMP,last_prepare_end = NULL WHERE sync_schema = 'some_schema'")
+
+        # mock_logger.reset_mock()
+        update_columns = ["last_prepare_end = CURRENT_TIMESTAMP"]
+        prepare_client._update_sync_schema('some_table_name', 'some_schema', update_columns)
+        # mock_logger.info.assert_called_once()
+        prepare_client._dst_datastore.execute.assert_called_with("UPDATE public.some_table_name SET last_prepare_end = CURRENT_TIMESTAMP WHERE sync_schema = 'some_schema'")
+
     def test_get_result(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
         prepare_client.result = {

@@ -7,11 +7,21 @@
   },
   "actions": [
     {
+      "type": "check_source_sync_complete",
+      "id": "check_source_sync",
+      "description": "Check if databricks tables sync is completed before starting 'BRK2' prepare",
+      "schema": "brk2",
+      "table_name": "synced_schemas"
+    },
+    {
       "type": "clear",
       "schemas": [
         "brk2_prep"
       ],
-      "id": "clear_schemas"
+      "id": "clear_schemas",
+      "depends_on": [
+        "check_source_sync"
+      ]
     },
     {
       "type": "import_csv",
@@ -359,6 +369,22 @@
       "publish_schemas": {
         "brk2_prep": "brk2_prepared"
       },
+      "depends_on": [
+        "populate_aardzakelijkrecht_waardelijst",
+        "import_gemeentes_csv",
+        "select_kce",
+        "select_sdl",
+        "select_kge",
+        "select_kse",
+        "select_sjt"
+      ]
+    },
+    {
+      "type": "complete_prepare",
+      "id": "update_after_prepare_complete",
+      "description": "Update sync table after 'brk2' prepare completed",
+      "schema": "brk2",
+      "table_name": "synced_schemas",
       "depends_on": "*"
     }
   ]

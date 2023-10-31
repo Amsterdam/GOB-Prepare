@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from gobprepare.utils.postgres import create_table_columnar_query, create_table_columnar_as_query
+from gobprepare.utils.postgres import create_table_columnar_query, create_table_columnar_as_query, check_table_existence_query
 
 
 class MockPostgresDatastore:
@@ -81,4 +81,14 @@ class TestPostgresUtils(TestCase):
 
             self.assertEqual("CREATE TABLE schema.tablename (id int, text varchar) USING columnar", result)
             mock_logger_warning.assert_not_called()
+
+    def test_check_table_existence_query(self, mock_logger_warning):
+        mock_logger_warning.reset_mock()
+        result = check_table_existence_query("some_schema_name", "some_table_name")
+        self.assertEqual(f"""SELECT EXISTS (
+                SELECT FROM pg_tables
+                WHERE schemaname = 'some_schema_name'
+                AND tablename  = 'some_table_name'
+            )""", result)
+        mock_logger_warning.assert_not_called()
 

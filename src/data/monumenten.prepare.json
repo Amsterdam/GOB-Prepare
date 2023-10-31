@@ -19,9 +19,9 @@
         "monumenten_prep"
       ],
       "id": "clear_schemas",
-        "depends_on": [
-          "check_source_sync"
-        ]
+      "depends_on": [
+        "check_source_sync"
+      ]
     },
     {
       "type": "create_table",
@@ -87,7 +87,6 @@
       "id": "update_after_prepare_complete",
       "description": "Update sync table after 'monumenten' prepare completed",
       "schema": "monumenten",
-      "public_schema": "public",
       "table_name": "synced_schemas",
       "depends_on": "*"
     }
