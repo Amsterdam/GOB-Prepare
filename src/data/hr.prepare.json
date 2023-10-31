@@ -7,11 +7,21 @@
   },
   "actions": [
     {
+      "type": "check_source_sync_complete",
+      "id": "check_source_sync",
+      "description": "Check if databricks tables sync is completed before starting 'hr' prepare",
+      "schema": "hr",
+      "table_name": "synced_schemas"
+    },
+    {
       "type": "clear",
       "schemas": [
         "hr_prep"
       ],
-      "id": "clear_schemas"
+      "id": "clear_schemas",
+      "depends_on": [
+        "check_source_sync"
+      ]
     },
     {
       "type": "execute_sql",
@@ -89,6 +99,16 @@
       "publish_schemas": {
         "hr_prep": "hr_prepared"
       },
+      "depends_on": [
+        "check_row_counts"
+      ]
+    },
+    {
+      "type": "complete_prepare",
+      "id": "update_after_prepare_complete",
+      "description": "Update sync table after 'hr' prepare completed",
+      "schema": "hr",
+      "table_name": "synced_schemas",
       "depends_on": "*"
     }
   ]
