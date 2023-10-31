@@ -42,7 +42,6 @@ from gobprepare.typing import (
 from gobprepare.utils.exceptions import DuplicateTableError
 from gobprepare.utils.postgres import check_table_existence_query, create_table_columnar_as_query
 
-
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
 
@@ -272,7 +271,6 @@ class PrepareClient:
         update_columns = ["last_prepare_start = CURRENT_TIMESTAMP", "last_prepare_end = NULL"]
         self._update_sync_schema(table_name, schema, update_columns)
         logger.info(f"Prepare for '{schema}' started.")
-
 
         return True
 
