@@ -553,8 +553,11 @@ class TestPrepareClient(TestCase):
         prepare_client._check_last_schema_sync = MagicMock(return_value=None)
         prepare_client._update_sync_schema = MagicMock(return_value=None)
         result = prepare_client.action_check_source_sync_complete(action)
+
         self.assertEqual(result, True)
         mock_logger.info.assert_called_once()
+        prepare_client._check_last_schema_sync.assert_called_with('some_table_name', 'some_schema')
+        prepare_client._update_sync_schema.assert_called_with('some_table_name', 'some_schema', ["last_prepare_start = CURRENT_TIMESTAMP", "last_prepare_end = NULL"])
 
         prepare_client._dst_datastore.query = MagicMock(return_value=None)
 
@@ -571,8 +574,12 @@ class TestPrepareClient(TestCase):
         prepare_client._check_last_schema_sync = MagicMock(return_value=None)
         prepare_client._update_sync_schema = MagicMock(return_value=None)
         result = prepare_client.action_complete_prepare(action)
+
         self.assertEqual(result, True)
         mock_logger.info.assert_called_once()
+        prepare_client._check_last_schema_sync.assert_called_with('some_table_name', 'some_schema')
+        prepare_client._update_sync_schema.assert_called_with('some_table_name', 'some_schema', ["last_prepare_end = CURRENT_TIMESTAMP"])
+
 
     def test__check_last_schema_sync(self, mock_logger):
         prepare_client = PrepareClient(self.mock_dataset, self.mock_msg)
