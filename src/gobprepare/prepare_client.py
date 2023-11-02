@@ -255,7 +255,7 @@ class PrepareClient:
                 )
         return tables_counts_ok
 
-    def action_check_source_sync_complete(self, action: SyncSchemaConfig) -> bool:
+    def action_check_source_sync_complete(self, action: SyncSchemaConfig) -> None:
         """Check source sync action. Verify when sync tables from databricks is completed.
 
         :param action:
@@ -272,9 +272,7 @@ class PrepareClient:
         self._update_sync_schema(table_name, schema, update_columns)
         logger.info(f"Prepare for '{schema}' started.")
 
-        return True
-
-    def action_complete_prepare(self, action: SyncSchemaConfig) -> bool:
+    def action_complete_prepare(self, action: SyncSchemaConfig) -> None:
         """Update sync table after prepare is completed.
 
         :param action:
@@ -287,9 +285,7 @@ class PrepareClient:
         self._update_sync_schema(table_name, schema, update_columns)
         logger.info(f"Prepare for '{schema}' completed.")
 
-        return True
-
-    def _check_last_schema_sync(self, table_name, schema) -> None:
+    def _check_last_schema_sync(self, table_name: str, schema: str) -> None:
         select_query = f"SELECT last_sync_end, last_sync_start FROM public.{table_name} WHERE sync_schema = '{schema}'"
         try:
             schema_sync_data = next(self._dst_datastore.query(select_query))  # type: ignore[union-attr]
@@ -303,7 +299,7 @@ class PrepareClient:
                 f"Last sync job started at '{schema_sync_data['last_sync_start']}'."
             )
 
-    def _update_sync_schema(self, table_name, schema, update_columns: list[str]) -> None:
+    def _update_sync_schema(self, table_name: str, schema: str, update_columns: list[str]) -> None:
         columns_values = ",".join((str(col_value) for col_value in update_columns))
         update_query = f"UPDATE public.{table_name} SET {columns_values} WHERE sync_schema = '{schema}'"
         self._dst_datastore.execute(update_query)  # type: ignore[union-attr]
@@ -360,14 +356,16 @@ class PrepareClient:
         elif action["type"] == "check_row_counts":
             result["row_count_check"] = self.action_check_row_counts(cast(RowCountConfig, action))
         elif action["type"] == "check_source_sync_complete":
-            result["check_source_sync"] = self.action_check_source_sync_complete(cast(SyncSchemaConfig, action))
+            self.action_check_source_sync_complete(cast(SyncSchemaConfig, action))
+            result["check_source_sync"] = "OK"
         elif action["type"] == "join_actions":
             # Action only joins dependencies. No further actions necessary
             return None
         elif action["type"] == "publish_schemas":
             result["published_schemas"] = self.action_publish_schemas(cast(PublishSchemasConfig, action))
         elif action["type"] == "complete_prepare":
-            result["complete_prepare"] = self.action_complete_prepare(cast(SyncSchemaConfig, action))
+            self.action_complete_prepare(cast(SyncSchemaConfig, action))
+            result["complete_prepare"] = "OK"
         else:
             raise NotImplementedError
 
