@@ -36,10 +36,11 @@ from gobprepare.typing import (
     RowCountConfig,
     SQLBaseConfig,
     Summary,
+    SyncSchemaConfig,
     TaskList,
 )
 from gobprepare.utils.exceptions import DuplicateTableError
-from gobprepare.utils.postgres import create_table_columnar_as_query
+from gobprepare.utils.postgres import check_table_existence_query, create_table_columnar_as_query
 
 READ_BATCH_SIZE = 100000
 WRITE_BATCH_SIZE = 100000
@@ -254,6 +255,55 @@ class PrepareClient:
                 )
         return tables_counts_ok
 
+    def action_check_source_sync_complete(self, action: SyncSchemaConfig) -> None:
+        """Check source sync action. Verify when sync tables from databricks is completed.
+
+        :param action:
+        :return:
+        """
+        table_name = action["table_name"]
+        schema = action["schema"]
+
+        if not self._dst_datastore.query(check_table_existence_query("public", table_name)):  # type: ignore[union-attr]
+            raise GOBException(f"Table 'public.{table_name}' does not exists.")
+
+        self._check_last_schema_sync(table_name, schema)
+        update_columns = ["last_prepare_start = CURRENT_TIMESTAMP", "last_prepare_end = NULL"]
+        self._update_sync_schema(table_name, schema, update_columns)
+        logger.info(f"Prepare for '{schema}' started.")
+
+    def action_complete_prepare(self, action: SyncSchemaConfig) -> None:
+        """Update sync table after prepare is completed.
+
+        :param action:
+        :return:
+        """
+        table_name = action["table_name"]
+        schema = action["schema"]
+        self._check_last_schema_sync(table_name, schema)
+        update_columns = ["last_prepare_end = CURRENT_TIMESTAMP"]
+        self._update_sync_schema(table_name, schema, update_columns)
+        logger.info(f"Prepare for '{schema}' completed.")
+
+    def _check_last_schema_sync(self, table_name: str, schema: str) -> None:
+        select_query = f"SELECT last_sync_end, last_sync_start FROM public.{table_name} WHERE sync_schema = '{schema}'"
+        try:
+            schema_sync_data = next(self._dst_datastore.query(select_query))  # type: ignore[union-attr]
+        except StopIteration:
+            raise GOBException(f"No record for schema '{schema}' found in 'public.synced_schemas'.")
+
+        if schema_sync_data["last_sync_end"] is None:
+            raise GOBException(
+                f"Prepare processing for '{schema}' can not be started. "
+                f"Databricks sync for schema '{schema}' not completed yet. "
+                f"Last sync job started at '{schema_sync_data['last_sync_start']}'."
+            )
+
+    def _update_sync_schema(self, table_name: str, schema: str, update_columns: list[str]) -> None:
+        columns_values = ",".join((str(col_value) for col_value in update_columns))
+        update_query = f"UPDATE public.{table_name} SET {columns_values} WHERE sync_schema = '{schema}'"
+        self._dst_datastore.execute(update_query)  # type: ignore[union-attr]
+
     def _get_query(self, action: SQLBaseConfig) -> str:
         """Extract query from action. Reads query from action or from file.
 
@@ -305,11 +355,17 @@ class PrepareClient:
             result["file_imported"] = self.action_import_sql_dump(cast(SqlDumpImporterConfig, action))
         elif action["type"] == "check_row_counts":
             result["row_count_check"] = self.action_check_row_counts(cast(RowCountConfig, action))
+        elif action["type"] == "check_source_sync_complete":
+            self.action_check_source_sync_complete(cast(SyncSchemaConfig, action))
+            result["check_source_sync"] = "OK"
         elif action["type"] == "join_actions":
             # Action only joins dependencies. No further actions necessary
             return None
         elif action["type"] == "publish_schemas":
             result["published_schemas"] = self.action_publish_schemas(cast(PublishSchemasConfig, action))
+        elif action["type"] == "complete_prepare":
+            self.action_complete_prepare(cast(SyncSchemaConfig, action))
+            result["complete_prepare"] = "OK"
         else:
             raise NotImplementedError
 

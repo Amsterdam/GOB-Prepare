@@ -39,3 +39,12 @@ def create_table_columnar_query(postgres_datastore: PostgresDatastore, tablename
     if _is_columnar_supported(postgres_datastore):
         return f"CREATE TABLE {tablename} ({columndefs}) USING columnar"
     return f"CREATE TABLE {tablename} ({columndefs})"
+
+
+def check_table_existence_query(schema: str, table_name: str) -> str:
+    """Return table exists query."""
+    return f"""SELECT EXISTS (
+                SELECT FROM pg_tables
+                WHERE schemaname = '{schema}'
+                AND tablename  = '{table_name}'
+            )"""
