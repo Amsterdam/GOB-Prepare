@@ -1,21 +1,21 @@
 SET max_parallel_workers_per_gather = 0;
 CREATE TABLE brk2_prep.aantekening_recht USING columnar AS
-SELECT atg.id                                            AS neuron_id,
-       atg.identificatie                                 AS identificatie,
-       idc.ident_oud                                     AS was_identificatie,
-       atg.einddatum_recht                               AS einddatum_recht,
-       atg.aardaantekening_code                          AS aard_code,
-       aag.omschrijving                                  AS aard_omschrijving,
-       atg.omschrijving                                  AS omschrijving,
-       atg.betreft_gedeelte_van_perceel                  AS betreft_gedeelte_van_perceel,
-       art.tng_ids                                       AS betrokken_brk_tenaamstelling,
-       abn.sjt_identificaties                            AS heeft_brk_betrokken_persoon,
-       atg.stukdeel_identificatie                        AS is_gebaseerd_op_brk_stukdeel,
-       atg.einddatum                                     AS einddatum,
-       LEAST(atg.einddatum, art.max_tng_eind_geldigheid) AS datum_actueel_tot,
-       LEAST(atg.einddatum, art.max_tng_eind_geldigheid) AS _expiration_date,
-       art.toestandsdatum                                AS toestandsdatum,
-       art.max_tng_begin_geldigheid                      AS __max_tng_begin_geldigheid
+SELECT atg.id                                                       AS neuron_id,
+       atg.identificatie                                            AS identificatie,
+       idc.ident_oud                                                AS was_identificatie,
+       atg.einddatum_recht::timestamp                               AS einddatum_recht,
+       atg.aardaantekening_code                                     AS aard_code,
+       aag.omschrijving                                             AS aard_omschrijving,
+       atg.omschrijving                                             AS omschrijving,
+       atg.betreft_gedeelte_van_perceel                             AS betreft_gedeelte_van_perceel,
+       art.tng_ids                                                  AS betrokken_brk_tenaamstelling,
+       abn.sjt_identificaties                                       AS heeft_brk_betrokken_persoon,
+       atg.stukdeel_identificatie                                   AS is_gebaseerd_op_brk_stukdeel,
+       atg.einddatum::timestamp                                     AS einddatum,
+       LEAST(atg.einddatum, art.max_tng_eind_geldigheid)::timestamp AS datum_actueel_tot,
+       LEAST(atg.einddatum, art.max_tng_eind_geldigheid)::timestamp AS _expiration_date,
+       art.toestandsdatum::timestamp                                AS toestandsdatum,
+       art.max_tng_begin_geldigheid::timestamp                      AS __max_tng_begin_geldigheid
 FROM brk2.aantekening atg
          JOIN (SELECT art.aantekening_identificatie,
                       -- Return NULL for eind_geldigheid if any is NULL

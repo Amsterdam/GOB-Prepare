@@ -14,7 +14,7 @@ SELECT sdl.id                                                               AS i
        ec.ec_ids                                                            AS is_bron_voor_brk_erfpachtcanon,
        stk.identificatie                                                    AS stukidentificatie,
        stk.akrportefeuillenr                                                AS portefeuillenummer_akr,
-       stk.tijdstip_aanbieding                                              AS tijdstip_aanbieding_stuk,
+       stk.tijdstip_aanbieding::timestamp                                   AS tijdstip_aanbieding_stuk,
        stk.reeks_code                                                       AS reeks_code,
        ree.omschrijving                                                     AS reeks_omschrijving,
        stk.nummer                                                           AS volgnummer_stuk,
@@ -23,22 +23,22 @@ SELECT sdl.id                                                               AS i
        stk.soortregister_code                                               AS soort_register_stuk_code,
        srr.omschrijving                                                     AS soort_register_stuk_omschrijving,
        stk.deel                                                             AS deel_soort_stuk,
-       meta.toestandsdatum                                                  AS toestandsdatum,
+       meta.toestandsdatum::timestamp                                       AS toestandsdatum,
        stk.tekeningingeschreven                                             AS tekening_ingeschreven,
-       stk.tijdstipondertekening                                            AS tijdstip_ondertekening,
+       stk.tijdstipondertekening::timestamp                                 AS tijdstip_ondertekening,
        stk.toelichtingbewaarder                                             AS toelichting_bewaarder,
-       CASE
-           WHEN tng.max_tng_eind_geldigheid IS NULL OR zrt.max_zrt_eind_geldigheid IS NULL OR
-                akt.max_akt_expiration_date IS NULL OR art.max_art_expiration_date IS NULL THEN NULL
-           ELSE
-               GREATEST(tng.max_tng_eind_geldigheid, zrt.max_zrt_eind_geldigheid, akt.max_akt_expiration_date,
-                        art.max_art_expiration_date) END                 AS datum_actueel_tot,
-       CASE
-           WHEN tng.max_tng_eind_geldigheid IS NULL OR zrt.max_zrt_eind_geldigheid IS NULL OR
-                akt.max_akt_expiration_date IS NULL OR art.max_art_expiration_date IS NULL THEN NULL
-           ELSE
-               GREATEST(tng.max_tng_eind_geldigheid, zrt.max_zrt_eind_geldigheid, akt.max_akt_expiration_date,
-                        art.max_art_expiration_date) END                 AS _expiration_date
+       (CASE
+            WHEN tng.max_tng_eind_geldigheid IS NULL OR zrt.max_zrt_eind_geldigheid IS NULL OR
+                 akt.max_akt_expiration_date IS NULL OR art.max_art_expiration_date IS NULL THEN NULL
+            ELSE
+                GREATEST(tng.max_tng_eind_geldigheid, zrt.max_zrt_eind_geldigheid, akt.max_akt_expiration_date,
+                         art.max_art_expiration_date) END)::timestamp       AS datum_actueel_tot,
+       (CASE
+            WHEN tng.max_tng_eind_geldigheid IS NULL OR zrt.max_zrt_eind_geldigheid IS NULL OR
+                 akt.max_akt_expiration_date IS NULL OR art.max_art_expiration_date IS NULL THEN NULL
+            ELSE
+                GREATEST(tng.max_tng_eind_geldigheid, zrt.max_zrt_eind_geldigheid, akt.max_akt_expiration_date,
+                         art.max_art_expiration_date) END)::timestamp       AS _expiration_date
 FROM brk2.stukdeel sdl
          LEFT JOIN brk2.stuk stk ON sdl.stuk_identificatie = stk.identificatie
          LEFT JOIN brk2.c_aardstukdeel asl ON sdl.aardstukdeel_code = asl.code
