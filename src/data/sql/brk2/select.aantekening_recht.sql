@@ -26,7 +26,7 @@ FROM brk2.aantekening atg
                       MAX(tng.toestandsdatum)                   AS toestandsdatum,
                       MAX(tng.begin_geldigheid)                 AS max_tng_begin_geldigheid,
 
-                      JSONB_AGG(DISTINCT JSONB_BUILD_OBJECT('tng_identificatie', tng.identificatie)) AS tng_ids
+                      JSONB_AGG(DISTINCT JSONB_BUILD_OBJECT('tng_identificatie', tng.identificatie) ORDER BY tng.identificatie) AS tng_ids
                FROM brk2.tenaamstelling_aantekening art
                         JOIN brk2_prep.tenaamstelling tng ON art.tenaamstelling_id = tng.neuron_id
                GROUP BY art.aantekening_identificatie) art ON art.aantekening_identificatie = atg.identificatie
