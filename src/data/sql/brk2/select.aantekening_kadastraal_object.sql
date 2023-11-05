@@ -17,7 +17,7 @@ SELECT atg.identificatie                                     AS identificatie,
        atg.einddatum::timestamp                              AS einddatum,
        LEAST(kot._expiration_date, atg.einddatum)::timestamp AS datum_actueel_tot,
        LEAST(kot._expiration_date, atg.einddatum)::timestamp AS _expiration_date,
-       kot.toestandsdatum                                    AS toestandsdatum
+       kot.toestandsdatum::timestamp                         AS toestandsdatum
 FROM brk2.aantekening atg
          JOIN brk2.kadastraal_object_aantekening koa ON koa.aantekening_identificatie = atg.identificatie
     -- Filter all aantekeningen based on aardaantekening != Aantekening PB
