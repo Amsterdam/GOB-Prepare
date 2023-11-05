@@ -59,7 +59,8 @@ FROM brk2.stukdeel sdl
                     GROUP BY tip.stukdeel_identificatie) tng ON sdl.identificatie = tng.stukdeel_identificatie
          LEFT JOIN (SELECT q.stukdeel_identificatie,
                            JSONB_AGG(JSONB_BUILD_OBJECT('art_identificatie', q.identificatie, 'art_neuron_id',
-                                                        q.neuron_id))  AS art_ids,
+                                                        q.neuron_id)
+                                     ORDER BY q.identificatie, q.neuron_id)                                       AS art_ids,
                            CASE
                                WHEN SUM(CASE WHEN q.max_art_expiration_date IS NULL THEN 0 ELSE 1 END) < 1 THEN NULL
                                ELSE MAX(q.max_art_expiration_date) END AS max_art_expiration_date
@@ -75,7 +76,8 @@ FROM brk2.stukdeel sdl
                     GROUP BY q.stukdeel_identificatie) art ON sdl.identificatie = art.stukdeel_identificatie
          LEFT JOIN (SELECT q.stukdeel_identificatie,
                            JSONB_AGG(JSONB_BUILD_OBJECT('akt_identificatie', q.identificatie, 'akt_neuron_id',
-                                                        q.__neuron_id)) AS akt_ids,
+                                                        q.__neuron_id)
+                                     ORDER BY q.identificatie, q.__neuron_id)                                     AS akt_ids,
                            CASE
                                WHEN SUM(CASE WHEN q.max_akt_expiration_date IS NULL THEN 0 ELSE 1 END) < 1 THEN NULL
                                ELSE MAX(q.max_akt_expiration_date) END  AS max_akt_expiration_date
@@ -107,7 +109,7 @@ FROM brk2.stukdeel sdl
                           GROUP BY asg.stukdeel_identificatie, zrt.identificatie) q
                     GROUP BY q.stukdeel_identificatie) zrt ON sdl.identificatie = zrt.stukdeel_identificatie
          LEFT JOIN (SELECT q.is_gebaseerd_op_brk_stukdeel_identificatie                       AS stukdeel_identificatie
-                         , JSONB_AGG(JSONB_BUILD_OBJECT('ec_identificatie', q.identificatie)) AS ec_ids
+                         , JSONB_AGG(JSONB_BUILD_OBJECT('ec_identificatie', q.identificatie) ORDER BY q.identificatie) AS ec_ids
                          , CASE
                                WHEN SUM(CASE WHEN q.max_ec_expiration_date IS NULL THEN 0 ELSE 1 END) < 1 THEN NULL
                                ELSE MAX(q.max_ec_expiration_date) END                         AS max_ec_expiration_date
