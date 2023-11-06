@@ -37,7 +37,7 @@ FROM brk2.tenaamstelling tng
          LEFT JOIN (SELECT g.tenaamstelling_id,
                            JSONB_AGG(JSONB_BUILD_OBJECT(
                                    'bronwaarde', stukdeel_identificatie
-                               )) isgebaseerd_op
+                               ) ORDER BY stukdeel_identificatie) isgebaseerd_op
                     FROM brk2.tenaamstelling_isgebaseerdop g
                     GROUP BY g.tenaamstelling_id) g ON tng.id = g.tenaamstelling_id
          LEFT JOIN brk2.tenaamstelling_onderzoek o ON tng.id = o.tenaamstelling_id
