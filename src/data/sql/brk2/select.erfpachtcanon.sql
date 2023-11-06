@@ -7,15 +7,15 @@ SELECT ec.identificatie                                            AS identifica
      , to_char(ec.jaarlijksbedrag_som, '999999999999.99')::numeric AS jaarlijks_bedrag_valuta_som
      , ec.jaarlijksbedrag_valuta_code                              AS jaarlijks_bedrag_valuta_code
      , ec.jaarlijksbedrag_betreftmeeroz                            AS jaarlijks_bedrag_betreft_meer_onroerende_zaken
-     , ec.einddatumafkoop                                          AS einddatum_afkoop
+     , ec.einddatumafkoop::timestamp                               AS einddatum_afkoop
      , ec.indicatie_oude_oz_betrokken                              AS indicatie_oude_onroerende_zaken_betrokken
      , ec.stukdeel_identificatie                                   AS is_gebaseerd_op_brk_stukdeel_identificatie
      , z.identificatie                                             AS betreft_brk_zakelijk_recht_identificatie
      , z.volgnummer                                                AS betreft_brk_zakelijkrecht_volgnummer
-     , z."_expiration_date"                                        AS datum_actueel_tot
-     , z.toestandsdatum                                            AS toestandsdatum
-     , z.begin_geldigheid                                          AS begin_geldigheid
-     , z.eind_geldigheid                                           AS eind_geldigheid
+     , z."_expiration_date"::timestamp                             AS datum_actueel_tot
+     , z.toestandsdatum::timestamp                                 AS toestandsdatum
+     , z.begin_geldigheid::timestamp                               AS begin_geldigheid
+     , z.eind_geldigheid::timestamp                                AS eind_geldigheid
 FROM brk2.erfpachtcanon ec
          LEFT JOIN brk2.c_soorterfpachtcanon cs
                    ON ec.soort_code = cs.code

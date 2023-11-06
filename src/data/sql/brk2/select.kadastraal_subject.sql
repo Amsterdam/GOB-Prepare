@@ -135,9 +135,9 @@ SELECT sjt.Identificatie_subject            AS identificatie,
        pbl.postbusnummer::integer           AS postadres_postbus_nummer,
        pbl.postcode                         AS postadres_postbus_postcode,
        pbl.woonplaatsnaam                   AS postadres_postbus_woonplaatsnaam,
-       ede.expiration_date                  AS datum_actueel_tot,
-       ede.expiration_date                  AS _expiration_date,
-       meta.toestandsdatum                  AS toestandsdatum
+       ede.expiration_date::timestamp       AS datum_actueel_tot,
+       ede.expiration_date::timestamp       AS _expiration_date,
+       meta.toestandsdatum::timestamp       AS toestandsdatum
 FROM subjecten sjt
          LEFT JOIN brk2.objectlocatie_binnenland obd ON (sjt.woonlocatie_identificatie = obd.identificatie)
          LEFT JOIN brk2.objectlocatie_buitenland obu ON (sjt.woonlocatie_identificatie = obu.identificatie)
