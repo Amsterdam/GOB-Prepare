@@ -22,11 +22,12 @@ FROM brk2.aantekening atg
                       CASE
                           WHEN SUM(CASE WHEN tng.eind_geldigheid IS NULL THEN 1 ELSE 0 END)
                               > 0 THEN NULL
-                          ELSE MAX(tng.eind_geldigheid) END     AS max_tng_eind_geldigheid,
-                      MAX(tng.toestandsdatum)                   AS toestandsdatum,
-                      MAX(tng.begin_geldigheid)                 AS max_tng_begin_geldigheid,
+                          ELSE MAX(tng.eind_geldigheid) END                                          AS max_tng_eind_geldigheid,
+                      MAX(tng.toestandsdatum)                                                        AS toestandsdatum,
+                      MAX(tng.begin_geldigheid)                                                      AS max_tng_begin_geldigheid,
 
-                      JSONB_AGG(DISTINCT JSONB_BUILD_OBJECT('tng_identificatie', tng.identificatie) ORDER BY tng.identificatie) AS tng_ids
+                      JSONB_AGG(DISTINCT JSONB_BUILD_OBJECT('tng_identificatie', tng.identificatie)
+                                ORDER BY JSONB_BUILD_OBJECT('tng_identificatie', tng.identificatie)) AS tng_ids
                FROM brk2.tenaamstelling_aantekening art
                         JOIN brk2_prep.tenaamstelling tng ON art.tenaamstelling_id = tng.neuron_id
                GROUP BY art.aantekening_identificatie) art ON art.aantekening_identificatie = atg.identificatie
