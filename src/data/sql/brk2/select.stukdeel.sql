@@ -23,7 +23,7 @@ SELECT sdl.id                                                               AS i
        stk.soortregister_code                                               AS soort_register_stuk_code,
        srr.omschrijving                                                     AS soort_register_stuk_omschrijving,
        stk.deel                                                             AS deel_soort_stuk,
-       meta.toestandsdatum::timestamp                                       AS toestandsdatum,
+       NULL                                                                 AS toestandsdatum,
        stk.tekeningingeschreven                                             AS tekening_ingeschreven,
        stk.tijdstipondertekening::timestamp                                 AS tijdstip_ondertekening,
        stk.toelichtingbewaarder                                             AS toelichting_bewaarder,
