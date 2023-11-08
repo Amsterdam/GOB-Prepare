@@ -20,9 +20,9 @@ SELECT
     'code', NULL::varchar,
     'omschrijving', NULL::varchar
   )                                                                                AS aktenummer, -- unvailable
-  kind."OntlGemeenteKindgegevens"                                                  AS gemeente_document,
-  brp_build_date_json(kind."OntlDatumKindgegevens")                                AS datum_document,
-  kind."Beschrijving document"                                                     AS beschrijving_document,
+  kind."GemeenteDocument"                                                          AS gemeente_document,
+  brp_build_date_json(kind."DatumDocument")                                        AS datum_document,
+  kind."BeschrijvingDocument"                                                     AS beschrijving_document,
   kind."GegevensInOnderzoek"::varchar                                              AS aanduiding_gegevens_in_onderzoek,
   brp_build_date_json(kind."DatumIngangOnderzoek")                                 AS datum_ingang_onderzoek,
   brp_build_date_json(kind."DatumEindeOnderzoek")                                  AS datum_einde_onderzoek,

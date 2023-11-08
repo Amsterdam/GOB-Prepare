@@ -1,7 +1,7 @@
 SELECT
   kr."BSN"::varchar                                                                AS burgerservicenummer,
   kr."Anummer"::varchar                                                            AS anummer,
-  kr."AandEuropeesKiesrecht"::varchar                                              AS aand_euro_kiesrecht,
+  kr."AandEuropeesKiesrechtOms"::varchar                                           AS aand_euro_kiesrecht,
   brp_build_date_json(kr."DatumVerzoekEukiesrecht")                                AS datum_euro_kiesrecht,
   brp_build_date_json(kr."DatumEindeUitsluitingEuKiesrecht")                       AS einddatum_euro_kiesrecht,
   NULL::varchar                                                                    AS adres_e_ulidstaat_herkomst,  -- deze worden in toekomst geleverd
