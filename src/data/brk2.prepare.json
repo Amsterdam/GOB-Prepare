@@ -36,8 +36,7 @@
       "type": "import_csv",
       "objectstore": "Basisinformatie",
       "read_config": {
-        "file_filter": "brk/Gemeentegrenzen_GML/gemeentes_2013_2022_incl_Weesp.csv",
-        "container": "acceptatie"
+        "file_filter": "brk/Gemeentegrenzen_GML/gemeentes_2013_2022_incl_Weesp.csv"
       },
       "separator": ",",
       "destination": "brk2_prep.import_gemeentes_2013_2022",
