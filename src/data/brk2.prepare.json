@@ -33,19 +33,6 @@
       ]
     },
     {
-      "type": "import_csv",
-      "objectstore": "Basisinformatie",
-      "read_config": {
-        "file_filter": "brk/Gemeentegrenzen_GML/gemeentes_2013_2022_incl_Weesp.csv"
-      },
-      "separator": ",",
-      "destination": "brk2_prep.import_gemeentes_2013_2022",
-      "id": "import_gemeentes_csv",
-      "depends_on": [
-        "clear_schemas"
-      ]
-    },
-    {
       "type": "execute_sql",
       "description": "Create materialized view Baghulptabel",
       "query_src": "file",
@@ -111,6 +98,16 @@
       "query_src": "file",
       "query": "data/sql/brk2/select.meta.sql",
       "id": "select_meta",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "execute_sql",
+      "description": "Select import_gemeentes_2013_2022",
+      "query_src": "file",
+      "query": "data/sql/brk2/select.import_gemeentes_2013_2022.sql",
+      "id": "select_import_gemeentes_2013_2022",
       "depends_on": [
         "clear_schemas"
       ]
@@ -370,7 +367,7 @@
       },
       "depends_on": [
         "populate_aardzakelijkrecht_waardelijst",
-        "import_gemeentes_csv",
+        "select_import_gemeentes_2013_2022",
         "select_kce",
         "select_sdl",
         "select_kge",
