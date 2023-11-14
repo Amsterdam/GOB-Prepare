@@ -91,7 +91,7 @@ SELECT sjt.Identificatie_subject            AS identificatie,
        sjt.Code_geboorteland                AS geboorteland_code,
        lad.omschrijving                     AS geboorteland_omschrijving,
        COALESCE (bon.overlijdensdatum::date,
-           sjt.Datum_overlijden::date  )    AS datum_overlijden,
+           sjt.Datum_overlijden::date)      AS datum_overlijden,
        sjt.Datum_overlijden_onvolledig      AS datum_overlijden_onvolledig,
        sjt.Indicatie_overleden              AS indicatie_overleden,
        sjt.Voornamen_partner                AS voornamen_partner,
@@ -156,6 +156,6 @@ FROM subjecten sjt
          LEFT JOIN brk2.c_land lbu ON (obu.land_code = lbu.code)
          LEFT JOIN brk2.c_land pbu ON (pau.land_code = pbu.code)
          LEFT JOIN brk2_prep.subject_expiration_date ede ON sjt.Identificatie_subject = ede.subject_id
-         LEFT JOIN brk2.bsn_overleden bon ON (sjt.bsn=bon.bsn)
+         LEFT JOIN brk2.bsn_overleden bon ON (sjt.bsn = bon.bsn)
          JOIN brk2_prep.meta meta ON TRUE
 ;
