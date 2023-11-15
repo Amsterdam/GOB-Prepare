@@ -29,7 +29,7 @@ docker compose up -d
 ## Tests
 
 ```bash
-docker compose -f src/.jenkins/test/docker-compose.yml build && docker compose -f src/.jenkins/test/docker-compose.yml run --rm test
+docker compose -f src/.jenkins/test/docker-compose.yml run --rm --build test
 ```
 
 # Local
