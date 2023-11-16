@@ -290,7 +290,10 @@ class PrepareClient:
         try:
             schema_sync_data = next(self._dst_datastore.query(select_query))  # type: ignore[union-attr]
         except StopIteration:
-            raise GOBException(f"No record for schema '{schema}' found in 'public.synced_schemas'.")
+            raise GOBException(
+                f"No record for schema '{schema}' found in 'public.synced_schemas'. "
+                f"Make sure that the databricks workflow for schema '{schema}' has been executed at least once."
+            )
 
         if schema_sync_data["last_sync_end"] is None:
             raise GOBException(
