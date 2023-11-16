@@ -158,5 +158,4 @@ FROM subjecten sjt
          LEFT JOIN brk2.c_land lbu ON (obu.land_code = lbu.code)
          LEFT JOIN brk2.c_land pbu ON (pau.land_code = pbu.code)
          LEFT JOIN brk2_prep.subject_expiration_date ede ON sjt.Identificatie_subject = ede.subject_id
-         JOIN brk2_prep.meta meta ON TRUE
 ;
