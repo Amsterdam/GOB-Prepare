@@ -24,6 +24,7 @@ WITH subjecten AS ((SELECT id                            AS nrn_sjt_id
                          , geboorteplaats                AS Geboorteplaats
                          , geboorteland_code             AS Code_geboorteland
                          , overlijdensdatum              AS Datum_overlijden
+                         , csv_overlijdensdatum          AS Datum_overlijden_uit_csv
                          , overlijdensdatum_onv          AS Datum_overlijden_onvolledig
                          , partner_geslachtsnaam         AS Geslachtsnaam_partner
                          , partner_voornamen             AS Voornamen_partner
@@ -59,6 +60,7 @@ WITH subjecten AS ((SELECT id                            AS nrn_sjt_id
                          , NULL                         AS Geboorteplaats
                          , NULL                         AS Code_geboorteland
                          , NULL                         AS Datum_overlijden
+                         , NULL                         AS Datum_overlijden_uit_csv
                          , NULL                         AS Datum_overlijden_onvolledig
                          , NULL                         AS Geslachtsnaam_partner
                          , NULL                         AS Voornamen_partner
@@ -90,7 +92,7 @@ SELECT sjt.Identificatie_subject            AS identificatie,
        sjt.Geboorteplaats                   AS geboorteplaats,
        sjt.Code_geboorteland                AS geboorteland_code,
        lad.omschrijving                     AS geboorteland_omschrijving,
-       COALESCE (bon.overlijdensdatum,
+       COALESCE (sjt.Datum_overlijden_uit_csv,
            sjt.Datum_overlijden)::date      AS datum_overlijden,
        sjt.Datum_overlijden_onvolledig      AS datum_overlijden_onvolledig,
        sjt.Indicatie_overleden              AS indicatie_overleden,
@@ -156,6 +158,4 @@ FROM subjecten sjt
          LEFT JOIN brk2.c_land lbu ON (obu.land_code = lbu.code)
          LEFT JOIN brk2.c_land pbu ON (pau.land_code = pbu.code)
          LEFT JOIN brk2_prep.subject_expiration_date ede ON sjt.Identificatie_subject = ede.subject_id
-         LEFT JOIN brk2.bsn_overleden bon ON (sjt.Heeft_BSN_voor = bon.bsn)
-         JOIN brk2_prep.meta meta ON TRUE
 ;
