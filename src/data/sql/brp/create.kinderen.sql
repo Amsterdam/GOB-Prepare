@@ -22,7 +22,7 @@ SELECT
   )                                                                                AS aktenummer, -- unvailable
   kind."GemeenteDocument"                                                          AS gemeente_document,
   brp_build_date_json(kind."DatumDocument")                                        AS datum_document,
-  kind."BeschrijvingDocument"                                                     AS beschrijving_document,
+  kind."BeschrijvingDocument"                                                      AS beschrijving_document,
   kind."GegevensInOnderzoek"::varchar                                              AS aanduiding_gegevens_in_onderzoek,
   brp_build_date_json(kind."DatumIngangOnderzoek")                                 AS datum_ingang_onderzoek,
   brp_build_date_json(kind."DatumEindeOnderzoek")                                  AS datum_einde_onderzoek,
