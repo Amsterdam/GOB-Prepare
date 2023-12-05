@@ -11,9 +11,9 @@ SELECT tng.identificatie                                     AS identificatie,
        idc.ident_oud                                         AS was_identificatie,
        tng.tennamevan_identificatie                          AS van_brk_kadastraalsubject,
        zrt.begin_geldigheid::timestamp                       AS begin_geldigheid,
-       LEAST(zrt._expiration_date, atg.einddatum)::timestamp AS eind_geldigheid,
-       LEAST(zrt._expiration_date, atg.einddatum)::timestamp AS datum_actueel_tot,
-       LEAST(zrt._expiration_date, atg.einddatum)::timestamp AS _expiration_date,
+       zrt.eind_geldigheid::timestamp                        AS eind_geldigheid,
+       zrt.datum_actueel_tot::timestamp                      AS datum_actueel_tot,
+       zrt._expiration_date::timestamp                       AS _expiration_date,
        tng.aandeel_teller                                    AS aandeel_teller,
        tng.aandeel_noemer                                    AS aandeel_noemer,
        ga.teller                                             AS geldt_voor_teller,
@@ -43,13 +43,5 @@ FROM brk2.tenaamstelling tng
          LEFT JOIN brk2.tenaamstelling_onderzoek o ON tng.id = o.tenaamstelling_id
          LEFT JOIN brk2.inonderzoek io ON io.identificatie = o.onderzoek_identificatie
          LEFT JOIN brk2.c_authentiekgegeven ag ON io.authentiekgegeven_code = ag.code
-         LEFT JOIN (SELECT tag.tenaamstelling_id,
-                           MAX(atg.id) AS id
-                    FROM brk2.tenaamstelling_aantekening tag
-                             JOIN brk2.aantekening atg
-                                  ON atg.identificatie = tag.aantekening_identificatie
-                    WHERE atg.aardaantekening_code = '21'
-                    GROUP BY tag.tenaamstelling_id) art ON tng.id = art.tenaamstelling_id
-         LEFT JOIN brk2.aantekening atg ON atg.id = art.id
          LEFT OUTER JOIN brk2_prep.id_conversion idc ON idc.ident_nieuw = tng.identificatie
 WHERE NOT (tng.identificatie = 'NL.IMKAD.Tenaamstelling.AKR2.100000010664394' AND zrt.volgnummer = 1);
