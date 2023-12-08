@@ -10,7 +10,7 @@
       "type": "check_source_sync_complete",
       "id": "check_source_sync",
       "description": "Check if databricks tables sync is completed before starting 'monumenten' prepare",
-      "schema": "monumenten",
+      "schema": "monumenten_silver",
       "table_name": "synced_schemas"
     },
     {
@@ -86,7 +86,7 @@
       "type": "complete_prepare",
       "id": "update_after_prepare_complete",
       "description": "Update sync table after 'monumenten' prepare completed",
-      "schema": "monumenten",
+      "schema": "monumenten_silver",
       "table_name": "synced_schemas",
       "depends_on": "*"
     }
