@@ -1,23 +1,23 @@
 SET max_parallel_workers_per_gather = 0;
 CREATE TABLE brk2_prep.aantekening_kadastraal_object USING columnar AS
-SELECT atg.identificatie                                     AS identificatie,
-       atg.id                                                AS __neuron_id,
-       idc.ident_oud                                         AS was_identificatie,
-       koa.kadastraalobject_volgnummer                       AS volgnummer,
-       kot.begin_geldigheid::timestamp                       AS begin_geldigheid,
-       LEAST(kot._expiration_date, atg.einddatum)::timestamp AS eind_geldigheid,
-       atg.einddatum_recht::timestamp                        AS einddatum_recht,
-       atg.aardaantekening_code                              AS aard_code,
-       aag.omschrijving                                      AS aard_omschrijving,
-       atg.omschrijving                                      AS omschrijving,
-       atg.betreft_gedeelte_van_perceel                      AS betreft_gedeelte_van_perceel,
-       abn.sjt_identificaties                                AS heeft_brk_betrokken_persoon,
-       kot.identificatie                                     AS heeft_betrekking_op_brk_kadastraal_object,
-       atg.stukdeel_identificatie                            AS is_gebaseerd_op_brk_stukdeel,
-       atg.einddatum::timestamp                              AS einddatum,
-       LEAST(kot._expiration_date, atg.einddatum)::timestamp AS datum_actueel_tot,
-       LEAST(kot._expiration_date, atg.einddatum)::timestamp AS _expiration_date,
-       kot.toestandsdatum::timestamp                         AS toestandsdatum
+SELECT atg.identificatie                AS identificatie,
+       atg.id                           AS __neuron_id,
+       idc.ident_oud                    AS was_identificatie,
+       koa.kadastraalobject_volgnummer  AS volgnummer,
+       kot.begin_geldigheid::timestamp  AS begin_geldigheid,
+       kot.eind_geldigheid::timestamp   AS eind_geldigheid,
+       atg.einddatum_recht::timestamp   AS einddatum_recht,
+       atg.aardaantekening_code         AS aard_code,
+       aag.omschrijving                 AS aard_omschrijving,
+       atg.omschrijving                 AS omschrijving,
+       atg.betreft_gedeelte_van_perceel AS betreft_gedeelte_van_perceel,
+       abn.sjt_identificaties           AS heeft_brk_betrokken_persoon,
+       kot.identificatie                AS heeft_betrekking_op_brk_kadastraal_object,
+       atg.stukdeel_identificatie       AS is_gebaseerd_op_brk_stukdeel,
+       atg.einddatum::timestamp         AS einddatum,
+       kot.datum_actueel_tot            AS datum_actueel_tot,
+       kot._expiration_date             AS _expiration_date,
+       kot.toestandsdatum::timestamp    AS toestandsdatum
 FROM brk2.aantekening atg
          JOIN brk2.kadastraal_object_aantekening koa ON koa.aantekening_identificatie = atg.identificatie
     -- Filter all aantekeningen based on aardaantekening != Aantekening PB
