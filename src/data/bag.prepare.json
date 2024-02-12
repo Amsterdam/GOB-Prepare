@@ -1,0 +1,146 @@
+{
+  "version": "0.1",
+  "name": "BAG",
+  "catalogue": "bag",
+  "destination": {
+    "application": "GOBPrepare"
+  },
+  "actions": [
+    {
+      "type": "check_source_sync_complete",
+      "id": "check_source_sync",
+      "description": "Check if Databricks tables sync is completed before starting 'BAG' prepare",
+      "schema": "bag_adb",
+      "table_name": "synced_schemas"
+    },
+    {
+      "type": "clear",
+      "schemas": [
+        "bag_prep"
+      ],
+      "id": "clear_schemas",
+      "depends_on": [
+        "check_source_sync"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BAG table ligplaatsen",
+      "table_name": "bag_prep.ligplaatsen",
+      "id": "create_bag_ligplaatsen",
+      "query_src": "file",
+      "query": "data/sql/bag/create.ligplaatsen.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BAG table nummeraanduidingen",
+      "table_name": "bag_prep.nummeraanduidingen",
+      "id": "create_bag_nummeraanduidingen",
+      "query_src": "file",
+      "query": "data/sql/bag/create.nummeraanduidingen.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BAG table openbareruimtes",
+      "table_name": "bag_prep.openbareruimtes",
+      "id": "create_bag_openbareruimtes",
+      "query_src": "file",
+      "query": "data/sql/bag/create.openbareruimtes.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BAG table panden",
+      "table_name": "bag_prep.panden",
+      "id": "create_bag_panden",
+      "query_src": "file",
+      "query": "data/sql/bag/create.panden.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BAG table standplaatsen",
+      "table_name": "bag_prep.standplaatsen",
+      "id": "create_bag_standplaatsen",
+      "query_src": "file",
+      "query": "data/sql/bag/create.standplaatsen.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BAG table verblijfsobjecten",
+      "table_name": "bag_prep.verblijfsobjecten",
+      "id": "create_bag_verblijfsobjecten",
+      "query_src": "file",
+      "query": "data/sql/bag/create.verblijfsobjecten.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BAG table woonplaatsen",
+      "table_name": "bag_prep.woonplaatsen",
+      "id": "create_bag_woonplaatsen",
+      "query_src": "file",
+      "query": "data/sql/bag/create.woonplaatsen.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "check_row_counts",
+      "description": "Verify number of rows in BAG tables",
+      "id": "check_row_counts",
+      "table_row_counts": {
+        "bag_prep.ligplaatsen": 4050,
+        "bag_prep.nummeraanduidingen": 769170,
+        "bag_prep.openbareruimtes": 13937,
+        "bag_prep.panden": 518596,
+        "bag_prep.standplaatsen": 724,
+        "bag_prep.verblijfsobjecten": 1199492,
+        "bag_prep.woonplaatsen": 9
+      },
+      "margin_percentage": 5,
+      "depends_on": [
+        "create_bag_ligplaatsen",
+        "create_bag_nummeraanduidingen",
+        "create_bag_openbareruimtes",
+        "create_bag_panden",
+        "create_bag_standplaatsen",
+        "create_bag_verblijfsobjecten",
+        "create_bag_woonplaatsen"
+      ]
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "bag_prep": "bag_prepared"
+      },
+      "depends_on": [
+        "check_row_counts"
+      ]
+    },
+    {
+      "type": "complete_prepare",
+      "id": "update_after_prepare_complete",
+      "description": "Update sync table after 'BAG' prepare completed",
+      "schema": "bag_adb",
+      "table_name": "synced_schemas",
+      "depends_on": "*"
+    }
+  ]
+}
