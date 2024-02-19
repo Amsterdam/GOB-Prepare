@@ -101,6 +101,17 @@
       ]
     },
     {
+      "type": "create_table",
+      "description": "Create BAG table onderzoeken",
+      "table_name": "bag_prep.onderzoeken",
+      "id": "create_bag_onderzoeken",
+      "query_src": "file",
+      "query": "data/sql/bag/create.onderzoeken.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
       "type": "check_row_counts",
       "description": "Verify number of rows in BAG tables",
       "id": "check_row_counts",
@@ -111,7 +122,8 @@
         "bag_prep.panden": 518596,
         "bag_prep.standplaatsen": 724,
         "bag_prep.verblijfsobjecten": 1199492,
-        "bag_prep.woonplaatsen": 9
+        "bag_prep.woonplaatsen": 9,
+        "bag_prep.onderzoeken": 376597
       },
       "margin_percentage": 5,
       "depends_on": [
@@ -121,7 +133,8 @@
         "create_bag_panden",
         "create_bag_standplaatsen",
         "create_bag_verblijfsobjecten",
-        "create_bag_woonplaatsen"
+        "create_bag_woonplaatsen",
+        "create_bag_onderzoeken"
       ]
     },
     {
