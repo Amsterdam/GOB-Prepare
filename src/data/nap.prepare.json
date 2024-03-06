@@ -1,0 +1,68 @@
+{
+  "version": "0.1",
+  "name": "NAP",
+  "catalogue": "nap",
+  "destination": {
+    "application": "GOBPrepare"
+  },
+  "actions": [
+    {
+      "type": "check_source_sync_complete",
+      "id": "check_source_sync",
+      "description": "Check if Databricks table sync is completed before starting 'NAP' prepare",
+      "schema": "nap_adb",
+      "table_name": "synced_schemas"
+    },
+    {
+      "type": "clear",
+      "schemas": [
+        "nap_prep"
+      ],
+      "id": "clear_schemas",
+      "depends_on": [
+        "check_source_sync"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create NAP table peilmerken",
+      "table_name": "nap_prep.peilmerken",
+      "id": "create_nap_peilmerken",
+      "query_src": "file",
+      "query": "data/sql/nap/create.peilmerken.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "check_row_counts",
+      "description": "Verify number of rows in NAP peilmerken",
+      "id": "check_row_counts",
+      "table_row_counts": {
+        "nap_prep.peilmerken": 1017
+      },
+      "margin_percentage": 5,
+      "depends_on": [
+        "create_nap_peilmerken"
+      ]
+    },
+    {
+      "type": "publish_schemas",
+      "id": "publish_schemas",
+      "publish_schemas": {
+        "nap_prep": "nap_prepared"
+      },
+      "depends_on": [
+        "check_row_counts"
+      ]
+    },
+    {
+      "type": "complete_prepare",
+      "id": "update_after_prepare_complete",
+      "description": "Update sync table after 'NAP' prepare completed",
+      "schema": "nap_adb",
+      "table_name": "synced_schemas",
+      "depends_on": "*"
+    }
+  ]
+}
