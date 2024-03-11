@@ -10,7 +10,7 @@
       "type": "check_source_sync_complete",
       "id": "check_source_sync",
       "description": "Check if databricks tables sync is completed before starting 'BRK2' prepare",
-      "schema": "brk2",
+      "schema": "brk2_adb",
       "table_name": "synced_schemas"
     },
     {
@@ -24,339 +24,157 @@
       ]
     },
     {
-      "type": "import_csv",
-      "source": "https://developer.kadaster.nl/schemas/waardelijsten/BurgemKadgemSectie/BurgemKadgemSectie.csv",
-      "destination": "brk2_prep.import_burgerlijke_gemeentes",
-      "id": "import_burgerlijke_gemeentes",
-      "depends_on": [
-        "clear_schemas"
-      ]
-    },
-    {
-      "type": "execute_sql",
-      "description": "Create materialized view Baghulptabel",
+      "type": "create_table",
+      "description": "Create BRK2 table aantekening_kadastraal_object",
+      "table_name": "brk2_prep.aantekening_kadastraal_object",
+      "id": "create_brk2_aantekening_kadastraal_object",
       "query_src": "file",
-      "query": "data/sql/brk2/materialized_view.baghulptabel.sql",
-      "id": "create_baghulptabel",
-      "depends_on": [
-        "clear_schemas"
-      ]
-    },
-    {
-      "type": "import_csv",
-      "source": "https://developer.kadaster.nl/schemas/waardelijsten/AardAantekening/AardAantekening.csv",
-      "destination": "brk2_prep.import_aardaantekening",
-      "column_names": {
-        "Code": "code",
-        "Waarde": "omschrijving",
-        "DatumVanaf": "datum_vanaf",
-        "DatumTot": "datum_tot",
-        "Toelichting": "type"
-      },
-      "id": "import_aardaantekening_csv",
-      "depends_on": [
-        "clear_schemas"
-      ]
-    },
-    {
-      "type": "import_csv",
-      "source": "https://developer.kadaster.nl/schemas/waardelijsten/AardZakelijkRecht/AardZakelijkRecht.csv",
-      "destination": "brk2_prep.aardzakelijkrecht_waardelijst_import",
-      "id": "import_aardzakelijkrecht_waardelijst",
+      "query": "data/sql/brk2/create.aantekening_kadastraal_object.sql",
       "depends_on": [
         "clear_schemas"
       ]
     },
     {
       "type": "create_table",
-      "description": "Populate AZT with AKR codes",
-      "id": "populate_aardzakelijkrecht_waardelijst",
-      "table_name": "brk2_prep.aardzakelijkrecht_waardelijst",
-      "depends_on": [
-        "import_aardzakelijkrecht_waardelijst"
-      ],
+      "description": "Create BRK2 table aantekening_recht",
+      "table_name": "brk2_prep.aantekening_recht",
+      "id": "create_brk2_aantekening_recht",
       "query_src": "file",
-      "query": "data/sql/brk2/select.aardzakelijkrecht_waardelijst.sql"
-    },
-    {
-      "type": "import_csv",
-      "objectstore": "Basisinformatie",
-      "read_config": {
-        "file_filter": "^brk/Oude_Nieuwe_ids/Conversietabel_BRK1_2_Identificaties.csv$",
-        "container": "acceptatie"
-      },
-      "separator": ",",
-      "destination": "brk2_prep.id_conversion",
-      "id": "import_id_conversion_csv",
-      "depends_on": [
-        "clear_schemas"
-      ]
-    },
-    {
-      "type": "execute_sql",
-      "description": "Select meta",
-      "query_src": "file",
-      "query": "data/sql/brk2/select.meta.sql",
-      "id": "select_meta",
-      "depends_on": [
-        "clear_schemas"
-      ]
-    },
-    {
-      "type": "execute_sql",
-      "description": "Select import_gemeentes_2013_2022",
-      "query_src": "file",
-      "query": "data/sql/brk2/select.import_gemeentes_2013_2022.sql",
-      "id": "select_import_gemeentes_2013_2022",
+      "query": "data/sql/brk2/create.aantekening_recht.sql",
       "depends_on": [
         "clear_schemas"
       ]
     },
     {
       "type": "create_table",
-      "description": "Select kot_geldigheid",
-      "table_name": "brk2_prep.kot_geldigheid",
+      "description": "Create BRK2 table aardzakelijkrecht",
+      "table_name": "brk2_prep.aardzakelijkrecht",
+      "id": "create_brk2_aardzakelijkrecht",
       "query_src": "file",
-      "query": "data/sql/brk2/preselect.kot.geldigheid.sql",
-      "id": "select_kot_geldigheid",
-      "depends_on": [
-        "clear_schemas",
-        "import_burgerlijke_gemeentes",
-        "create_baghulptabel"
-      ]
-    },
-    {
-      "type": "execute_sql",
-      "description": "Select KOT",
-      "query_src": "file",
-      "query": "data/sql/brk2/select.kadastraal_object.sql",
-      "id": "select_kot",
-      "depends_on": [
-        "select_kot_geldigheid"
-      ]
-    },
-    {
-      "type": "execute_sql",
-      "description": "Create zrt_kot_wip table",
-      "id": "preselect_zrt_kot_generate",
-      "query_src": "file",
-      "query": "data/sql/brk2/preselect.zrt_kot_wip.sql",
-      "depends_on": [
-        "select_kot"
-      ]
-    },
-    {
-      "type": "create_table",
-      "description": "Copy zrt_kot_wip table to zrt_kot",
-      "id": "preselect_zrt_kot",
-      "query_src": "file",
-      "query": "data/sql/brk2/preselect.zrt_kot.sql",
-      "depends_on": [
-        "preselect_zrt_kot_generate"
-      ],
-      "table_name": "brk2_prep.zrt_kot"
-    },
-    {
-      "type": "create_table",
-      "description": "Create zrt_asg table",
-      "id": "preselect_zrt_asg",
-      "query_src": "file",
-      "query": "data/sql/brk2/preselect.zrt_asg.sql",
-      "depends_on": [
-        "preselect_zrt_kot"
-      ],
-      "table_name": "brk2_prep.zrt_asg"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Select ZRT",
-      "query_src": "file",
-      "query": "data/sql/brk2/select.zakelijk_recht.sql",
-      "id": "select_zrt",
-      "depends_on": [
-        "preselect_zrt_kot",
-        "preselect_zrt_asg",
-        "import_id_conversion_csv"
-      ]
-    },
-    {
-      "type": "execute_sql",
-      "description": "Select Erfpachtcanon",
-      "query_src": "file",
-      "query": "data/sql/brk2/select.erfpachtcanon.sql",
-      "id": "select_ec",
-      "depends_on": [
-        "select_zrt"
-      ]
-    },
-    {
-      "type": "create_table",
-      "description": "KOT - is_ontstaan_uit_kadastraalobject",
-      "table_name": "brk2_prep.kot_ontstaan_uit_kot",
-      "id": "set_is_ontstaan_uit_kadastraalobject",
-      "depends_on": [
-        "select_kot",
-        "select_zrt"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk2/preselect.kot.is_ontstaan_uit_kadastraalobject.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "KOT - Set is_ontstaan_uit_g_perceel",
-      "id": "set_is_ontstaan_uit_g_perceel",
-      "depends_on": [
-        "select_kot",
-        "select_zrt"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk2/preselect.kot.is_ontstaan_uit_g_perceel.sql"
-    },
-    {
-      "type": "import_api",
-      "description": "Import BAG geometrie van verblijfsobjecten",
-      "id": "import_verblijfsobjecten_geometrie",
+      "query": "data/sql/brk2/create.aardzakelijkrecht.sql",
       "depends_on": [
         "clear_schemas"
-      ],
-      "query_src": "file",
-      "query": "data/api/bag/verblijfsobjecten_geometrie_import.graphql",
-      "meta_type": "bag_verblijfsobjectenRootObjectType",
-      "schema": "bag_brk2",
-      "destination": "verblijfsobjecten_geometrie"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Generate geometrie voor actuele appartementsrechten",
-      "id": "update_geometrie_appartementsrechten",
-      "depends_on": [
-        "import_verblijfsobjecten_geometrie",
-        "set_is_ontstaan_uit_g_perceel"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk2/preselect.kot_geo.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Remove duplicate g-perceel relations",
-      "id": "remove_duplicate_g_perceel_relations",
-      "depends_on": [
-        "update_geometrie_appartementsrechten"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk2/kot.is_ontstaan_uit_g_perceel.unduplicate.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Finalise KOT table",
-      "id": "finalise_kot",
-      "depends_on": [
-        "remove_duplicate_g_perceel_relations",
-        "set_is_ontstaan_uit_kadastraalobject"
-      ],
-      "query_src": "file",
-      "query": "data/sql/brk2/finalise.kadastraal_object.sql"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Select TNG",
-      "query_src": "file",
-      "query": "data/sql/brk2/select.tenaamstelling.sql",
-      "id": "select_tng",
-      "depends_on": [
-        "select_zrt"
       ]
     },
     {
-      "type": "execute_sql",
-      "description": "Select AKT",
+      "type": "create_table",
+      "description": "Create BRK2 table erfpachtcanon",
+      "table_name": "brk2_prep.erfpachtcanon",
+      "id": "create_brk2_erfpachtcanon",
       "query_src": "file",
-      "query": "data/sql/brk2/select.aantekening_kadastraal_object.sql",
-      "id": "select_akt",
+      "query": "data/sql/brk2/create.erfpachtcanon.sql",
       "depends_on": [
-        "select_kot",
-        "import_aardaantekening_csv",
-        "import_id_conversion_csv"
+        "clear_schemas"
       ]
     },
     {
-      "type": "execute_sql",
-      "description": "Select ART",
+      "type": "create_table",
+      "description": "Create BRK2 table gemeente",
+      "table_name": "brk2_prep.gemeente",
+      "id": "create_brk2_gemeente",
       "query_src": "file",
-      "query": "data/sql/brk2/select.aantekening_recht.sql",
-      "id": "select_art",
+      "query": "data/sql/brk2/create.gemeente.sql",
       "depends_on": [
-        "select_tng"
+        "clear_schemas"
       ]
     },
     {
-      "type": "execute_sql",
-      "description": "Create materialized view subject_expiration_date",
-      "id": "create_view_subject_actueel",
-      "depends_on": [
-        "select_akt",
-        "select_art",
-        "select_zrt"
-      ],
-      "query": "data/sql/brk2/materialized_view.subject_expiration_date.sql",
-      "query_src": "file"
-    },
-    {
-      "type": "execute_sql",
-      "description": "Select SJT",
+      "type": "create_table",
+      "description": "Create BRK2 table kadastraal_object",
+      "table_name": "brk2_prep.kadastraal_object",
+      "id": "create_brk2_kadastraal_object",
       "query_src": "file",
-      "query": "data/sql/brk2/select.kadastraal_subject.sql",
-      "id": "select_sjt",
+      "query": "data/sql/brk2/create.kadastraal_object.sql",
       "depends_on": [
-        "select_meta",
-        "create_view_subject_actueel",
-        "select_tng",
-        "select_zrt"
+        "clear_schemas"
       ]
     },
     {
-      "type": "execute_sql",
-      "description": "Select KSE",
+      "type": "create_table",
+      "description": "Create BRK2 table kadastraal_subject",
+      "table_name": "brk2_prep.kadastraal_subject",
+      "id": "create_brk2_kadastraal_subject",
       "query_src": "file",
-      "query": "data/sql/brk2/select.kadastrale_sectie.sql",
-      "id": "select_kse",
+      "query": "data/sql/brk2/create.kadastraal_subject.sql",
       "depends_on": [
-        "finalise_kot"
+        "clear_schemas"
       ]
     },
     {
-      "type": "execute_sql",
-      "description": "Select KGE",
+      "type": "create_table",
+      "description": "Create BRK2 table kadastrale_gemeente",
+      "table_name": "brk2_prep.kadastrale_gemeente",
+      "id": "create_brk2_kadastrale_gemeente",
       "query_src": "file",
-      "query": "data/sql/brk2/select.kadastrale_gemeente.sql",
-      "id": "select_kge",
+      "query": "data/sql/brk2/create.kadastrale_gemeente.sql",
       "depends_on": [
-        "finalise_kot"
+        "clear_schemas"
       ]
     },
     {
-      "type": "execute_sql",
-      "description": "Select KCE",
+      "type": "create_table",
+      "description": "Create BRK2 table kadastrale_gemeentecode",
+      "table_name": "brk2_prep.kadastrale_gemeentecode",
+      "id": "create_brk2_kadastrale_gemeentecode",
       "query_src": "file",
-      "query": "data/sql/brk2/select.kadastrale_gemeentecode.sql",
-      "id": "select_kce",
+      "query": "data/sql/brk2/create.kadastrale_gemeentecode.sql",
       "depends_on": [
-        "finalise_kot"
+        "clear_schemas"
       ]
     },
     {
-      "type": "execute_sql",
-      "description": "Select SDL",
+      "type": "create_table",
+      "description": "Create BRK2 table kadastrale_sectie",
+      "table_name": "brk2_prep.kadastrale_sectie",
+      "id": "create_brk2_kadastrale_sectie",
       "query_src": "file",
-      "query": "data/sql/brk2/select.stukdeel.sql",
-      "id": "select_sdl",
+      "query": "data/sql/brk2/create.kadastrale_sectie.sql",
       "depends_on": [
-        "select_meta",
-        "select_art",
-        "select_akt",
-        "select_tng",
-        "select_zrt",
-        "select_ec"
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BRK2 table meta",
+      "table_name": "brk2_prep.meta",
+      "id": "create_brk2_meta",
+      "query_src": "file",
+      "query": "data/sql/brk2/create.meta.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BRK2 table stukdeel",
+      "table_name": "brk2_prep.stukdeel",
+      "id": "create_brk2_stukdeel",
+      "query_src": "file",
+      "query": "data/sql/brk2/create.stukdeel.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BRK2 table tenaamstelling",
+      "table_name": "brk2_prep.tenaamstelling",
+      "id": "create_brk2_tenaamstelling",
+      "query_src": "file",
+      "query": "data/sql/brk2/create.tenaamstelling.sql",
+      "depends_on": [
+        "clear_schemas"
+      ]
+    },
+    {
+      "type": "create_table",
+      "description": "Create BRK2 table zakelijk_recht",
+      "table_name": "brk2_prep.zakelijk_recht",
+      "id": "create_brk2_zakelijk_recht",
+      "query_src": "file",
+      "query": "data/sql/brk2/create.zakelijk_recht.sql",
+      "depends_on": [
+        "clear_schemas"
       ]
     },
     {
@@ -366,13 +184,20 @@
         "brk2_prep": "brk2_prepared"
       },
       "depends_on": [
-        "populate_aardzakelijkrecht_waardelijst",
-        "select_import_gemeentes_2013_2022",
-        "select_kce",
-        "select_sdl",
-        "select_kge",
-        "select_kse",
-        "select_sjt"
+        "create_brk2_aantekening_kadastraal_object",
+        "create_brk2_aantekening_recht",
+        "create_brk2_aardzakelijkrecht",
+        "create_brk2_erfpachtcanon",
+        "create_brk2_gemeente",
+        "create_brk2_kadastraal_object",
+        "create_brk2_kadastraal_subject",
+        "create_brk2_kadastrale_gemeente",
+        "create_brk2_kadastrale_gemeentecode",
+        "create_brk2_kadastrale_sectie",
+        "create_brk2_meta",
+        "create_brk2_stukdeel",
+        "create_brk2_tenaamstelling",
+        "create_brk2_zakelijk_recht"
       ]
     },
     {
