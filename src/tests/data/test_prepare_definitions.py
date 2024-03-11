@@ -11,7 +11,7 @@ from gobprepare.prepare_client import PrepareClient
 class TestPrepareDefinitions(TestCase):
     files = [
         # Relative to 'src' directory
-        'data/brk.prepare.json'
+        'data/brk2.prepare.json'
     ]
 
     def _get_filepath(self, filename):
