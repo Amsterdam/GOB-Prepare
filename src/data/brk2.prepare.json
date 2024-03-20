@@ -204,7 +204,7 @@
       "type": "complete_prepare",
       "id": "update_after_prepare_complete",
       "description": "Update sync table after 'brk2' prepare completed",
-      "schema": "brk2",
+      "schema": "brk2_adb",
       "table_name": "synced_schemas",
       "depends_on": "*"
     }
